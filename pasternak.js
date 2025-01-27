@@ -93,12 +93,15 @@ async function updateAlerts() {
 function applyAlertStyles(element, difference) {
   // Reset classes and inline styles
   element.classList.remove(
-    'alert-positive', 
-    'alert-negative', 
-    'alert-flashing-1', 
-    'alert-flashing-2', 
-    'alert-flashing-negative-1', 
-    'alert-flashing-negative-2'
+    'alert-positive',
+    'alert-negative',
+    'alert-flashing-1',
+    'alert-flashing-2',
+    'alert-flashing-negative-1',
+    'alert-flashing-negative-2',
+    'alert-large',
+    'alert-large-green',
+    'alert-large-red'
   );
   element.style.fontSize = ''; // Reset font size
   element.style.backgroundColor = ''; // Reset background color
@@ -111,6 +114,9 @@ function applyAlertStyles(element, difference) {
   } else if (difference > 0.001) {
     element.style.fontSize = '2em'; // 2x bigger font size
     element.classList.add('alert-flashing-1'); // Slower flashing
+  } else if (difference > 0.0005) {
+    element.style.fontSize = '2em'; // 2x bigger font size
+    element.classList.add('alert-large', 'alert-large-green'); // Green background with white text
   } else if (difference > 0) {
     element.classList.add('alert-positive');
   } else if (difference < -0.002) {
@@ -119,11 +125,13 @@ function applyAlertStyles(element, difference) {
   } else if (difference < -0.001) {
     element.style.fontSize = '2em'; // 2x bigger font size
     element.classList.add('alert-flashing-negative-1'); // Slower flashing (red)
+  } else if (difference < -0.0005) {
+    element.style.fontSize = '2em'; // 2x bigger font size
+    element.classList.add('alert-large', 'alert-large-red'); // Red background with white text
   } else if (difference < 0) {
     element.classList.add('alert-negative');
   }
 }
-
 
 // Update alerts every 5 seconds
 async function updatePrices() {

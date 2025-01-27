@@ -38,54 +38,29 @@ body {
   color: #f44336; /* Red for negative difference */
 }
 
-.loading {
-  color: #888;
+/* Style for 2x font size without flashing */
+.alert-large {
+  font-size: 2em; /* 2x bigger font size */
+  font-weight: bold;
 }
 
-/* Flashing animation for alerts */
-@keyframes flash {
-  0%, 100% {
-    background-color: #4caf50; /* Green background */
-    color: white; /* White text */
-  }
-  50% {
-    background-color: transparent; /* Transparent background */
-    color: #4caf50; /* Green text */
-  }
+/* Green background with white text */
+.alert-large-green {
+  background-color: #4caf50; /* Green background */
+  color: white; /* White text */
+  padding: 5px 10px; /* Add some padding for better visibility */
+  border-radius: 4px; /* Rounded corners */
 }
 
-.alert-flashing-1 {
-  animation: flash 1s infinite; /* 1-second flashing */
+/* Red background with white text */
+.alert-large-red {
+  background-color: #f44336; /* Red background */
+  color: white; /* White text */
+  padding: 5px 10px; /* Add some padding for better visibility */
+  border-radius: 4px; /* Rounded corners */
 }
 
-.alert-flashing-2 {
-  animation: flash 0.5s infinite; /* 0.5-second flashing */
-}
-
-/* Flashing animation for positive alerts */
-@keyframes flash {
-  0%, 100% {
-    background-color: #4caf50; /* Green background */
-    color: white; /* White text */
-  }
-  50% {
-    background-color: transparent; /* Transparent background */
-    color: #4caf50; /* Green text */
-  }
-}
-
-/* Flashing animation for negative alerts */
-@keyframes flash-negative {
-  0%, 100% {
-    background-color: #f44336; /* Red background */
-    color: white; /* White text */
-  }
-  50% {
-    background-color: transparent; /* Transparent background */
-    color: #f44336; /* Red text */
-  }
-}
-
+/* Existing styles for flashing alerts */
 .alert-flashing-1 {
   animation: flash 1s infinite; /* 1-second flashing (green) */
 }
@@ -100,4 +75,27 @@ body {
 
 .alert-flashing-negative-2 {
   animation: flash-negative 0.5s infinite; /* 0.5-second flashing (red) */
+}
+
+/* Existing keyframes for flashing animations */
+@keyframes flash {
+  0%, 100% {
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+  }
+  50% {
+    background-color: transparent; /* Transparent background */
+    color: #4caf50; /* Green text */
+  }
+}
+
+@keyframes flash-negative {
+  0%, 100% {
+    background-color: #f44336; /* Red background */
+    color: white; /* White text */
+  }
+  50% {
+    background-color: transparent; /* Transparent background */
+    color: #f44336; /* Red text */
+  }
 }
