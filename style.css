@@ -61,3 +61,43 @@ body {
 .alert-flashing-2 {
   animation: flash 0.5s infinite; /* 0.5-second flashing */
 }
+
+/* Flashing animation for positive alerts */
+@keyframes flash {
+  0%, 100% {
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+  }
+  50% {
+    background-color: transparent; /* Transparent background */
+    color: #4caf50; /* Green text */
+  }
+}
+
+/* Flashing animation for negative alerts */
+@keyframes flash-negative {
+  0%, 100% {
+    background-color: #f44336; /* Red background */
+    color: white; /* White text */
+  }
+  50% {
+    background-color: transparent; /* Transparent background */
+    color: #f44336; /* Red text */
+  }
+}
+
+.alert-flashing-1 {
+  animation: flash 1s infinite; /* 1-second flashing (green) */
+}
+
+.alert-flashing-2 {
+  animation: flash 0.5s infinite; /* 0.5-second flashing (green) */
+}
+
+.alert-flashing-negative-1 {
+  animation: flash-negative 1s infinite; /* 1-second flashing (red) */
+}
+
+.alert-flashing-negative-2 {
+  animation: flash-negative 0.5s infinite; /* 0.5-second flashing (red) */
+}
