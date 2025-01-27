@@ -90,12 +90,22 @@ async function updateAlerts() {
 }
 
 // Function to apply styles based on the alert difference
+// Function to apply styles based on the alert difference
 function applyAlertStyles(element, difference) {
-  // Reset classes
-  element.classList.remove('alert-positive', 'alert-negative');
+  // Reset classes and inline styles
+  element.classList.remove('alert-positive', 'alert-negative', 'alert-flashing-1', 'alert-flashing-2');
+  element.style.fontSize = ''; // Reset font size
+  element.style.backgroundColor = ''; // Reset background color
+  element.style.color = ''; // Reset text color
 
   // Apply styles based on the difference
-  if (difference > 0) {
+  if (difference > 0.002) {
+    element.style.fontSize = '4em'; // 4x bigger font size
+    element.classList.add('alert-flashing-2'); // Faster flashing
+  } else if (difference > 0.001) {
+    element.style.fontSize = '2em'; // 2x bigger font size
+    element.classList.add('alert-flashing-1'); // Slower flashing
+  } else if (difference > 0) {
     element.classList.add('alert-positive');
   } else if (difference < 0) {
     element.classList.add('alert-negative');

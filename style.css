@@ -41,3 +41,23 @@ body {
 .loading {
   color: #888;
 }
+
+/* Flashing animation for alerts */
+@keyframes flash {
+  0%, 100% {
+    background-color: #4caf50; /* Green background */
+    color: white; /* White text */
+  }
+  50% {
+    background-color: transparent; /* Transparent background */
+    color: #4caf50; /* Green text */
+  }
+}
+
+.alert-flashing-1 {
+  animation: flash 1s infinite; /* 1-second flashing */
+}
+
+.alert-flashing-2 {
+  animation: flash 0.5s infinite; /* 0.5-second flashing */
+}
