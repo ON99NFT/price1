@@ -1,0 +1,52 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  text-align: left;
+  padding: 20px;
+  margin: 0;
+}
+
+#price-container {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+#price-container p {
+  margin: 10px 0;
+  font-size: 1em;
+}
+
+#mexc-bid,
+#mexc-ask,
+#jup-rate-300-usdc,
+#jup-rate-9000-pasternak,
+#price-difference-300-usdc,
+#price-difference-9000-pasternak {
+  font-weight: bold;
+}
+
+#price-difference-300-usdc,
+#price-difference-9000-pasternak {
+  transition: all 0.3s ease;
+  padding: 2px 5px;
+  border-radius: 4px;
+}
+
+.difference-positive {
+  color: green;
+}
+
+.difference-negative {
+  color: red;
+}
+
+.loading {
+  color: #888;
+}
+
