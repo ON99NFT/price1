@@ -100,3 +100,9 @@ body {
   }
 }
 
+.alert-positive { color: #4caf50; }  /* Green text */
+.alert-negative { color: #f44336; }  /* Red text */
+.alert-large-green { background: #4caf50; color: white; }  /* Solid green */
+.alert-large-red { background: #f44336; color: white; }    /* Solid red */
+.alert-flashing-1 { animation: flash 1s infinite; }        /* Slow flash */
+.alert-flashing-2 { animation: flash 0.5s infinite; }      /* Fast flash */
