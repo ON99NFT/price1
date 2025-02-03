@@ -17,10 +17,10 @@
   </div>
 
   <div class="token-section">
-    <h2>Hood Alerts</h2>
+    <h2>Alpha Alerts</h2>
     <div class="price-container">
-      <p>Buy Alert: <span id="hood-buy-alert" aria-live="polite">Loading...</span></p>
-      <p>Sell Alert: <span id="hood-sell-alert" aria-live="polite">Loading...</span></p>
+      <p>Buy Alert: <span id="alpha-buy-alert" aria-live="polite">Loading...</span></p>
+      <p>Sell Alert: <span id="alpha-sell-alert" aria-live="polite">Loading...</span></p>
     </div>
   </div>
 
@@ -64,22 +64,22 @@ const tokens = {
       sell: document.getElementById('gfm-sell-alert')
     }
   },
-  hood: {
+  alpha: {
     type: 'jup',
-    mexcApiUrl: 'https://contract.mexc.com/api/v1/contract/depth/HOOD_USDT',
+    mexcApiUrl: 'https://contract.mexc.com/api/v1/contract/depth/ALPHAOFSOL_USDT',
     jupConfig: {
       inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-      outputMint: 'h5NciPdMZ5QCB5BYETJMYBMpVx9ZuitR6HcVjyBhood',
-      buySwap: { amount: 220, decimals: 6 },
-      sellSwap: { amount: 110000, decimals: 6 }
+      outputMint: '2sCUCJdVkmyXp4dT8sFaA9LKgSMK4yDPi9zLHiwXpump',
+      buySwap: { amount: 600, decimals: 6 },
+      sellSwap: { amount: 5500, decimals: 6 }
     },
     elements: {
-      buy: document.getElementById('hood-buy-alert'),
-      sell: document.getElementById('hood-sell-alert')
+      buy: document.getElementById('alpha-buy-alert'),
+      sell: document.getElementById('alpha-sell-alert')
     },
     thresholds: {
-      positive: [0.00004, 0.00007, 0.0001],
-      negative: [-0.00004, -0.00007, -0.0001]
+      positive: [0.001, 0.002, 0.003],
+      negative: [-0.001, -0.002, -0.003]
     }
   },
   stonks: {
@@ -88,7 +88,7 @@ const tokens = {
     jupConfig: {
       inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       outputMint: '6NcdiK8B5KK2DzKvzvCfqi8EHaEqu48fyEzC8Mm9pump',
-      buySwap: { amount: 500, decimals: 6 },
+      buySwap: { amount: 300, decimals: 6 },
       sellSwap: { amount: 8500, decimals: 6 }
     },
     elements: {
@@ -295,23 +295,23 @@ function applyAlertStyles(element, value, tokenKey) {
   const isPositive = value > 0;
   const absValue = Math.abs(value);
 
-  if (tokenKey === 'hood') {
+  if (tokenKey === 'alpha') {
     if (isPositive) {
-      if (value >= 0.0001) {
+      if (value >= 0.003) {
         element.classList.add('alert-flashing-2');
-      } else if (value >= 0.00007) {
+      } else if (value >= 0.002) {
         element.classList.add('alert-flashing-1');
-      } else if (value >= 0.00004) {
+      } else if (value >= 0.001) {
         element.classList.add('alert-large-green');
       } else {
         element.classList.add('alert-positive');
       }
     } else {
-      if (value <= -0.0001) {
+      if (value <= -0.003) {
         element.classList.add('alert-flashing-negative-2');
-      } else if (value <= -0.00007) {
+      } else if (value <= -0.002) {
         element.classList.add('alert-flashing-negative-1');
-      } else if (value <= -0.00004) {
+      } else if (value <= -0.001) {
         element.classList.add('alert-large-red');
       } else {
         element.classList.add('alert-negative');
@@ -437,7 +437,7 @@ async function updateTokenAlerts(tokenKey) {
 
 function updateAllAlerts() {
   updateTokenAlerts('gfm');
-  updateTokenAlerts('hood');
+  updateTokenAlerts('alpha');
   updateTokenAlerts('stonks');
   updateTokenAlerts('vvv');
   updateTokenAlerts('eur');
