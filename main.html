@@ -95,7 +95,7 @@
       <p>Sell Alert: <span id="alpha-sell-alert" aria-live="polite">Loading...</span></p>
     </div>
   </div>
-  
+
 <script>
 // Audio context handling
 let audioContext = null;
@@ -262,21 +262,41 @@ function playSound(isPositive, level) {
 
     const oscillator = audioContext.createOscillator();
     const gainNode = audioContext.createGain();
-    oscillator.connect(gainNode);
+    const filter = audioContext.createBiquadFilter();
+    
+    // Setup filter to make sound less harsh
+    filter.type = 'lowpass';
+    filter.frequency.value = 2000;
+    
+    // Connect nodes
+    oscillator.connect(filter);
+    filter.connect(gainNode);
     gainNode.connect(audioContext.destination);
 
-    const baseFreq = isPositive ? 1000 : 400;
-    const frequency = baseFreq + (level * 200);
-    const duration = level === 2 ? 0.4 : 0.3;
+    // Configure sound parameters
+    const baseFreq = isPositive ? 800 : 400;
+    const frequency = baseFreq + (level * 100);
+    const duration = 0.3 + (level * 0.1);
+    
+    // Use different waveform for positive/negative
+    oscillator.type = isPositive ? 'triangle' : 'square';
+    
+    // Add slight pitch variation
+    oscillator.frequency.setValueAtTime(frequency * 0.98, audioContext.currentTime);
+    oscillator.frequency.exponentialRampToValueAtTime(frequency, audioContext.currentTime + 0.1);
 
-    oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-    gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+    // Configure volume envelope
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
     oscillator.start();
     oscillator.stop(audioContext.currentTime + duration);
 
+    // Cleanup
     setTimeout(() => {
       oscillator.disconnect();
       gainNode.disconnect();
+      filter.disconnect();
     }, (duration + 0.1) * 1000);
   } catch (error) {
     console.error('Sound error:', error);
