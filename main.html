@@ -159,24 +159,6 @@ const tokens = {
       positive: [0.005, 0.01, 0.02],
       negative: [-0.005, -0.01, -0.02]
     }
-  },
-  hood: {
-    type: 'jup',
-    mexcApiUrl: 'https://contract.mexc.com/api/v1/contract/depth/HOOD_USDT',
-    jupConfig: {
-      inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-      outputMint: 'h5NciPdMZ5QCB5BYETJMYBMpVx9ZuitR6HcVjyBhood',
-      buySwap: { amount: 3200, decimals: 6 },
-      sellSwap: { amount: 2200000, decimals: 6 }
-    },
-    elements: {
-      buy: document.getElementById('hood-buy-alert'),
-      sell: document.getElementById('hood-sell-alert')
-    },
-    thresholds: {
-      positive: [0.00002, 0.00004, 0.00006],
-      negative: [-0.00002, -0.00004, -0.00006]
-    }
   }
 };
 
@@ -377,7 +359,6 @@ async function updateTokenAlerts(tokenKey) {
 
 function updateAllAlerts() {
   updateTokenAlerts('alpha');
-  updateTokenAlerts('hood');
 }
 
 updateAllAlerts();
