@@ -39,25 +39,47 @@
     .alert-negative { background-color: #990000; }
 
     /* Strong alerts */
-    .alert-large-green { background-color: #007700; }
-    .alert-large-red { background-color: #770000; }
+    .alert-large-green { 
+        background-color: #007700;  
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 2em;
+    }
+    .alert-large-red { 
+        background-color: #770000;
+        padding: 5px 10px;
+        border-radius: 4px;
+        font-size: 2em;
+    }
 
     /* Flashing alerts */
     .alert-flashing-1 {
       animation: flash-green 1s infinite;
       background-color: #009900;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 2em;
     }
     .alert-flashing-2 {
       animation: flash-green 0.5s infinite;
       background-color: #009900;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 2em;
     }
     .alert-flashing-negative-1 {
       animation: flash-red 1s infinite;
       background-color: #990000;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 2em;
     }
     .alert-flashing-negative-2 {
       animation: flash-red 0.5s infinite;
       background-color: #990000;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 2em;
     }
 
     @keyframes flash-green {
@@ -71,14 +93,6 @@
   </style>
 </head>
 <body>
-  <div class="token-section">
-    <h2>Jelly Alerts</h2>
-    <div class="price-container">
-      <p>Buy Alert: <span id="jelly-buy-alert" aria-live="polite">Loading...</span></p>
-      <p>Sell Alert: <span id="jelly-sell-alert" aria-live="polite">Loading...</span></p>
-    </div>
-  </div>
-
 
   <div class="token-section">
     <h2>Hood Alerts</h2>
@@ -128,36 +142,22 @@ audioPrompt.addEventListener('click', function initAudio() {
 }, { once: true });
 
 const tokens = {
-  jelly: {
-    type: 'jup',
-    mexcApiUrl: 'https://contract.mexc.com/api/v1/contract/depth/JELLYJELLY_USDT',
-    jupConfig: {
-      inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
-      outputMint: 'FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump',
-      buySwap: { amount: 1500, decimals: 6 },
-      sellSwap: { amount: 48000, decimals: 6 }
-    },
-    elements: {
-      buy: document.getElementById('jelly-buy-alert'),
-      sell: document.getElementById('jelly-sell-alert')
-    }
-  },
   alpha: {
     type: 'jup',
     mexcApiUrl: 'https://contract.mexc.com/api/v1/contract/depth/ALPHAOFSOL_USDT',
     jupConfig: {
       inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       outputMint: '2sCUCJdVkmyXp4dT8sFaA9LKgSMK4yDPi9zLHiwXpump',
-      buySwap: { amount: 500, decimals: 6 },
-      sellSwap: { amount: 5500, decimals: 6 }
+      buySwap: { amount: 1400, decimals: 6 },
+      sellSwap: { amount: 12000, decimals: 6 }
     },
     elements: {
       buy: document.getElementById('alpha-buy-alert'),
       sell: document.getElementById('alpha-sell-alert')
     },
     thresholds: {
-      positive: [0.006, 0.012, 0.018],
-      negative: [-0.006, -0.012, -0.018]
+      positive: [0.005, 0.01, 0.02],
+      negative: [-0.005, -0.01, -0.02]
     }
   },
   hood: {
@@ -166,16 +166,16 @@ const tokens = {
     jupConfig: {
       inputMintUSDC: 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
       outputMint: 'h5NciPdMZ5QCB5BYETJMYBMpVx9ZuitR6HcVjyBhood',
-      buySwap: { amount: 600, decimals: 6 },
-      sellSwap: { amount: 550000, decimals: 6 }
+      buySwap: { amount: 3200, decimals: 6 },
+      sellSwap: { amount: 2200000, decimals: 6 }
     },
     elements: {
       buy: document.getElementById('hood-buy-alert'),
       sell: document.getElementById('hood-sell-alert')
     },
     thresholds: {
-      positive: [0.00003, 0.00005, 0.00009],
-      negative: [-0.00003, -0.00005, -0.00009]
+      positive: [0.00002, 0.00004, 0.00006],
+      negative: [-0.00002, -0.00004, -0.00006]
     }
   }
 };
@@ -260,44 +260,24 @@ function playSound(isPositive, level) {
       return;
     }
 
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
     const filter = audioContext.createBiquadFilter();
     
-    // Setup filter to make sound less harsh
-    filter.type = 'lowpass';
-    filter.frequency.value = 2000;
+    // Singing bowl parameters
+    osc.type = 'sine';
+    filter.type = 'highpass';
+    filter.frequency.value = 800;
     
-    // Connect nodes
-    oscillator.connect(filter);
-    filter.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    osc.frequency.setValueAtTime(isPositive ? 432 : 528, audioContext.currentTime);
+    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 3);
 
-    // Configure sound parameters
-    const baseFreq = isPositive ? 800 : 400;
-    const frequency = baseFreq + (level * 100);
-    const duration = 0.3 + (level * 0.1);
-    
-    // Use different waveform for positive/negative
-    oscillator.type = isPositive ? 'triangle' : 'square';
-    
-    // Add slight pitch variation
-    oscillator.frequency.setValueAtTime(frequency * 0.98, audioContext.currentTime);
-    oscillator.frequency.exponentialRampToValueAtTime(frequency, audioContext.currentTime + 0.1);
+    osc.connect(filter).connect(gain).connect(audioContext.destination);
+    osc.start();
+    osc.stop(audioContext.currentTime + 3);
 
-    // Configure volume envelope
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
-
-    oscillator.start();
-    oscillator.stop(audioContext.currentTime + duration);
-
-    // Cleanup
-    setTimeout(() => {
-      oscillator.disconnect();
-      gainNode.disconnect();
-      filter.disconnect();
-    }, (duration + 0.1) * 1000);
+    setTimeout(() => osc.disconnect(), 3100);
   } catch (error) {
     console.error('Sound error:', error);
   }
@@ -330,26 +310,26 @@ function applyAlertStyles(element, value, tokenKey) {
 
   if (tokenKey === 'alpha') {
     if (isPositive) {
-      if (absValue >= 0.018) element.classList.add('alert-flashing-2');
-      else if (absValue >= 0.012) element.classList.add('alert-flashing-1');
-      else if (absValue >= 0.006) element.classList.add('alert-large-green');
+      if (absValue >= 0.02) element.classList.add('alert-flashing-2');
+      else if (absValue >= 0.01) element.classList.add('alert-flashing-1');
+      else if (absValue >= 0.005) element.classList.add('alert-large-green');
       else element.classList.add('alert-positive');
     } else {
-      if (absValue >= 0.018) element.classList.add('alert-flashing-negative-2');
-      else if (absValue >= 0.012) element.classList.add('alert-flashing-negative-1');
-      else if (absValue >= 0.006) element.classList.add('alert-large-red');
+      if (absValue >= 0.02) element.classList.add('alert-flashing-negative-2');
+      else if (absValue >= 0.01) element.classList.add('alert-flashing-negative-1');
+      else if (absValue >= 0.005) element.classList.add('alert-large-red');
       else element.classList.add('alert-negative');
     }
   } else if (tokenKey === 'hood') {
     if (isPositive) {
-      if (absValue >= 0.00009) element.classList.add('alert-flashing-2');
-      else if (absValue >= 0.00005) element.classList.add('alert-flashing-1');
-      else if (absValue >= 0.00003) element.classList.add('alert-large-green');
+      if (absValue >= 0.00006) element.classList.add('alert-flashing-2');
+      else if (absValue >= 0.00004) element.classList.add('alert-flashing-1');
+      else if (absValue >= 0.00002) element.classList.add('alert-large-green');
       else element.classList.add('alert-positive');
     } else {
-      if (absValue >= 0.00009) element.classList.add('alert-flashing-negative-2');
-      else if (absValue >= 0.00005) element.classList.add('alert-flashing-negative-1');
-      else if (absValue >= 0.00003) element.classList.add('alert-large-red');
+      if (absValue >= 0.00006) element.classList.add('alert-flashing-negative-2');
+      else if (absValue >= 0.00004) element.classList.add('alert-flashing-negative-1');
+      else if (absValue >= 0.00002) element.classList.add('alert-large-red');
       else element.classList.add('alert-negative');
     }
   } else {
@@ -396,13 +376,12 @@ async function updateTokenAlerts(tokenKey) {
 }
 
 function updateAllAlerts() {
-  updateTokenAlerts('jelly');
   updateTokenAlerts('alpha');
   updateTokenAlerts('hood');
 }
 
 updateAllAlerts();
-setInterval(updateAllAlerts, 7000);
+setInterval(updateAllAlerts, 4700);
 </script>
 </body>
 </html>
