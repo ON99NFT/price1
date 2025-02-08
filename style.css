@@ -1,108 +1,94 @@
 body {
   font-family: Arial, sans-serif;
-  background-color: #121212; /* Dark background */
-  color: #e0e0e0; /* Light text color */
-  text-align: left;
+  background-color: #1a1a1a;
+  color: white;
   padding: 20px;
   margin: 0;
 }
 
-#price-container {
-  background-color: #1e1e1e; /* Dark container background */
-  padding: 20px;
+.token-section {
+  background-color: #2d2d2d;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Darker shadow */
+  padding: 20px;
+  margin-bottom: 20px;
   max-width: 600px;
-  width: 100%;
-  margin: 0 auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-#price-container p {
+.price-container p {
   margin: 10px 0;
-  font-size: 1.2em; /* Slightly larger text */
+  font-size: 1.2em;
 }
 
-#buy-alert,
-#sell-alert {
+[aria-live="polite"] {
   font-weight: bold;
   transition: all 0.3s ease;
   padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* Alert Styles */
+.alert-positive, .alert-negative,
+.alert-large-green, .alert-large-red,
+.alert-flashing-1, .alert-flashing-2,
+.alert-flashing-negative-1, .alert-flashing-negative-2 {
+  color: white !important;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.alert-positive { background-color: #009900; }
+.alert-negative { background-color: #990000; }
+
+.alert-large-green { 
+  background-color: #007700;  
+  padding: 5px 10px;
   border-radius: 4px;
+  font-size: 1.5em;
+}
+.alert-large-red { 
+  background-color: #770000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
 }
 
-.alert-positive {
-  color: #4caf50; /* Green for positive difference */
-}
-
-.alert-negative {
-  color: #f44336; /* Red for negative difference */
-}
-
-/* Style for 2x font size without flashing */
-.alert-large {
-  font-size: 2em; /* 2x bigger font size */
-  font-weight: bold;
-}
-
-/* Green background with white text */
-.alert-large-green {
-  background-color: #4caf50; /* Green background */
-  color: white; /* White text */
-  padding: 5px 10px; /* Add some padding for better visibility */
-  border-radius: 4px; /* Rounded corners */
-}
-
-/* Red background with white text */
-.alert-large-red {
-  background-color: #f44336; /* Red background */
-  color: white; /* White text */
-  padding: 5px 10px; /* Add some padding for better visibility */
-  border-radius: 4px; /* Rounded corners */
-}
-
-/* Existing styles for flashing alerts */
 .alert-flashing-1 {
-  animation: flash 1s infinite; /* 1-second flashing (green) */
+  animation: flash-green 1s infinite;
+  background-color: #009900;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
 }
-
 .alert-flashing-2 {
-  animation: flash 0.5s infinite; /* 0.5-second flashing (green) */
+  animation: flash-green 0.5s infinite;
+  background-color: #009900;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
 }
-
 .alert-flashing-negative-1 {
-  animation: flash-negative 1s infinite; /* 1-second flashing (red) */
+  animation: flash-red 1s infinite;
+  background-color: #990000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
 }
-
 .alert-flashing-negative-2 {
-  animation: flash-negative 0.5s infinite; /* 0.5-second flashing (red) */
+  animation: flash-red 0.5s infinite;
+  background-color: #990000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
 }
 
-/* Existing keyframes for flashing animations */
-@keyframes flash {
-  0%, 100% {
-    background-color: #4caf50; /* Green background */
-    color: white; /* White text */
-  }
-  50% {
-    background-color: transparent; /* Transparent background */
-    color: #4caf50; /* Green text */
-  }
+@keyframes flash-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
-
-@keyframes flash-negative {
-  0%, 100% {
-    background-color: #f44336; /* Red background */
-    color: white; /* White text */
-  }
-  50% {
-    background-color: transparent; /* Transparent background */
-    color: #f44336; /* Red text */
-  }
+@keyframes flash-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }
-
-.alert-positive { color: #4caf50; }  /* Green text */
-.alert-negative { color: #f44336; }  /* Red text */
-.alert-large-green { background: #4caf50; color: white; }  /* Solid green */
-.alert-large-red { background: #f44336; color: white; }    /* Solid red */
-.alert-flashing-1 { animation: flash 1s infinite; }        /* Slow flash */
-.alert-flashing-2 { animation: flash 0.5s infinite; }      /* Fast flash */
