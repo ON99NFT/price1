@@ -128,5 +128,5 @@ async function fetchKyberPrice() {
   // Initialize and update every 5 seconds
   (function init() {
     updateAlerts();
-    setInterval(updateAlerts, 5000);
+    setInterval(updateAlerts, 2000);
   })();
