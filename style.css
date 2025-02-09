@@ -1,0 +1,94 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #1a1a1a;
+  color: white;
+  padding: 20px;
+  margin: 0;
+}
+
+.token-section {
+  background-color: #2d2d2d;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.price-container p {
+  margin: 10px 0;
+  font-size: 1.2em;
+}
+
+[aria-live="polite"] {
+  font-weight: bold;
+  transition: all 0.3s ease;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+/* Alert Styles */
+.alert-positive, .alert-negative,
+.alert-large-green, .alert-large-red,
+.alert-flashing-1, .alert-flashing-2,
+.alert-flashing-negative-1, .alert-flashing-negative-2 {
+  color: white !important;
+  padding: 2px 5px;
+  border-radius: 3px;
+  transition: background-color 0.3s ease;
+}
+
+.alert-positive { background-color: #009900; }
+.alert-negative { background-color: #990000; }
+
+.alert-large-green { 
+  background-color: #007700;  
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+.alert-large-red { 
+  background-color: #770000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+
+.alert-flashing-1 {
+  animation: flash-green 1s infinite;
+  background-color: #009900;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+.alert-flashing-2 {
+  animation: flash-green 0.5s infinite;
+  background-color: #009900;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+.alert-flashing-negative-1 {
+  animation: flash-red 1s infinite;
+  background-color: #990000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+.alert-flashing-negative-2 {
+  animation: flash-red 0.5s infinite;
+  background-color: #990000;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 1.5em;
+}
+
+@keyframes flash-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+@keyframes flash-red {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
