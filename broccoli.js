@@ -48,15 +48,15 @@ const BROCCOLI = (() => {
     
       try {
         const [broccoliAmount, usdtAmount] = await Promise.all([
-          fetchKyberSwapPrice(USDT_ADDRESS, BROCCOLI_ADDRESS, 800 * 1e18),
-          fetchKyberSwapPrice(BROCCOLI_ADDRESS, USDT_ADDRESS, 8000 * 1e18)
+          fetchKyberSwapPrice(USDT_ADDRESS, BROCCOLI_ADDRESS, 4000 * 1e18),
+          fetchKyberSwapPrice(BROCCOLI_ADDRESS, USDT_ADDRESS, 27500 * 1e18)
         ]);
     
         if (!broccoliAmount || !usdtAmount) return null;
     
         return {
-          buyPrice: 800 / (broccoliAmount / 1e18),
-          sellPrice: (usdtAmount / 1e18) / 8000
+          buyPrice: 4000 / (broccoliAmount / 1e18),
+          sellPrice: (usdtAmount / 1e18) / 27500
         };
       } catch (error) {
         console.error('Price Calculation Error:', error);

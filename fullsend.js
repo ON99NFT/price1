@@ -45,22 +45,22 @@ const fullsend = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
   
-      const [fullsendAmountFor1400USDC, usdcAmountFor25000fullsend] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 1400 * 1e6, 6),
-        fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 25000 * 1e6, 6),
+      const [fullsendAmountFor3000USDC, usdcAmountFor60000fullsend] = await Promise.all([
+        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 3000 * 1e6, 6),
+        fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 60000 * 1e6, 6),
       ]);
     
-      if (fullsendAmountFor1400USDC === null || usdcAmountFor25000fullsend === null) {
+      if (fullsendAmountFor3000USDC === null || usdcAmountFor60000fullsend === null) {
         return null;
       }
     
       // Calculate rates
-      const jupRateFor1400USDC = 1400 / fullsendAmountFor1400USDC;
-      const jupRateFor25000fullsend = usdcAmountFor25000fullsend / 25000;
+      const jupRateFor3000USDC = 3000 / fullsendAmountFor3000USDC;
+      const jupRateFor60000fullsend = usdcAmountFor60000fullsend / 60000;
     
       return {
-        rateFor1400USDC: jupRateFor1400USDC,
-        rateFor25000fullsend: jupRateFor25000fullsend,
+        rateFor3000USDC: jupRateFor3000USDC,
+        rateFor60000fullsend: jupRateFor60000fullsend,
       };
     }
   
@@ -73,11 +73,11 @@ const fullsend = (() => {
       const jupPrices = await fetchJupPrice();
     
       if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor1400USDC;
+        const buyDifference = mexcPrices.bid - jupPrices.rateFor3000USDC;
         buyAlertElement.textContent = buyDifference.toFixed(5);
         applyAlertStyles(buyAlertElement, buyDifference);
     
-        const sellDifference = jupPrices.rateFor25000fullsend - mexcPrices.ask;
+        const sellDifference = jupPrices.rateFor60000fullsend - mexcPrices.ask;
         sellAlertElement.textContent = sellDifference.toFixed(5);
         applyAlertStyles(sellAlertElement, sellDifference);
       } else {
