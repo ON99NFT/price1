@@ -45,21 +45,21 @@ const fullsend = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
   
-      const [fullsendAmountFor3000USDC, usdcAmountFor60000fullsend] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 3000 * 1e6, 6),
+      const [fullsendAmountFor4000USDC, usdcAmountFor60000fullsend] = await Promise.all([
+        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 4000 * 1e6, 6),
         fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 60000 * 1e6, 6),
       ]);
     
-      if (fullsendAmountFor3000USDC === null || usdcAmountFor60000fullsend === null) {
+      if (fullsendAmountFor4000USDC === null || usdcAmountFor60000fullsend === null) {
         return null;
       }
     
       // Calculate rates
-      const jupRateFor3000USDC = 3000 / fullsendAmountFor3000USDC;
+      const jupRateFor4000USDC = 4000 / fullsendAmountFor4000USDC;
       const jupRateFor60000fullsend = usdcAmountFor60000fullsend / 60000;
     
       return {
-        rateFor3000USDC: jupRateFor3000USDC,
+        rateFor4000USDC: jupRateFor4000USDC,
         rateFor60000fullsend: jupRateFor60000fullsend,
       };
     }
@@ -73,7 +73,7 @@ const fullsend = (() => {
       const jupPrices = await fetchJupPrice();
     
       if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor3000USDC;
+        const buyDifference = mexcPrices.bid - jupPrices.rateFor4000USDC;
         buyAlertElement.textContent = buyDifference.toFixed(5);
         applyAlertStyles(buyAlertElement, buyDifference);
     
