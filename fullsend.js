@@ -45,22 +45,22 @@ const fullsend = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
   
-      const [fullsendAmountFor4000USDC, usdcAmountFor60000fullsend] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 4000 * 1e6, 6),
-        fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 60000 * 1e6, 6),
+      const [fullsendAmountFor1200USDC, usdcAmountFor20000fullsend] = await Promise.all([
+        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 1200 * 1e6, 6),
+        fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 20000 * 1e6, 6),
       ]);
     
-      if (fullsendAmountFor4000USDC === null || usdcAmountFor60000fullsend === null) {
+      if (fullsendAmountFor1200USDC === null || usdcAmountFor20000fullsend === null) {
         return null;
       }
     
       // Calculate rates
-      const jupRateFor4000USDC = 4000 / fullsendAmountFor4000USDC;
-      const jupRateFor60000fullsend = usdcAmountFor60000fullsend / 60000;
+      const jupRateFor1200USDC = 1200 / fullsendAmountFor1200USDC;
+      const jupRateFor20000fullsend = usdcAmountFor20000fullsend / 20000;
     
       return {
-        rateFor4000USDC: jupRateFor4000USDC,
-        rateFor60000fullsend: jupRateFor60000fullsend,
+        rateFor1200USDC: jupRateFor1200USDC,
+        rateFor20000fullsend: jupRateFor20000fullsend,
       };
     }
   
@@ -73,11 +73,11 @@ const fullsend = (() => {
       const jupPrices = await fetchJupPrice();
     
       if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor4000USDC;
+        const buyDifference = mexcPrices.bid - jupPrices.rateFor1200USDC;
         buyAlertElement.textContent = buyDifference.toFixed(5);
         applyAlertStyles(buyAlertElement, buyDifference);
     
-        const sellDifference = jupPrices.rateFor60000fullsend - mexcPrices.ask;
+        const sellDifference = jupPrices.rateFor20000fullsend - mexcPrices.ask;
         sellAlertElement.textContent = sellDifference.toFixed(5);
         applyAlertStyles(sellAlertElement, sellDifference);
       } else {
@@ -98,26 +98,17 @@ const fullsend = (() => {
       element.style.backgroundColor = '';
       element.style.color = '';
   
-      if (difference > 0.009) {
+      if (difference > 0.002) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-flashing-2');
-      } else if (difference > 0.006) {
+      } else if (difference > 0.001) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-flashing-1');
-      } else if (difference > 0.003) {
+      } else if (difference > 0.0005) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-large', 'alert-large-green');
       } else if (difference > 0) {
         element.classList.add('alert-positive');
-      } else if (difference < -0.009) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-negative-2');
-      } else if (difference < -0.006) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-negative-1');
-      } else if (difference < -0.003) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-large', 'alert-large-red');
       } else if (difference < 0) {
         element.classList.add('alert-negative');
       }

@@ -45,22 +45,22 @@ const libra = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintlibra = 'Bo9jh3wsmcC2AjakLWzNmKJ3SgtZmXEcSaW7L2FAvUsU';
   
-      const [libraAmountFor1200USDC, usdcAmountFor6000libra] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintlibra, 1200 * 1e6, 6),
-        fetchJupSwapPrice(outputMintlibra, inputMintUSDC, 6000 * 1e6, 6),
+      const [libraAmountFor800USDC, usdcAmountFor1700libra] = await Promise.all([
+        fetchJupSwapPrice(inputMintUSDC, outputMintlibra, 800 * 1e6, 6),
+        fetchJupSwapPrice(outputMintlibra, inputMintUSDC, 1700 * 1e6, 6),
       ]);
     
-      if (libraAmountFor1200USDC === null || usdcAmountFor6000libra === null) {
+      if (libraAmountFor800USDC === null || usdcAmountFor1700libra === null) {
         return null;
       }
     
       // Calculate rates
-      const jupRateFor1200USDC = 1200 / libraAmountFor1200USDC;
-      const jupRateFor6000libra = usdcAmountFor6000libra / 6000;
+      const jupRateFor800USDC = 800 / libraAmountFor800USDC;
+      const jupRateFor1700libra = usdcAmountFor1700libra / 1700;
     
       return {
-        rateFor1200USDC: jupRateFor1200USDC,
-        rateFor6000libra: jupRateFor6000libra,
+        rateFor800USDC: jupRateFor800USDC,
+        rateFor1700libra: jupRateFor1700libra,
       };
     }
   
@@ -73,11 +73,11 @@ const libra = (() => {
       const jupPrices = await fetchJupPrice();
     
       if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor1200USDC;
+        const buyDifference = mexcPrices.bid - jupPrices.rateFor800USDC;
         buyAlertElement.textContent = buyDifference.toFixed(5);
         applyAlertStyles(buyAlertElement, buyDifference);
     
-        const sellDifference = jupPrices.rateFor6000libra - mexcPrices.ask;
+        const sellDifference = jupPrices.rateFor1700libra - mexcPrices.ask;
         sellAlertElement.textContent = sellDifference.toFixed(5);
         applyAlertStyles(sellAlertElement, sellDifference);
       } else {
@@ -98,26 +98,17 @@ const libra = (() => {
       element.style.backgroundColor = '';
       element.style.color = '';
   
-      if (difference > 0.03) {
+      if (difference > 0.02) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-flashing-2');
-      } else if (difference > 0.02) {
+      } else if (difference > 0.01) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-flashing-1');
-      } else if (difference > 0.01) {
+      } else if (difference > 0.005) {
         element.style.fontSize = '1.5em';
         element.classList.add('alert-large', 'alert-large-green');
       } else if (difference > 0) {
         element.classList.add('alert-positive');
-      } else if (difference < -0.03) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-negative-2');
-      } else if (difference < -0.02) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-negative-1');
-      } else if (difference < -0.01) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-large', 'alert-large-red');
       } else if (difference < 0) {
         element.classList.add('alert-negative');
       }
