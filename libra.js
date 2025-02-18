@@ -45,22 +45,22 @@ const libra = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintlibra = 'Bo9jh3wsmcC2AjakLWzNmKJ3SgtZmXEcSaW7L2FAvUsU';
   
-      const [libraAmountFor800USDC, usdcAmountFor1700libra] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintlibra, 800 * 1e6, 6),
-        fetchJupSwapPrice(outputMintlibra, inputMintUSDC, 1700 * 1e6, 6),
+      const [libraAmountFor500USDC, usdcAmountFor1675libra] = await Promise.all([
+        fetchJupSwapPrice(inputMintUSDC, outputMintlibra, 500 * 1e6, 6),
+        fetchJupSwapPrice(outputMintlibra, inputMintUSDC, 1675 * 1e6, 6),
       ]);
     
-      if (libraAmountFor800USDC === null || usdcAmountFor1700libra === null) {
+      if (libraAmountFor500USDC === null || usdcAmountFor1675libra === null) {
         return null;
       }
     
       // Calculate rates
-      const jupRateFor800USDC = 800 / libraAmountFor800USDC;
-      const jupRateFor1700libra = usdcAmountFor1700libra / 1700;
+      const jupRateFor500USDC = 500 / libraAmountFor500USDC;
+      const jupRateFor1675libra = usdcAmountFor1675libra / 1675;
     
       return {
-        rateFor800USDC: jupRateFor800USDC,
-        rateFor1700libra: jupRateFor1700libra,
+        rateFor500USDC: jupRateFor500USDC,
+        rateFor1675libra: jupRateFor1675libra,
       };
     }
   
@@ -73,11 +73,11 @@ const libra = (() => {
       const jupPrices = await fetchJupPrice();
     
       if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor800USDC;
+        const buyDifference = mexcPrices.bid - jupPrices.rateFor500USDC;
         buyAlertElement.textContent = buyDifference.toFixed(5);
         applyAlertStyles(buyAlertElement, buyDifference);
     
-        const sellDifference = jupPrices.rateFor1700libra - mexcPrices.ask;
+        const sellDifference = jupPrices.rateFor1675libra - mexcPrices.ask;
         sellAlertElement.textContent = sellDifference.toFixed(5);
         applyAlertStyles(sellAlertElement, sellDifference);
       } else {

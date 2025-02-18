@@ -145,12 +145,12 @@ function playSystemAlert() {
       try {
           const [buyAmount, sellAmount] = await Promise.all([
               fetchKyberSwapPrice(addresses.USDT, addresses.BROCCOLI, 4000 * 1e18),
-              fetchKyberSwapPrice(addresses.BROCCOLI, addresses.USDT, 37500 * 1e18)
+              fetchKyberSwapPrice(addresses.BROCCOLI, addresses.USDT, 40000 * 1e18)
           ]);
       
           return {
               buyPrice: buyAmount ? 4000 / (buyAmount / 1e18) : null,
-              sellPrice: sellAmount ? (sellAmount / 1e18) / 37500 : null
+              sellPrice: sellAmount ? (sellAmount / 1e18) / 40000 : null
           };
       } catch (error) {
           console.error('Price Calculation Error:', error);
@@ -199,22 +199,16 @@ function playSystemAlert() {
     let shouldPlaySound = false;
 
     // Visual styling logic
-    if (value > 0.007) {
+    if (value > 0.002) {
         element.classList.add('alert-flashing-2');
         shouldPlaySound = true;
-    } else if (value > 0.003) {
+    } else if (value > 0.001) {
         element.classList.add('alert-flashing-1');
         shouldPlaySound = true;
-    } else if (value > 0.002) {
+    } else if (value > 0.0005) {
         element.classList.add('alert-large-green');
     } else if (value > 0) {
         element.classList.add('alert-positive');
-    } else if (value < -0.007) {
-        element.classList.add('alert-flashing-negative-2');
-    } else if (value < -0.003) {
-        element.classList.add('alert-flashing-negative-1');
-    } else if (value < -0.002) {
-        element.classList.add('alert-large-red');
     } else {
         element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
     }
