@@ -144,13 +144,13 @@ function playSystemAlert() {
   
       try {
           const [buyAmount, sellAmount] = await Promise.all([
-              fetchKyberSwapPrice(addresses.USDT, addresses.BROCCOLI, 4000 * 1e18),
-              fetchKyberSwapPrice(addresses.BROCCOLI, addresses.USDT, 40000 * 1e18)
+              fetchKyberSwapPrice(addresses.USDT, addresses.BROCCOLI, 2700 * 1e18),
+              fetchKyberSwapPrice(addresses.BROCCOLI, addresses.USDT, 50000 * 1e18)
           ]);
       
           return {
-              buyPrice: buyAmount ? 4000 / (buyAmount / 1e18) : null,
-              sellPrice: sellAmount ? (sellAmount / 1e18) / 40000 : null
+              buyPrice: buyAmount ? 2700 / (buyAmount / 1e18) : null,
+              sellPrice: sellAmount ? (sellAmount / 1e18) / 50000 : null
           };
       } catch (error) {
           console.error('Price Calculation Error:', error);
