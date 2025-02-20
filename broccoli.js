@@ -200,13 +200,13 @@ function playSystemAlert() {
     let shouldPlaySound = false;
 
     // Visual styling logic
-    if (value > 0.002) {
+    if (value > 0.008) {
         element.classList.add('alert-flashing-2');
         shouldPlaySound = true;
-    } else if (value > 0.001) {
+    } else if (value > 0.004) {
         element.classList.add('alert-flashing-1');
         shouldPlaySound = true;
-    } else if (value > 0.0005) {
+    } else if (value > 0.0002) {
         element.classList.add('alert-large-green');
     } else if (value > 0) {
         element.classList.add('alert-positive');
