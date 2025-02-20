@@ -5,12 +5,12 @@ const BADAI = (() => {
   
     // Create and manage audio enable button
     function handleAudioInitialization() {
-        // Create floating enable button
+        // Create section-specific enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'audio-enable-btn';
+        enableButton.id = 'badai-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
-            position: fixed;
+            position: absolute;
             top: 20px;
             right: 20px;
             padding: 12px 20px;
@@ -19,7 +19,7 @@ const BADAI = (() => {
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            z-index: 10000;
+            z-index: 100;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         `;
@@ -57,10 +57,12 @@ const BADAI = (() => {
             }
         });
   
-        document.body.appendChild(enableButton);
+        // Append to Badai section
+        const section = document.getElementById('badai-buy-alert').closest('.token-section');
+        section.appendChild(enableButton);
     }
   
-    // Modified playSystemAlert function
+    // Play system alert sound
     function playSystemAlert() {
       if (!audioEnabled || !audioContext) return;
   
@@ -181,31 +183,31 @@ const BADAI = (() => {
         }
     }
   
-    // Apply visual and audio alerts
+    // Apply visual and audio alerts (FIXED VERSION)
     function applyAlertStyles(element, value) {
-      element.className = '';
-      let shouldPlaySound = false;
+        element.className = '';
+        let shouldPlaySound = false;
   
-      // Visual styling logic
-      if (value > 0.004) {
-          element.classList.add('alert-flashing-2');
-          shouldPlaySound = true;
-      } else if (value > 0.002) {
-          element.classList.add('alert-flashing-1');
-          shouldPlaySound = true;
-      } else if (value > 0.001) {
-          element.classList.add('alert-large-green');
-      } else if (value > 0) {
-          element.classList.add('alert-positive');
-      } else {
-          element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
-      }
+        // Visual styling logic
+        if (value > 0.003) {
+            element.classList.add('alert-flashing-2');
+            shouldPlaySound = true;
+        } else if (value > 0.001) {
+            element.classList.add('alert-flashing-1');
+            shouldPlaySound = true;
+        } else if (value > 0.0005) {
+            element.classList.add('alert-large-green');
+        } else if (value > 0) {
+            element.classList.add('alert-positive');
+        } else {
+            element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
+        }
   
-      // Trigger sound only for positive flashing alerts
-      if (shouldPlaySound && audioEnabled) {
-          playSystemAlert();
+        // Fixed condition: Check element ID instead of undefined variable
+        if (shouldPlaySound && audioEnabled && element.id === 'badai-buy-alert') {
+            playSystemAlert();
+        }
       }
-    }
   
     // Initialize application
     (function init() {

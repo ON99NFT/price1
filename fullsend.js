@@ -1,124 +1,210 @@
 const fullsend = (() => {
-    // Function to fetch MEXC bid-ask prices for fullsend
-    async function fetchMexcPrice() {
+  let audioContext = null;
+  let audioEnabled = false;
+  let enableButton = null;
+
+  // Audio initialization
+  function handleAudioInitialization() {
+      enableButton = document.createElement('button');
+      enableButton.id = 'fullsend-audio-enable-btn';
+      enableButton.innerHTML = '🔇 Enable Alert Sounds';
+      enableButton.style.cssText = `
+          position: absolute;
+          top: 20px;
+          right: 20px;
+          padding: 8px 15px;
+          background: #4CAF50;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          z-index: 100;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+          transition: all 0.2s ease;
+      `;
+
+      enableButton.addEventListener('mouseover', () => {
+          enableButton.style.transform = 'scale(1.03)';
+          enableButton.style.background = '#45a049';
+      });
+      
+      enableButton.addEventListener('mouseout', () => {
+          enableButton.style.transform = 'scale(1)';
+          enableButton.style.background = '#4CAF50';
+      });
+
+      enableButton.addEventListener('click', async () => {
+          try {
+              if (!audioContext) {
+                  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+              }
+              if (audioContext.state === 'suspended') {
+                  await audioContext.resume();
+              }
+              audioEnabled = true;
+              enableButton.innerHTML = '🔊 Sounds Enabled!';
+              setTimeout(() => {
+                  enableButton.style.opacity = '0';
+                  setTimeout(() => enableButton.remove(), 300);
+              }, 1500);
+          } catch (error) {
+              console.error('Audio initialization failed:', error);
+              enableButton.innerHTML = '❌ Error';
+              enableButton.style.background = '#f44336';
+          }
+      });
+
+      const section = document.getElementById('fullsend-buy-alert').closest('.token-section');
+      section.appendChild(enableButton);
+  }
+
+  // Sound alert function
+  function playAlertSound() {
+      if (!audioEnabled || !audioContext) return;
+
       try {
-        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/FULLSEND_USDT';
-        const response = await fetch(proxyUrl + apiUrl);
-        const data = await response.json();
-    
-        if (!data || !data.data || !data.data.bids || !data.data.asks) {
-          throw new Error('Invalid MEXC API response');
-        }
-    
-        // Extract the best bid and ask prices
-        const bestBid = parseFloat(data.data.bids[0][0]);
-        const bestAsk = parseFloat(data.data.asks[0][0]);
-    
-        return { bid: bestBid, ask: bestAsk };
+          const osc = audioContext.createOscillator();
+          const gainNode = audioContext.createGain();
+          osc.connect(gainNode);
+          gainNode.connect(audioContext.destination);
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5 note
+          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+
+          osc.start();
+          osc.stop(audioContext.currentTime + 0.4);
       } catch (error) {
-        console.error('Error fetching MEXC bid-ask prices:', error);
-        return null;
+          console.log('Sound playback error:', error);
       }
-    }
-  
-    // Function to fetch JUP price for a given swap
-    async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals) {
+  }
+
+  // Function to fetch MEXC bid-ask prices
+  async function fetchMexcPrice() {
       try {
-        const url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
-        const response = await fetch(url);
-    
-        if (!response.ok) {
-          throw new Error(`JUP API error: ${response.status} ${response.statusText}`);
-        }
-    
-        const data = await response.json();
-        return data.outAmount / 10 ** decimals;
+          const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+          const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/FULLSEND_USDT';
+          const response = await fetch(proxyUrl + apiUrl);
+          const data = await response.json();
+      
+          if (!data || !data.data || !data.data.bids || !data.data.asks) {
+              throw new Error('Invalid MEXC API response');
+          }
+      
+          const bestBid = parseFloat(data.data.bids[0][0]);
+          const bestAsk = parseFloat(data.data.asks[0][0]);
+      
+          return { bid: bestBid, ask: bestAsk };
       } catch (error) {
-        console.error('Error fetching JUP swap price:', error);
-        return null;
+          console.error('Error fetching MEXC prices:', error);
+          return null;
       }
-    }
-  
-    // Function to fetch JUP prices for fullsend
-    async function fetchJupPrice() {
+  }
+
+  // Function to fetch JUP swap price
+  async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals) {
+      try {
+          const url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
+          const response = await fetch(url);
+      
+          if (!response.ok) {
+              throw new Error(`JUP API error: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          return data.outAmount / 10 ** decimals;
+      } catch (error) {
+          console.error('JUP swap error:', error);
+          return null;
+      }
+  }
+
+  // Fetch JUP prices
+  async function fetchJupPrice() {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
   
       const [fullsendAmountFor1200USDC, usdcAmountFor20000fullsend] = await Promise.all([
-        fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 1200 * 1e6, 6),
-        fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 20000 * 1e6, 6),
+          fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 1200 * 1e6, 6),
+          fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 20000 * 1e6, 6),
       ]);
-    
-      if (fullsendAmountFor1200USDC === null || usdcAmountFor20000fullsend === null) {
-        return null;
-      }
-    
-      // Calculate rates
-      const jupRateFor1200USDC = 1200 / fullsendAmountFor1200USDC;
-      const jupRateFor20000fullsend = usdcAmountFor20000fullsend / 20000;
-    
+  
+      if (!fullsendAmountFor1200USDC || !usdcAmountFor20000fullsend) return null;
+  
       return {
-        rateFor1200USDC: jupRateFor1200USDC,
-        rateFor20000fullsend: jupRateFor20000fullsend,
+          rateFor1200USDC: 1200 / fullsendAmountFor1200USDC,
+          rateFor20000fullsend: usdcAmountFor20000fullsend / 20000
       };
-    }
+  }
+
+  // Update alerts
+  async function updateAlerts() {
+      const buyElement = document.getElementById('fullsend-buy-alert');
+      const sellElement = document.getElementById('fullsend-sell-alert');
   
-    // Function to update alerts
-    async function updateAlerts() {
-      const buyAlertElement = document.getElementById('fullsend-buy-alert');
-      const sellAlertElement = document.getElementById('fullsend-sell-alert');
-    
-      const mexcPrices = await fetchMexcPrice();
-      const jupPrices = await fetchJupPrice();
-    
-      if (mexcPrices !== null && jupPrices !== null) {
-        const buyDifference = mexcPrices.bid - jupPrices.rateFor1200USDC;
-        buyAlertElement.textContent = buyDifference.toFixed(5);
-        applyAlertStyles(buyAlertElement, buyDifference);
-    
-        const sellDifference = jupPrices.rateFor20000fullsend - mexcPrices.ask;
-        sellAlertElement.textContent = sellDifference.toFixed(5);
-        applyAlertStyles(sellAlertElement, sellDifference);
-      } else {
-        buyAlertElement.textContent = 'Error';
-        sellAlertElement.textContent = 'Error';
+      try {
+          const [mexcData, jupData] = await Promise.all([
+              fetchMexcPrice(),
+              fetchJupPrice()
+          ]);
+  
+          if (!mexcData || !jupData) {
+              buyElement.textContent = sellElement.textContent = 'Error';
+              return;
+          }
+  
+          const buyDiff = mexcData.bid - jupData.rateFor1200USDC;
+          const sellDiff = jupData.rateFor20000fullsend - mexcData.ask;
+  
+          buyElement.textContent = buyDiff.toFixed(5);
+          sellElement.textContent = sellDiff.toFixed(5);
+  
+          applyAlertStyles(buyElement, buyDiff);
+          applyAlertStyles(sellElement, sellDiff);
+      } catch (error) {
+          console.error('Update error:', error);
+          buyElement.textContent = sellElement.textContent = 'Error';
       }
-    }
-  
-    // Style application function
-    function applyAlertStyles(element, difference) {
+  }
+
+  // Apply styles and sounds
+  function applyAlertStyles(element, difference) {
       element.classList.remove(
-        'alert-positive', 'alert-negative',
-        'alert-flashing-1', 'alert-flashing-2',
-        'alert-flashing-negative-1', 'alert-flashing-negative-2',
-        'alert-large', 'alert-large-green', 'alert-large-red'
+          'alert-positive', 'alert-negative',
+          'alert-flashing-1', 'alert-flashing-2',
+          'alert-large-green'
       );
       element.style.fontSize = '';
-      element.style.backgroundColor = '';
-      element.style.color = '';
-  
-      if (difference > 0.002) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-2');
-      } else if (difference > 0.001) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-flashing-1');
-      } else if (difference > 0.0005) {
-        element.style.fontSize = '1.5em';
-        element.classList.add('alert-large', 'alert-large-green');
+      
+      let playSound = false;
+      if (difference > 0.0008) {
+          element.classList.add('alert-flashing-2');
+          playSound = true;
+      } else if (difference > 0.0004) {
+          element.classList.add('alert-flashing-1');
+          playSound = true;
+      } else if (difference > 0.0002) {
+          element.classList.add('alert-large-green');
       } else if (difference > 0) {
-        element.classList.add('alert-positive');
-      } else if (difference < 0) {
-        element.classList.add('alert-negative');
+          element.classList.add('alert-positive');
+      } else {
+          element.classList.add('alert-negative');
       }
-    }
-  
-    // Initialize
-    (function init() {
+
+      if (playSound && audioEnabled && element.id === 'fullsend-buy-alert') {
+          playAlertSound();
+      }
+  }
+
+  // Initialize
+  (function init() {
       updateAlerts();
       setInterval(updateAlerts, 4700);
-    })();
-  
-    return { updateAlerts };
+      setTimeout(() => {
+          if (!audioEnabled && !enableButton) handleAudioInitialization();
+      }, 5000);
   })();
+
+  return { updateAlerts };
+})();

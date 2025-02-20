@@ -7,10 +7,10 @@ const BROCCOLI = (() => {
   function handleAudioInitialization() {
       // Create floating enable button
       enableButton = document.createElement('button');
-      enableButton.id = 'audio-enable-btn';
+      enableButton.id = 'broccoli-audio-enable-btn';
       enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
       enableButton.style.cssText = `
-          position: fixed;
+          position: absolute;
           top: 20px;
           right: 20px;
           padding: 12px 20px;
@@ -57,7 +57,8 @@ const BROCCOLI = (() => {
           }
       });
 
-      document.body.appendChild(enableButton);
+        const section = document.getElementById('broccoli-buy-alert').closest('.token-section');
+        section.appendChild(enableButton);
   }
 
 // Modified playSystemAlert function
@@ -214,7 +215,7 @@ function playSystemAlert() {
     }
 
     // Trigger sound only for positive flashing alerts
-    if (shouldPlaySound && audioEnabled) {
+    if (shouldPlaySound && audioEnabled && element.id === 'broccoli-buy-alert') {
         playSystemAlert();
     }
 }
