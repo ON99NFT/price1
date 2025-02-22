@@ -125,16 +125,16 @@ const fullsend = (() => {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
   
-      const [fullsendAmountFor1200USDC, usdcAmountFor20000fullsend] = await Promise.all([
-          fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 1200 * 1e6, 6),
-          fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 20000 * 1e6, 6),
+      const [fullsendAmountFor500USDC, usdcAmountFor25000fullsend] = await Promise.all([
+          fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 500 * 1e6, 6),
+          fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 25000 * 1e6, 6),
       ]);
   
-      if (!fullsendAmountFor1200USDC || !usdcAmountFor20000fullsend) return null;
+      if (!fullsendAmountFor500USDC || !usdcAmountFor25000fullsend) return null;
   
       return {
-          rateFor1200USDC: 1200 / fullsendAmountFor1200USDC,
-          rateFor20000fullsend: usdcAmountFor20000fullsend / 20000
+          rateFor500USDC: 500 / fullsendAmountFor500USDC,
+          rateFor25000fullsend: usdcAmountFor25000fullsend / 25000
       };
   }
 
@@ -154,8 +154,8 @@ const fullsend = (() => {
               return;
           }
   
-          const buyDiff = mexcData.bid - jupData.rateFor1200USDC;
-          const sellDiff = jupData.rateFor20000fullsend - mexcData.ask;
+          const buyDiff = mexcData.bid - jupData.rateFor500USDC;
+          const sellDiff = jupData.rateFor25000fullsend - mexcData.ask;
   
           buyElement.textContent = buyDiff.toFixed(5);
           sellElement.textContent = sellDiff.toFixed(5);
@@ -168,33 +168,40 @@ const fullsend = (() => {
       }
   }
 
-  // Apply styles and sounds
+  // In applyAlertStyles function - modified section
   function applyAlertStyles(element, difference) {
-      element.classList.remove(
-          'alert-positive', 'alert-negative',
-          'alert-flashing-1', 'alert-flashing-2',
-          'alert-large-green'
-      );
-      element.style.fontSize = '';
-      
-      let playSound = false;
-      if (difference > 0.0008) {
-          element.classList.add('alert-flashing-2');
-          playSound = true;
-      } else if (difference > 0.0004) {
-          element.classList.add('alert-flashing-1');
-          playSound = true;
-      } else if (difference > 0.0002) {
-          element.classList.add('alert-large-green');
-      } else if (difference > 0) {
-          element.classList.add('alert-positive');
-      } else {
-          element.classList.add('alert-negative');
-      }
+    element.classList.remove(
+        'alert-positive', 'alert-negative',
+        'alert-flashing-1', 'alert-flashing-2',
+        'alert-flashing-negative-1', 'alert-flashing-negative-2',
+        'alert-large-green'
+    );
+    element.style.fontSize = '';
+    
+    let playSound = false;
+    if (difference > 0.0008) {
+        element.classList.add('alert-flashing-2');
+        playSound = true;
+    } else if (difference > 0.0004) {
+        element.classList.add('alert-flashing-1');
+        playSound = true;
+    } else if (difference > 0.0002) {
+        element.classList.add('alert-large-green');
+    } else if (difference > 0) {
+        element.classList.add('alert-positive');
+    } else {
+        element.classList.add('alert-negative');
+        
+        // New condition for negative buy alerts
+        if (element.id === 'fullsend-buy-alert' && difference < -0.0002) {
+            element.classList.add('alert-flashing-negative-2');
+            playSound = true;
+        }
+    }
 
-      if (playSound && audioEnabled && element.id === 'fullsend-buy-alert') {
-          playAlertSound();
-      }
+    if (playSound && audioEnabled) {
+        playAlertSound();
+    }
   }
 
   // Initialize
