@@ -198,7 +198,7 @@ const pain = (() => {
   // Initialization
   (function init() {
       updateAlerts();
-      setInterval(updateAlerts, 4700);
+      setInterval(updateAlerts, 7000);
       setTimeout(() => {
           if (!audioEnabled && !enableButton) handleAudioInitialization();
       }, 9000);

@@ -1,4 +1,4 @@
-const fullsend = (() => {
+const jailstool = (() => {
   let audioContext = null;
   let audioEnabled = false;
   let enableButton = null;
@@ -6,7 +6,7 @@ const fullsend = (() => {
   // Audio initialization
   function handleAudioInitialization() {
       enableButton = document.createElement('button');
-      enableButton.id = 'fullsend-audio-enable-btn';
+      enableButton.id = 'jailstool-audio-enable-btn';
       enableButton.innerHTML = '🔇 Enable Alert Sounds';
       enableButton.style.cssText = `
           position: absolute;
@@ -46,7 +46,7 @@ const fullsend = (() => {
               setTimeout(() => {
                   enableButton.style.opacity = '0';
                   setTimeout(() => enableButton.remove(), 300);
-              }, 1500);
+              }, 1751);
           } catch (error) {
               console.error('Audio initialization failed:', error);
               enableButton.innerHTML = '❌ Error';
@@ -54,7 +54,7 @@ const fullsend = (() => {
           }
       });
 
-      const section = document.getElementById('fullsend-buy-alert').closest('.token-section');
+      const section = document.getElementById('jailstool-buy-alert').closest('.token-section');
       section.appendChild(enableButton);
   }
 
@@ -84,7 +84,7 @@ const fullsend = (() => {
   async function fetchMexcPrice() {
       try {
           const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-          const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/FULLSEND_USDT';
+          const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/JAILSTOOL_USDT';
           const response = await fetch(proxyUrl + apiUrl);
           const data = await response.json();
       
@@ -123,25 +123,25 @@ const fullsend = (() => {
   // Fetch JUP prices
   async function fetchJupPrice() {
       const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
+      const outputMintjailstool = 'AxriehR6Xw3adzHopnvMn7GcpRFcD41ddpiTWMg6pump';
   
-      const [fullsendAmountFor500USDC, usdcAmountFor25000fullsend] = await Promise.all([
-          fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 500 * 1e6, 6),
-          fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 25000 * 1e6, 6),
+      const [jailstoolAmountFor751USDC, usdcAmountFor49999jailstool] = await Promise.all([
+          fetchJupSwapPrice(inputMintUSDC, outputMintjailstool, 751 * 1e6, 6),
+          fetchJupSwapPrice(outputMintjailstool, inputMintUSDC, 49999 * 1e6, 6),
       ]);
   
-      if (!fullsendAmountFor500USDC || !usdcAmountFor25000fullsend) return null;
+      if (!jailstoolAmountFor751USDC || !usdcAmountFor49999jailstool) return null;
   
       return {
-          rateFor500USDC: 500 / fullsendAmountFor500USDC,
-          rateFor25000fullsend: usdcAmountFor25000fullsend / 25000
+          rateFor751USDC: 751 / jailstoolAmountFor751USDC,
+          rateFor49999jailstool: usdcAmountFor49999jailstool / 49999
       };
   }
 
   // Update alerts
   async function updateAlerts() {
-      const buyElement = document.getElementById('fullsend-buy-alert');
-      const sellElement = document.getElementById('fullsend-sell-alert');
+      const buyElement = document.getElementById('jailstool-buy-alert');
+      const sellElement = document.getElementById('jailstool-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
@@ -154,8 +154,8 @@ const fullsend = (() => {
               return;
           }
   
-          const buyDiff = mexcData.bid - jupData.rateFor500USDC;
-          const sellDiff = jupData.rateFor25000fullsend - mexcData.ask;
+          const buyDiff = mexcData.bid - jupData.rateFor751USDC;
+          const sellDiff = jupData.rateFor49999jailstool - mexcData.ask;
   
           buyElement.textContent = buyDiff.toFixed(5);
           sellElement.textContent = sellDiff.toFixed(5);
@@ -193,7 +193,7 @@ const fullsend = (() => {
         element.classList.add('alert-negative');
         
         // New condition for negative buy alerts
-        if (element.id === 'fullsend-buy-alert' && difference < -0.0003) {
+        if (element.id === 'jailstool-buy-alert' && difference < -0.0003) {
             element.classList.add('alert-flashing-negative-2');
             playSound = true;
         }
@@ -210,7 +210,7 @@ const fullsend = (() => {
       setInterval(updateAlerts, 7000);
       setTimeout(() => {
           if (!audioEnabled && !enableButton) handleAudioInitialization();
-      }, 5000);
+      }, 7510);
   })();
 
   return { updateAlerts };
