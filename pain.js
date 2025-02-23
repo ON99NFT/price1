@@ -80,91 +80,164 @@ const pain = (() => {
       }
   }
 
-  // JUP swap function
-  async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals) {
+    // Updated JUP swap function with ExactOut support
+    async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals, exactOut = false) {
       try {
-          const url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
-          const response = await fetch(url);
-      
-          if (!response.ok) {
-              throw new Error(`JUP API error: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          return data.outAmount / 10 ** decimals;
-      } catch (error) {
-          console.error('Error fetching JUP swap price:', error);
-          return null;
-      }
-  }
-
-  // MEXC price fetch
-  async function fetchMexcPrice() {
-      try {
-          const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-          const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/PAIN_USDT';
-          const response = await fetch(proxyUrl + apiUrl);
-          const data = await response.json();
-      
-          if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
+          let url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
+          if (exactOut) url += '&swapMode=ExactOut';
           
-          return {
-              bid: parseFloat(data.data.bids[0][0]),
-              ask: parseFloat(data.data.asks[0][0])
-          };
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`JUP API error: ${response.status}`);
+          
+          const data = await response.json();
+          return exactOut 
+              ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
+              : data.outAmount / 10 ** decimals; // PAIN received for ExactIn
       } catch (error) {
-          console.error('MEXC Error:', error);
+          console.error('JUP Error:', error);
           return null;
       }
   }
 
-  // JUP price calculation
-  async function fetchJupPrice() {
-      const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const outputMintpain = '1Qf8gESP4i6CFNWerUSDdLKJ9U1LpqTYvjJ2MM4pain';
-  
-      const [painAmount, usdcAmount] = await Promise.all([
-          fetchJupSwapPrice(inputMintUSDC, outputMintpain, 900 * 1e6, 6),
-          fetchJupSwapPrice(outputMintpain, inputMintUSDC, 100 * 1e6, 6)
-      ]);
-  
-      if (!painAmount || !usdcAmount) return null;
-  
-      return {
-          rateFor900USDC: 900 / painAmount,
-          rateFor100pain: usdcAmount / 100
-      };
-  }
+  async function fetchMexcPrice() {
+    try {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/PAIN_USDT';
+        const response = await fetch(proxyUrl + apiUrl);
+        const data = await response.json();
+        
+        const calculateBidPrice = (bids, targetPAIN) => {
+            let totalPAIN = 0;
+            let totalUSDT = 0;
+            
+            for (const [priceStr, usdtAvailableStr] of bids) {
+                const price = parseFloat(priceStr);
+                const usdtAvailable = parseFloat(usdtAvailableStr);
+                const painAvailable = usdtAvailable / price;
+                const remaining = targetPAIN - totalPAIN;
+                const fillAmount = Math.min(remaining, painAvailable);
+                
+                totalUSDT += fillAmount * price;
+                totalPAIN += fillAmount;
+                
+                if (totalPAIN >= targetPAIN) break;
+            }
+            return totalUSDT / targetPAIN;
+        };
 
-  // Alert update
-  async function updateAlerts() {
-      const buyElement = document.getElementById('pain-buy-alert');
-      const sellElement = document.getElementById('pain-sell-alert');
-  
-      try {
-          const [mexcData, jupData] = await Promise.all([
-              fetchMexcPrice(),
-              fetchJupPrice()
-          ]);
-  
-          if (!mexcData || !jupData) {
-              buyElement.textContent = sellElement.textContent = 'Error';
-              return;
-          }
-  
-          const buyDiff = (mexcData.bid - jupData.rateFor900USDC).toFixed(5);
-          const sellDiff = (jupData.rateFor100pain - mexcData.ask).toFixed(5);
-  
-          buyElement.textContent = buyDiff;
-          sellElement.textContent = sellDiff;
-  
-          applyAlertStyles(buyElement, parseFloat(buyDiff));
-          applyAlertStyles(sellElement, parseFloat(sellDiff));
-      } catch (error) {
-          console.error('Update error:', error);
+        const calculateAskPrice = (asks, targetPAIN) => {
+            let totalPAIN = 0;
+            let totalUSDT = 0;
+            
+            for (const [priceStr, usdtAvailableStr] of asks) {
+                const price = parseFloat(priceStr);
+                const usdtAvailable = parseFloat(usdtAvailableStr);
+                const painAvailable = usdtAvailable / price;
+                const remaining = targetPAIN - totalPAIN;
+                const fillAmount = Math.min(remaining, painAvailable);
+                
+                totalUSDT += fillAmount * price;
+                totalPAIN += fillAmount;
+                
+                if (totalPAIN >= targetPAIN) break;
+            }
+            return totalUSDT / targetPAIN;
+        };
+
+        const targetFullsend = 100;
+        const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
+        const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
+
+        if (!bidPrice || !askPrice) throw new Error('Insufficient liquidity');
+        
+        return {
+            bid: bidPrice,
+            ask: askPrice
+        };
+    } catch (error) {
+        console.error('MEXC Error:', error);
+        return null;
+    }
+}
+
+  // Corrected JUP price calculation
+  async function fetchJupPrice() {
+    const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+    const PAIN_MINT = '1Qf8gESP4i6CFNWerUSDdLKJ9U1LpqTYvjJ2MM4pain';
+    const PAIN_DECIMALS = 6;
+
+    // Get USDC needed to buy EXACTLY 100 PAIN
+    const usdcNeeded = await fetchJupSwapPrice(
+        USDC_MINT,
+        PAIN_MINT,
+        100 * 10 ** PAIN_DECIMALS, // 100 PAIN in atoms
+        6, // USDC decimals
+        true // ExactOut mode
+    );
+
+    // Get USDC received for selling 100 PAIN
+    const usdcReceived = await fetchJupSwapPrice(
+        PAIN_MINT,
+        USDC_MINT,
+        100 * 10 ** PAIN_DECIMALS, // 100 PAIN in atoms
+        6 // USDC decimals
+    );
+
+    if (!usdcNeeded || !usdcReceived) return null;
+
+    return {
+        buyPrice: usdcNeeded / 100,  // USDC per PAIN (buy)
+        sellPrice: usdcReceived / 100 // USDC per PAIN (sell)
+    };
+}
+
+// Fixed alert update
+async function updateAlerts() {
+  const buyElement = document.getElementById('pain-buy-alert');
+  const sellElement = document.getElementById('pain-sell-alert');
+
+  try {
+      const [mexcData, jupData] = await Promise.all([
+          fetchMexcPrice(),
+          fetchJupPrice()
+      ]);
+
+      if (!mexcData || !jupData) {
           buyElement.textContent = sellElement.textContent = 'Error';
+          return;
       }
+
+      // Format prices
+      const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+      
+      const jupBuy = formatPrice(jupData.buyPrice);
+      const jupSell = formatPrice(jupData.sellPrice);
+      const mexcBid = formatPrice(mexcData.bid);
+      const mexcAsk = formatPrice(mexcData.ask);
+
+      // Calculate differences
+      const buyDiff = formatPrice(mexcData.bid - jupData.buyPrice);
+      const sellDiff = formatPrice(jupData.sellPrice - mexcData.ask);
+
+      // Update display
+      buyElement.innerHTML = `$${jupBuy} - `
+          + `$${mexcBid}`
+          + `<span class="difference">$${buyDiff}</span>`;
+
+      sellElement.innerHTML = `$${jupSell} - `
+          + `$${mexcAsk}`
+          + `<span class="difference">$${sellDiff}</span>`;
+
+      // Apply styles
+      applyAlertStyles(buyElement.querySelector('.difference'), parseFloat(buyDiff));
+      applyAlertStyles(sellElement.querySelector('.difference'), parseFloat(sellDiff));
+
+  } catch (error) {
+      console.error('Update error:', error);
+      buyElement.textContent = sellElement.textContent = 'Error';
   }
+}
+
 
   // Alert styling
   function applyAlertStyles(element, difference) {

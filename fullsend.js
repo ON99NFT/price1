@@ -80,103 +80,173 @@ const fullsend = (() => {
       }
   }
 
-  // Function to fetch MEXC bid-ask prices
-  async function fetchMexcPrice() {
-      try {
-          const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-          const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/FULLSEND_USDT';
-          const response = await fetch(proxyUrl + apiUrl);
-          const data = await response.json();
-      
-          if (!data || !data.data || !data.data.bids || !data.data.asks) {
-              throw new Error('Invalid MEXC API response');
-          }
-      
-          const bestBid = parseFloat(data.data.bids[0][0]);
-          const bestAsk = parseFloat(data.data.asks[0][0]);
-      
-          return { bid: bestBid, ask: bestAsk };
-      } catch (error) {
-          console.error('Error fetching MEXC prices:', error);
-          return null;
-      }
-  }
+  // Updated JUP swap function with ExactOut support
+  async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals, exactOut = false) {
+    try {
+        let url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
+        if (exactOut) url += '&swapMode=ExactOut';
+        
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`JUP API error: ${response.status}`);
+        
+        const data = await response.json();
+        return exactOut 
+            ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
+            : data.outAmount / 10 ** decimals; // FULLSEND received for ExactIn
+    } catch (error) {
+        console.error('JUP Error:', error);
+        return null;
+    }
+}
 
-  // Function to fetch JUP swap price
-  async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals) {
-      try {
-          const url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
-          const response = await fetch(url);
-      
-          if (!response.ok) {
-              throw new Error(`JUP API error: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          return data.outAmount / 10 ** decimals;
-      } catch (error) {
-          console.error('JUP swap error:', error);
-          return null;
-      }
-  }
+async function fetchMexcPrice() {
+    try {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/FULLSEND_USDT';
+        const response = await fetch(proxyUrl + apiUrl);
+        const data = await response.json();
+        
+        const calculateBidPrice = (bids, targetFULLSEND) => {
+            let totalFULLSEND = 0;
+            let totalUSDT = 0;
+            
+            for (const [priceStr, usdtAvailableStr] of bids) {
+                const price = parseFloat(priceStr);
+                const usdtAvailable = parseFloat(usdtAvailableStr);
+                const fullsendAvailable = usdtAvailable / price;
+                const remaining = targetFULLSEND - totalFULLSEND;
+                const fillAmount = Math.min(remaining, fullsendAvailable);
+                
+                totalUSDT += fillAmount * price;
+                totalFULLSEND += fillAmount;
+                
+                if (totalFULLSEND >= targetFULLSEND) break;
+            }
+            return totalUSDT / targetFULLSEND;
+        };
 
-  // Fetch JUP prices
-  async function fetchJupPrice() {
-      const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const outputMintfullsend = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
-  
-      const [fullsendAmountFor500USDC, usdcAmountFor25000fullsend] = await Promise.all([
-          fetchJupSwapPrice(inputMintUSDC, outputMintfullsend, 500 * 1e6, 6),
-          fetchJupSwapPrice(outputMintfullsend, inputMintUSDC, 25000 * 1e6, 6),
-      ]);
-  
-      if (!fullsendAmountFor500USDC || !usdcAmountFor25000fullsend) return null;
-  
-      return {
-          rateFor500USDC: 500 / fullsendAmountFor500USDC,
-          rateFor25000fullsend: usdcAmountFor25000fullsend / 25000
-      };
-  }
+        const calculateAskPrice = (asks, targetFULLSEND) => {
+            let totalFULLSEND = 0;
+            let totalUSDT = 0;
+            
+            for (const [priceStr, usdtAvailableStr] of asks) {
+                const price = parseFloat(priceStr);
+                const usdtAvailable = parseFloat(usdtAvailableStr);
+                const fullsendAvailable = usdtAvailable / price;
+                const remaining = targetFULLSEND - totalFULLSEND;
+                const fillAmount = Math.min(remaining, fullsendAvailable);
+                
+                totalUSDT += fillAmount * price;
+                totalFULLSEND += fillAmount;
+                
+                if (totalFULLSEND >= targetFULLSEND) break;
+            }
+            return totalUSDT / targetFULLSEND;
+        };
 
-  // Update alerts
-  async function updateAlerts() {
-      const buyElement = document.getElementById('fullsend-buy-alert');
-      const sellElement = document.getElementById('fullsend-sell-alert');
-  
-      try {
-          const [mexcData, jupData] = await Promise.all([
-              fetchMexcPrice(),
-              fetchJupPrice()
-          ]);
-  
-          if (!mexcData || !jupData) {
-              buyElement.textContent = sellElement.textContent = 'Error';
-              return;
-          }
-  
-          const buyDiff = mexcData.bid - jupData.rateFor500USDC;
-          const sellDiff = jupData.rateFor25000fullsend - mexcData.ask;
-  
-          buyElement.textContent = buyDiff.toFixed(5);
-          sellElement.textContent = sellDiff.toFixed(5);
-  
-          applyAlertStyles(buyElement, buyDiff);
-          applyAlertStyles(sellElement, sellDiff);
-      } catch (error) {
-          console.error('Update error:', error);
-          buyElement.textContent = sellElement.textContent = 'Error';
-      }
-  }
+        const targetFullsend = 28000;
+        const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
+        const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
-  // In applyAlertStyles function - modified section
-  function applyAlertStyles(element, difference) {
+        if (!bidPrice || !askPrice) throw new Error('Insufficient liquidity');
+        
+        return {
+            bid: bidPrice,
+            ask: askPrice
+        };
+    } catch (error) {
+        console.error('MEXC Error:', error);
+        return null;
+    }
+}
+
+// Updated JUP price calculation
+async function fetchJupPrice() {
+    const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+    const FULLSEND_MINT = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
+    const FULLSEND_DECIMALS = 6;
+
+    // Get USDC needed to buy 28000 FULLSEND
+    const usdcNeeded = await fetchJupSwapPrice(
+        USDC_MINT,
+        FULLSEND_MINT,
+        28000 * 10 ** FULLSEND_DECIMALS,
+        6,
+        true
+    );
+
+    // Get USDC received for selling 28000 FULLSEND
+    const usdcReceived = await fetchJupSwapPrice(
+        FULLSEND_MINT,
+        USDC_MINT,
+        28000 * 10 ** FULLSEND_DECIMALS,
+        6
+    );
+
+    if (!usdcNeeded || !usdcReceived) return null;
+
+    return {
+        buyPrice: usdcNeeded / 28000,  // USDC per FULLSEND (buy)
+        sellPrice: usdcReceived / 28000 // USDC per FULLSEND (sell)
+    };
+}
+
+// Updated alert display
+async function updateAlerts() {
+    const buyElement = document.getElementById('fullsend-buy-alert');
+    const sellElement = document.getElementById('fullsend-sell-alert');
+
+    try {
+        const [mexcData, jupData] = await Promise.all([
+            fetchMexcPrice(),
+            fetchJupPrice()
+        ]);
+
+        if (!mexcData || !jupData) {
+            buyElement.textContent = sellElement.textContent = 'Error';
+            return;
+        }
+
+        // Format prices
+        const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+        const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+
+        const jupBuy = formatPrice(jupData.buyPrice);
+        const jupSell = formatPrice(jupData.sellPrice);
+        const mexcBid = formatPrice(mexcData.bid);
+        const mexcAsk = formatPrice(mexcData.ask);
+
+        // Calculate differences
+        const buyDiff = formatDiff(mexcData.bid - jupData.buyPrice);
+        const sellDiff = formatDiff(jupData.sellPrice - mexcData.ask);
+
+        // Update display
+        buyElement.innerHTML = `$${jupBuy} - `
+            + `$${mexcBid}`
+            + `<span class="difference">$${buyDiff}</span>`;
+
+        sellElement.innerHTML = `$${jupSell} - `
+            + `$${mexcAsk}`
+            + `<span class="difference">$${sellDiff}</span>`;
+
+        // Apply styles to difference elements
+        applyAlertStyles(buyElement.querySelector('.difference'), parseFloat(buyDiff));
+        applyAlertStyles(sellElement.querySelector('.difference'), parseFloat(sellDiff));
+
+    } catch (error) {
+        console.error('Update error:', error);
+        buyElement.textContent = sellElement.textContent = 'Error';
+    }
+}
+
+// Updated alert styling
+function applyAlertStyles(element, difference) {
     element.classList.remove(
         'alert-positive', 'alert-negative',
         'alert-flashing-1', 'alert-flashing-2',
         'alert-flashing-negative-1', 'alert-flashing-negative-2',
         'alert-large-green'
     );
-    element.style.fontSize = '';
     
     let playSound = false;
     if (difference > 0.0008) {
@@ -191,9 +261,7 @@ const fullsend = (() => {
         element.classList.add('alert-positive');
     } else {
         element.classList.add('alert-negative');
-        
-        // New condition for negative buy alerts
-        if (element.id === 'fullsend-buy-alert' && difference < -0.0003) {
+        if (difference < -0.0004) {
             element.classList.add('alert-flashing-negative-2');
             playSound = true;
         }
@@ -202,7 +270,7 @@ const fullsend = (() => {
     if (playSound && audioEnabled) {
         playAlertSound();
     }
-  }
+}
 
   // Initialize
   (function init() {
