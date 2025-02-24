@@ -261,9 +261,9 @@ function applyAlertStyles(element, difference) {
         element.classList.add('alert-positive');
     } else {
         element.classList.add('alert-negative');
-        if (difference < -0.0004) {
+        if (difference < -0.001) {
             element.classList.add('alert-flashing-negative-2');
-            playSound = true;
+            playSound = false;
         }
     }
 
