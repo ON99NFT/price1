@@ -170,7 +170,7 @@ async function fetchJupPrice() {
     const usdcNeeded = await fetchJupSwapPrice(
         USDC_MINT,
         FULLSEND_MINT,
-        28000 * 10 ** FULLSEND_DECIMALS,
+        38000 * 10 ** FULLSEND_DECIMALS,
         6,
         true
     );
@@ -179,15 +179,15 @@ async function fetchJupPrice() {
     const usdcReceived = await fetchJupSwapPrice(
         FULLSEND_MINT,
         USDC_MINT,
-        28000 * 10 ** FULLSEND_DECIMALS,
+        38000 * 10 ** FULLSEND_DECIMALS,
         6
     );
 
     if (!usdcNeeded || !usdcReceived) return null;
 
     return {
-        buyPrice: usdcNeeded / 28000,  // USDC per FULLSEND (buy)
-        sellPrice: usdcReceived / 28000 // USDC per FULLSEND (sell)
+        buyPrice: usdcNeeded / 38000,  // USDC per FULLSEND (buy)
+        sellPrice: usdcReceived / 38000 // USDC per FULLSEND (sell)
     };
 }
 
