@@ -208,7 +208,7 @@ async function updateAlerts() {
       }
 
       // Format prices
-      const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+      const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(2);
       
       const jupBuy = formatPrice(jupData.buyPrice);
       const jupSell = formatPrice(jupData.sellPrice);

@@ -144,7 +144,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetFULLSEND;
         };
 
-        const targetFullsend = 38000;
+        const targetFullsend = 49999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ async function fetchJupPrice() {
     const FULLSEND_MINT = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
     const FULLSEND_DECIMALS = 6;
 
-    // Get USDC needed to buy 28000 FULLSEND
+    // Get USDC needed to buy 49999 FULLSEND
     const usdcNeeded = await fetchJupSwapPrice(
         USDC_MINT,
         FULLSEND_MINT,
-        38000 * 10 ** FULLSEND_DECIMALS,
+        49999 * 10 ** FULLSEND_DECIMALS,
         6,
         true
     );
 
-    // Get USDC received for selling 28000 FULLSEND
+    // Get USDC received for selling 49999 FULLSEND
     const usdcReceived = await fetchJupSwapPrice(
         FULLSEND_MINT,
         USDC_MINT,
-        38000 * 10 ** FULLSEND_DECIMALS,
+        49999 * 10 ** FULLSEND_DECIMALS,
         6
     );
 
     if (!usdcNeeded || !usdcReceived) return null;
 
     return {
-        buyPrice: usdcNeeded / 38000,  // USDC per FULLSEND (buy)
-        sellPrice: usdcReceived / 38000 // USDC per FULLSEND (sell)
+        buyPrice: usdcNeeded / 49999,  // USDC per FULLSEND (buy)
+        sellPrice: usdcReceived / 49999 // USDC per FULLSEND (sell)
     };
 }
 
@@ -208,8 +208,8 @@ async function updateAlerts() {
         }
 
         // Format prices
-        const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
-        const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+        const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
+        const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
 
         const jupBuy = formatPrice(jupData.buyPrice);
         const jupSell = formatPrice(jupData.sellPrice);
@@ -261,7 +261,7 @@ function applyAlertStyles(element, difference) {
         element.classList.add('alert-positive');
     } else {
         element.classList.add('alert-negative');
-        if (difference < -0.001) {
+        if (difference < -0.0008) {
             element.classList.add('alert-flashing-negative-2');
             playSound = false;
         }
