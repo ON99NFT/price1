@@ -261,9 +261,9 @@ const hood = (() => {
           element.classList.add('alert-positive');
       } else {
           element.classList.add('alert-negative');
-          if (difference < 0.0005) {
-              element.classList.add('alert-flashing-2');
-              playSound = true;
+          if (difference < -0.0008) {
+              element.classList.add('alert-flashing-negative-2');
+              playSound = false;
           }
       }
   
