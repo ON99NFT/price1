@@ -144,7 +144,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetFULLSEND;
         };
 
-        const targetFullsend = 28000;
+        const targetFullsend = 38000;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
