@@ -249,10 +249,10 @@ const hood = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.000006) {
+      if (difference > 0.000005) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.000004) {
+      } else if (difference > 0.000003) {
           element.classList.add('alert-flashing-1');
           playSound = true;
       } else if (difference > 0.000002) {
