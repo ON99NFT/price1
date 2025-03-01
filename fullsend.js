@@ -144,7 +144,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetFULLSEND;
         };
 
-        const targetFullsend = 49999;
+        const targetFullsend = 62000;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ async function fetchJupPrice() {
     const FULLSEND_MINT = 'AshG5mHt4y4etsjhKFb2wA2rq1XZxKks1EPzcuXwpump';
     const FULLSEND_DECIMALS = 6;
 
-    // Get USDC needed to buy 49999 FULLSEND
+    // Get USDC needed to buy 62000 FULLSEND
     const usdcNeeded = await fetchJupSwapPrice(
         USDC_MINT,
         FULLSEND_MINT,
-        49999 * 10 ** FULLSEND_DECIMALS,
+        62000 * 10 ** FULLSEND_DECIMALS,
         6,
         true
     );
 
-    // Get USDC received for selling 49999 FULLSEND
+    // Get USDC received for selling 62000 FULLSEND
     const usdcReceived = await fetchJupSwapPrice(
         FULLSEND_MINT,
         USDC_MINT,
-        49999 * 10 ** FULLSEND_DECIMALS,
+        62000 * 10 ** FULLSEND_DECIMALS,
         6
     );
 
     if (!usdcNeeded || !usdcReceived) return null;
 
     return {
-        buyPrice: usdcNeeded / 49999,  // USDC per FULLSEND (buy)
-        sellPrice: usdcReceived / 49999 // USDC per FULLSEND (sell)
+        buyPrice: usdcNeeded / 62000,  // USDC per FULLSEND (buy)
+        sellPrice: usdcReceived / 62000 // USDC per FULLSEND (sell)
     };
 }
 
@@ -275,7 +275,7 @@ function applyAlertStyles(element, difference) {
   // Initialize
   (function init() {
       updateAlerts();
-      setInterval(updateAlerts, 7000);
+      setInterval(updateAlerts, 10000);
       setTimeout(() => {
           if (!audioEnabled && !enableButton) handleAudioInitialization();
       }, 5000);

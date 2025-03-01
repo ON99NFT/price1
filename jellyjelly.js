@@ -1,4 +1,4 @@
-const hood = (() => {
+const jellyjelly = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const hood = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'hood-audio-enable-btn';
+        enableButton.id = 'jellyjelly-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const hood = (() => {
             }
         });
   
-        const section = document.getElementById('hood-buy-alert').closest('.token-section');
+        const section = document.getElementById('jellyjelly-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -92,7 +92,7 @@ const hood = (() => {
           const data = await response.json();
           return exactOut 
               ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
-              : data.outAmount / 10 ** decimals; // HOOD received for ExactIn
+              : data.outAmount / 10 ** decimals; // JELLYJELLY received for ExactIn
       } catch (error) {
           console.error('JUP Error:', error);
           return null;
@@ -102,49 +102,49 @@ const hood = (() => {
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/HOOD_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/JELLYJELLY_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetHOOD) => {
-            let totalHOOD = 0;
+        const calculateBidPrice = (bids, targetJELLYJELLY) => {
+            let totalJELLYJELLY = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const hoodAvailable = usdtAvailable / price;
-                const remaining = targetHOOD - totalHOOD;
-                const fillAmount = Math.min(remaining, hoodAvailable);
+                const jellyjellyAvailable = usdtAvailable / price;
+                const remaining = targetJELLYJELLY - totalJELLYJELLY;
+                const fillAmount = Math.min(remaining, jellyjellyAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalHOOD += fillAmount;
+                totalJELLYJELLY += fillAmount;
                 
-                if (totalHOOD >= targetHOOD) break;
+                if (totalJELLYJELLY >= targetJELLYJELLY) break;
             }
-            return totalUSDT / targetHOOD;
+            return totalUSDT / targetJELLYJELLY;
         };
 
-        const calculateAskPrice = (asks, targetHOOD) => {
-            let totalHOOD = 0;
+        const calculateAskPrice = (asks, targetJELLYJELLY) => {
+            let totalJELLYJELLY = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const hoodAvailable = usdtAvailable / price;
-                const remaining = targetHOOD - totalHOOD;
-                const fillAmount = Math.min(remaining, hoodAvailable);
+                const jellyjellyAvailable = usdtAvailable / price;
+                const remaining = targetJELLYJELLY - totalJELLYJELLY;
+                const fillAmount = Math.min(remaining, jellyjellyAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalHOOD += fillAmount;
+                totalJELLYJELLY += fillAmount;
                 
-                if (totalHOOD >= targetHOOD) break;
+                if (totalJELLYJELLY >= targetJELLYJELLY) break;
             }
-            return totalUSDT / targetHOOD;
+            return totalUSDT / targetJELLYJELLY;
         };
 
-        const targetFullsend = 4800000;
+        const targetFullsend = 120000;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -163,38 +163,38 @@ const hood = (() => {
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const HOOD_MINT = 'h5NciPdMZ5QCB5BYETJMYBMpVx9ZuitR6HcVjyBhood';
-      const HOOD_DECIMALS = 6;
+      const JELLYJELLY_MINT = 'FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump';
+      const JELLYJELLY_DECIMALS = 6;
   
-      // Get USDC needed to buy 4800000 HOOD
+      // Get USDC needed to buy 120000 JELLYJELLY
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
-          HOOD_MINT,
-          4800000 * 10 ** HOOD_DECIMALS,
+          JELLYJELLY_MINT,
+          120000 * 10 ** JELLYJELLY_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 4800000 HOOD
+      // Get USDC received for selling 120000 JELLYJELLY
       const usdcReceived = await fetchJupSwapPrice(
-          HOOD_MINT,
+          JELLYJELLY_MINT,
           USDC_MINT,
-          4800000 * 10 ** HOOD_DECIMALS,
+          120000 * 10 ** JELLYJELLY_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 4800000,  // USDC per HOOD (buy)
-          sellPrice: usdcReceived / 4800000 // USDC per HOOD (sell)
+          buyPrice: usdcNeeded / 120000,  // USDC per JELLYJELLY (buy)
+          sellPrice: usdcReceived / 120000 // USDC per JELLYJELLY (sell)
       };
   }
   
   // Updated alert display
   async function updateAlerts() {
-      const buyElement = document.getElementById('hood-buy-alert');
-      const sellElement = document.getElementById('hood-sell-alert');
+      const buyElement = document.getElementById('jellyjelly-buy-alert');
+      const sellElement = document.getElementById('jellyjelly-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
@@ -208,8 +208,8 @@ const hood = (() => {
           }
   
           // Format prices
-          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
-          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
   
           const jupBuy = formatPrice(jupData.buyPrice);
           const jupSell = formatPrice(jupData.sellPrice);
@@ -249,19 +249,19 @@ const hood = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.000005) {
+      if (difference > 0.0006) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.000003) {
+      } else if (difference > 0.0004) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.000002) {
+      } else if (difference > 0.0002) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
       } else {
           element.classList.add('alert-negative');
-          if (difference < -0.000008) {
+          if (difference < -0.0008) {
               element.classList.add('alert-flashing-negative-2');
               playSound = false;
           }
@@ -275,7 +275,7 @@ const hood = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3700);
+        setInterval(updateAlerts, 10000);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
