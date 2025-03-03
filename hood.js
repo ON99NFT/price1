@@ -275,7 +275,7 @@ const hood = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3700);
+        setInterval(updateAlerts, 3800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
