@@ -146,12 +146,12 @@ const STAR10 = (() => {
         try {
             const [buyAmount, sellAmount] = await Promise.all([
                 fetchKyberSwapPrice(addresses.USDT, addresses.STAR10, 499 * 1e18),
-                fetchKyberSwapPrice(addresses.STAR10, addresses.USDT, 2500 * 1e18)
+                fetchKyberSwapPrice(addresses.STAR10, addresses.USDT, 4000 * 1e18)
             ]);
         
             return {
                 buyPrice: buyAmount ? 499 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 2500 : null
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 4000 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
