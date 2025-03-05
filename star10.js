@@ -19,7 +19,7 @@ const STAR10 = (() => {
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            z-index: 4990;
+            z-index: 3990;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             transition: all 0.3s ease;
         `;
@@ -145,13 +145,13 @@ const STAR10 = (() => {
     
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.STAR10, 499 * 1e18),
-                fetchKyberSwapPrice(addresses.STAR10, addresses.USDT, 4000 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.STAR10, 399 * 1e18),
+                fetchKyberSwapPrice(addresses.STAR10, addresses.USDT, 6000 * 1e18)
             ]);
         
             return {
-                buyPrice: buyAmount ? 499 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 4000 : null
+                buyPrice: buyAmount ? 399 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 6000 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
@@ -200,13 +200,13 @@ const STAR10 = (() => {
       let shouldPlaySound = false;
   
       // Visual styling logic
-      if (value > 0.006) {
+      if (value > 0.001) {
           element.classList.add('alert-flashing-2');
           shouldPlaySound = true;
-      } else if (value > 0.004) {
+      } else if (value > 0.0008) {
           element.classList.add('alert-flashing-1');
           shouldPlaySound = true;
-      } else if (value > 0.002) {
+      } else if (value > 0.0006) {
           element.classList.add('alert-large-green');
       } else if (value > 0) {
           element.classList.add('alert-positive');
@@ -252,7 +252,7 @@ const STAR10 = (() => {
         setInterval(updateAlerts, 2000);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
-        }, 2500);
+        }, 6000);
     })();
   
     return { updateAlerts };
