@@ -249,13 +249,13 @@ const pain = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.03) {
+      if (difference > 0.08) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.02) {
+      } else if (difference > 0.04) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.01) {
+      } else if (difference > 0.02) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
