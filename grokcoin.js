@@ -275,7 +275,7 @@ const grokcoin = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4500);
+        setInterval(updateAlerts, 4700);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
