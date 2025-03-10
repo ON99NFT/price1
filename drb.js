@@ -57,47 +57,35 @@ const DRB = (() => {
             }
         });
   
-          const section = document.getElementById('drb-buy-alert').closest('.token-section');
-          section.appendChild(enableButton);
+        const section = document.getElementById('drb-buy-alert').closest('.token-section');
+        section.appendChild(enableButton);
     }
   
-  // Modified playSystemAlert function
-  function playSystemAlert() {
-    if (!audioEnabled || !audioContext) return;
-  
-    try {
-        // Create two oscillators for a pleasant chime
-        const primaryOsc = audioContext.createOscillator();
-        const secondaryOsc = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-  
-        // Connect nodes
-        primaryOsc.connect(gainNode);
-        secondaryOsc.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-  
-        // Configure chime sound
-        primaryOsc.type = 'triangle';
-        secondaryOsc.type = 'sine';
-        primaryOsc.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5 note
-        secondaryOsc.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5 note
-  
-        // Create volume envelope
-        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-  
-        // Start/stop oscillators
-        primaryOsc.start();
-        secondaryOsc.start();
-        primaryOsc.stop(audioContext.currentTime + 0.8);
-        secondaryOsc.stop(audioContext.currentTime + 0.8);
-  
-    } catch (error) {
-        console.log('Sound playback error:', error);
+    // Modified playSystemAlert function
+    function playSystemAlert() {
+        if (!audioEnabled || !audioContext) return;
+    
+        try {
+            const primaryOsc = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            primaryOsc.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+    
+            // Pleasant chime configuration
+            primaryOsc.type = 'sine';
+            primaryOsc.frequency.setValueAtTime(784.0, audioContext.currentTime); // G5 note
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            
+            // Create volume envelope
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            primaryOsc.start();
+            primaryOsc.stop(audioContext.currentTime + 0.5);
+        } catch (error) {
+            console.log('Sound playback error:', error);
+        }
     }
-  }
-  
-  // Keep the rest of the code the same as previous version
   
     // Fetch MEXC prices
     async function fetchMexcPrice() {
@@ -136,46 +124,21 @@ const DRB = (() => {
         }
     }
 
-        // New Uniswap price fetch function
-    async function fetchUniswapPrice(inputToken, outputToken, amount) {
-        const UNISWAP_API = 'https://api.uniswap.org/v1/quote';
-        try {
-            const response = await fetch(`${UNISWAP_API}?` + new URLSearchParams({
-                chain: 'base',
-                tokenIn: inputToken,
-                tokenOut: outputToken,
-                amount: amount.toString(),
-                type: 'exactIn'
-            }));
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            return data.amountOut;
-        } catch (error) {
-            console.error('Uniswap Error:', error);
-            return null;
-        }
-    }
-  
     // Corrected price calculation
     async function fetchKyberPrice() {
         const addresses = {
-            USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // 6 decimals
-            DRB: '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2' // 18 decimals
+            USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            DRB: '0x3ec2156D4c0A9CBdAB4a016633b7BcF6a8d68Ea2'
         };
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                // Buy: 599 USDC (6 decimals) -> DRB
                 fetchKyberSwapPrice(addresses.USDC, addresses.DRB, 599 * 1e6),
-                // Sell: 20,000 DRB (18 decimals) -> USDC
                 fetchKyberSwapPrice(addresses.DRB, addresses.USDC, 2999999 * 1e18)
             ]);
 
             return {
-                // Convert DRB received to proper decimals (18)
                 buyPrice: buyAmount ? 599 / (buyAmount / 1e18) : null,
-                // Convert USDC received to proper decimals (6)
                 sellPrice: sellAmount ? (sellAmount / 1e6) / 2999999 : null
             };
         } catch (error) {
@@ -184,7 +147,7 @@ const DRB = (() => {
         }
     }
 
-    // Updated alert calculation
+    // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
             buy: document.getElementById('drb-buy-alert'),
@@ -202,78 +165,62 @@ const DRB = (() => {
                 return;
             }
 
-            const differences = {
-                // MEXC Bid vs Kyber Buy Price
-                buy: (mexcData.bid - kyberData.buyPrice).toFixed(6),
-                // MEXC Ask vs Kyber Sell Price
-                sell: (mexcData.ask - kyberData.sellPrice).toFixed(6)
-            };
+            // Formatting functions
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
 
-            elements.buy.textContent = differences.buy;
-            elements.sell.textContent = differences.sell;
+            // Format prices
+            const kyberBuy = formatPrice(kyberData.buyPrice);
+            const kyberSell = formatPrice(kyberData.sellPrice);
+            const mexcBid = formatPrice(mexcData.bid);
+            const mexcAsk = formatPrice(mexcData.ask);
+
+            // Calculate differences
+            const buyDiff = mexcData.bid - kyberData.buyPrice;
+            const sellDiff = kyberData.sellPrice - mexcData.ask;
+
+            // Update display with price comparison
+            elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
+                + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
-            applyAlertStyles(elements.buy, parseFloat(differences.buy));
-            applyAlertStyles(elements.sell, parseFloat(differences.sell));
+            elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
+                + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
+
+            // Apply styles to difference spans
+            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
+            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
             
         } catch (error) {
             console.error('Update Error:', error);
-            elements.buy.textContent = elements.sell.textContent = 'Error';
+            elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
         }
     }
 
-  
-    // Apply visual and audio alerts
+    // Modified alert styling function
     function applyAlertStyles(element, value) {
-      element.className = '';
-      let shouldPlaySound = false;
-  
-      // Visual styling logic
-      if (value > 0.00002) {
-          element.classList.add('alert-flashing-2');
-          shouldPlaySound = true;
-      } else if (value > 0.00001) {
-          element.classList.add('alert-flashing-1');
-          shouldPlaySound = true;
-      } else if (value > 0.000005) {
-          element.classList.add('alert-large-green');
-      } else if (value > 0) {
-          element.classList.add('alert-positive');
-      } else {
-          element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
-      }
-  
-      // Trigger sound only for positive flashing alerts
-      if (shouldPlaySound && audioEnabled && element.id === 'drb-buy-alert') {
-          playSystemAlert();
-      }
-  }
-  
-  // Modified playSystemAlert function (pleasant chime version)
-  function playSystemAlert() {
-      if (!audioContext || audioContext.state !== 'running') return;
-  
-      try {
-          const primaryOsc = audioContext.createOscillator();
-          const gainNode = audioContext.createGain();
-          
-          primaryOsc.connect(gainNode);
-          gainNode.connect(audioContext.destination);
-  
-          // Pleasant chime configuration
-          primaryOsc.type = 'sine';
-          primaryOsc.frequency.setValueAtTime(784.0, audioContext.currentTime); // G5 note
-          gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-          
-          // Create volume envelope
-          gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-          
-          primaryOsc.start();
-          primaryOsc.stop(audioContext.currentTime + 0.5);
-      } catch (error) {
-          console.log('Sound playback error:', error);
-      }
-  }
-  
+        element.className = '';
+        let shouldPlaySound = false;
+    
+        if (value > 0.00001) {
+            element.classList.add('alert-flashing-2');
+            shouldPlaySound = true;
+        } else if (value > 0.000005) {
+            element.classList.add('alert-flashing-1');
+            shouldPlaySound = true;
+        } else if (value > 0.000003) {
+            element.classList.add('alert-large-green');
+        } else if (value > 0) {
+            element.classList.add('alert-positive');
+        } else {
+            element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
+        }
+    
+        // Trigger sound only for positive buy alerts
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'drb-buy-alert') {
+            playSystemAlert();
+        }
+    }
+
     // Initialize application
     (function init() {
         updateAlerts();
@@ -284,4 +231,4 @@ const DRB = (() => {
     })();
   
     return { updateAlerts };
-  })();
+})();
