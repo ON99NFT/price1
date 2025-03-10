@@ -144,7 +144,7 @@ const hood = (() => {
             return totalUSDT / targetHOOD;
         };
 
-        const targetFullsend = 3000000;
+        const targetFullsend = 999999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const hood = (() => {
       const HOOD_MINT = 'h5NciPdMZ5QCB5BYETJMYBMpVx9ZuitR6HcVjyBhood';
       const HOOD_DECIMALS = 6;
   
-      // Get USDC needed to buy 3000000 HOOD
+      // Get USDC needed to buy 999999 HOOD
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           HOOD_MINT,
-          3000000 * 10 ** HOOD_DECIMALS,
+          999999 * 10 ** HOOD_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 3000000 HOOD
+      // Get USDC received for selling 999999 HOOD
       const usdcReceived = await fetchJupSwapPrice(
           HOOD_MINT,
           USDC_MINT,
-          3000000 * 10 ** HOOD_DECIMALS,
+          999999 * 10 ** HOOD_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 3000000,  // USDC per HOOD (buy)
-          sellPrice: usdcReceived / 3000000 // USDC per HOOD (sell)
+          buyPrice: usdcNeeded / 999999,  // USDC per HOOD (buy)
+          sellPrice: usdcReceived / 999999 // USDC per HOOD (sell)
       };
   }
   
@@ -249,19 +249,19 @@ const hood = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.0000025) {
+      if (difference > 0.000002) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.0000015) {
+      } else if (difference > 0.000001) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.000001) {
+      } else if (difference > 0.0000005) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
       } else {
           element.classList.add('alert-negative');
-          if (difference < -0.000008) {
+          if (difference < -0.00002) {
               element.classList.add('alert-flashing-negative-2');
               playSound = false;
           }
@@ -275,7 +275,7 @@ const hood = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4700);
+        setInterval(updateAlerts, 4300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

@@ -144,7 +144,7 @@ const grokcoin = (() => {
               return totalUSDT / targetGROKCOIN;
           };
   
-          const targetFullsend = 39999;
+          const targetFullsend = 79999;
           const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
           const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
   
@@ -166,28 +166,28 @@ const grokcoin = (() => {
       const GROKCOIN_MINT = '3MadWqcN9cSrULn8ikDnan9mF3znoQmBPXtVy6BfSTDB';
       const GROKCOIN_DECIMALS = 6;
   
-      // Get USDC needed to buy 39999 GROKCOIN
+      // Get USDC needed to buy 79999 GROKCOIN
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           GROKCOIN_MINT,
-          39999 * 10 ** GROKCOIN_DECIMALS,
+          79999 * 10 ** GROKCOIN_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 39999 GROKCOIN
+      // Get USDC received for selling 79999 GROKCOIN
       const usdcReceived = await fetchJupSwapPrice(
           GROKCOIN_MINT,
           USDC_MINT,
-          39999 * 10 ** GROKCOIN_DECIMALS,
+          79999 * 10 ** GROKCOIN_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 39999,  // USDC per GROKCOIN (buy)
-          sellPrice: usdcReceived / 39999 // USDC per GROKCOIN (sell)
+          buyPrice: usdcNeeded / 79999,  // USDC per GROKCOIN (buy)
+          sellPrice: usdcReceived / 79999 // USDC per GROKCOIN (sell)
       };
   }
   
@@ -249,13 +249,13 @@ const grokcoin = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.0009) {
+      if (difference > 0.0002) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.0006) {
+      } else if (difference > 0.0001) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0004) {
+      } else if (difference > 0.00005) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
