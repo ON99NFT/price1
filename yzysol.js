@@ -275,7 +275,7 @@ const yzysol = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4600);
+        setInterval(updateAlerts, 4800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
