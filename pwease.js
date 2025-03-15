@@ -249,13 +249,13 @@ const pwease = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.002) {
+      if (difference > 0.0009) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.001) {
+      } else if (difference > 0.006) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0005) {
+      } else if (difference > 0.0003) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
@@ -275,7 +275,7 @@ const pwease = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4700);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

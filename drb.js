@@ -201,10 +201,10 @@ const DRB = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.00001) {
+        if (value > 0.000009) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.000005) {
+        } else if (value > 0.000006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
         } else if (value > 0.000003) {
