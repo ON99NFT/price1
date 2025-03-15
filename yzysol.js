@@ -1,4 +1,4 @@
-const pwease = (() => {
+const yzysol = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const pwease = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'pwease-audio-enable-btn';
+        enableButton.id = 'yzysol-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const pwease = (() => {
             }
         });
   
-        const section = document.getElementById('pwease-buy-alert').closest('.token-section');
+        const section = document.getElementById('yzysol-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -92,7 +92,7 @@ const pwease = (() => {
           const data = await response.json();
           return exactOut 
               ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
-              : data.outAmount / 10 ** decimals; // PWEASE received for ExactIn
+              : data.outAmount / 10 ** decimals; // YZYSOL received for ExactIn
       } catch (error) {
           console.error('JUP Error:', error);
           return null;
@@ -102,49 +102,49 @@ const pwease = (() => {
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/PWEASE_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/YZYSOL_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetPWEASE) => {
-            let totalPWEASE = 0;
+        const calculateBidPrice = (bids, targetYZYSOL) => {
+            let totalYZYSOL = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const pweaseAvailable = usdtAvailable / price;
-                const remaining = targetPWEASE - totalPWEASE;
-                const fillAmount = Math.min(remaining, pweaseAvailable);
+                const yzysolAvailable = usdtAvailable / price;
+                const remaining = targetYZYSOL - totalYZYSOL;
+                const fillAmount = Math.min(remaining, yzysolAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalPWEASE += fillAmount;
+                totalYZYSOL += fillAmount;
                 
-                if (totalPWEASE >= targetPWEASE) break;
+                if (totalYZYSOL >= targetYZYSOL) break;
             }
-            return totalUSDT / targetPWEASE;
+            return totalUSDT / targetYZYSOL;
         };
 
-        const calculateAskPrice = (asks, targetPWEASE) => {
-            let totalPWEASE = 0;
+        const calculateAskPrice = (asks, targetYZYSOL) => {
+            let totalYZYSOL = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const pweaseAvailable = usdtAvailable / price;
-                const remaining = targetPWEASE - totalPWEASE;
-                const fillAmount = Math.min(remaining, pweaseAvailable);
+                const yzysolAvailable = usdtAvailable / price;
+                const remaining = targetYZYSOL - totalYZYSOL;
+                const fillAmount = Math.min(remaining, yzysolAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalPWEASE += fillAmount;
+                totalYZYSOL += fillAmount;
                 
-                if (totalPWEASE >= targetPWEASE) break;
+                if (totalYZYSOL >= targetYZYSOL) break;
             }
-            return totalUSDT / targetPWEASE;
+            return totalUSDT / targetYZYSOL;
         };
 
-        const targetFullsend = 8750;
+        const targetFullsend = 24999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -163,38 +163,38 @@ const pwease = (() => {
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const PWEASE_MINT = 'CniPCE4b3s8gSUPhUiyMjXnytrEqUrMfSsnbBjLCpump';
-      const PWEASE_DECIMALS = 6;
+      const YZYSOL_MINT = '9gyfbPVwwZx4y1hotNSLcqXCQNpNqqz6ZRvo8yTLpump';
+      const YZYSOL_DECIMALS = 6;
   
-      // Get USDC needed to buy 8750 PWEASE
+      // Get USDC needed to buy 24999 YZYSOL
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
-          PWEASE_MINT,
-          8750 * 10 ** PWEASE_DECIMALS,
+          YZYSOL_MINT,
+          24999 * 10 ** YZYSOL_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 8750 PWEASE
+      // Get USDC received for selling 24999 YZYSOL
       const usdcReceived = await fetchJupSwapPrice(
-          PWEASE_MINT,
+          YZYSOL_MINT,
           USDC_MINT,
-          8750 * 10 ** PWEASE_DECIMALS,
+          24999 * 10 ** YZYSOL_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 8750,  // USDC per PWEASE (buy)
-          sellPrice: usdcReceived / 8750 // USDC per PWEASE (sell)
+          buyPrice: usdcNeeded / 24999,  // USDC per YZYSOL (buy)
+          sellPrice: usdcReceived / 24999 // USDC per YZYSOL (sell)
       };
   }
   
   // Updated alert display
   async function updateAlerts() {
-      const buyElement = document.getElementById('pwease-buy-alert');
-      const sellElement = document.getElementById('pwease-sell-alert');
+      const buyElement = document.getElementById('yzysol-buy-alert');
+      const sellElement = document.getElementById('yzysol-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
