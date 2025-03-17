@@ -144,7 +144,7 @@ const yzysol = (() => {
             return totalUSDT / targetYZYSOL;
         };
 
-        const targetFullsend = 24999;
+        const targetFullsend = 89999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const yzysol = (() => {
       const YZYSOL_MINT = '9gyfbPVwwZx4y1hotNSLcqXCQNpNqqz6ZRvo8yTLpump';
       const YZYSOL_DECIMALS = 6;
   
-      // Get USDC needed to buy 24999 YZYSOL
+      // Get USDC needed to buy 89999 YZYSOL
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           YZYSOL_MINT,
-          24999 * 10 ** YZYSOL_DECIMALS,
+          89999 * 10 ** YZYSOL_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 24999 YZYSOL
+      // Get USDC received for selling 89999 YZYSOL
       const usdcReceived = await fetchJupSwapPrice(
           YZYSOL_MINT,
           USDC_MINT,
-          24999 * 10 ** YZYSOL_DECIMALS,
+          89999 * 10 ** YZYSOL_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 24999,  // USDC per YZYSOL (buy)
-          sellPrice: usdcReceived / 24999 // USDC per YZYSOL (sell)
+          buyPrice: usdcNeeded / 89999,  // USDC per YZYSOL (buy)
+          sellPrice: usdcReceived / 89999 // USDC per YZYSOL (sell)
       };
   }
   
@@ -249,13 +249,13 @@ const yzysol = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.0009) {
+      if (difference > 0.0006) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.006) {
+      } else if (difference > 0.0004) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0003) {
+      } else if (difference > 0.0002) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');

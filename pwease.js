@@ -144,7 +144,7 @@ const pwease = (() => {
             return totalUSDT / targetPWEASE;
         };
 
-        const targetFullsend = 8750;
+        const targetFullsend = 17499;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const pwease = (() => {
       const PWEASE_MINT = 'CniPCE4b3s8gSUPhUiyMjXnytrEqUrMfSsnbBjLCpump';
       const PWEASE_DECIMALS = 6;
   
-      // Get USDC needed to buy 8750 PWEASE
+      // Get USDC needed to buy 17499 PWEASE
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           PWEASE_MINT,
-          8750 * 10 ** PWEASE_DECIMALS,
+          17499 * 10 ** PWEASE_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 8750 PWEASE
+      // Get USDC received for selling 17499 PWEASE
       const usdcReceived = await fetchJupSwapPrice(
           PWEASE_MINT,
           USDC_MINT,
-          8750 * 10 ** PWEASE_DECIMALS,
+          17499 * 10 ** PWEASE_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 8750,  // USDC per PWEASE (buy)
-          sellPrice: usdcReceived / 8750 // USDC per PWEASE (sell)
+          buyPrice: usdcNeeded / 17499,  // USDC per PWEASE (buy)
+          sellPrice: usdcReceived / 17499 // USDC per PWEASE (sell)
       };
   }
   
@@ -249,13 +249,13 @@ const pwease = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.0009) {
+      if (difference > 0.0006) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.006) {
+      } else if (difference > 0.0004) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0003) {
+      } else if (difference > 0.0002) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
