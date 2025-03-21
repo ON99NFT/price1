@@ -204,24 +204,24 @@ function applyAlertStyles(element, value) {
 
     if (isSellAlert) {
         // New sell alert thresholds
-        if (value >= 0.0015) {
+        if (value >= 0.001) {
             element.classList.add('alert-flashing-2');
-        } else if (value >= 0.001) {
-            element.classList.add('alert-flashing-1');
         } else if (value >= 0.0005) {
+            element.classList.add('alert-flashing-1');
+        } else if (value >= 0.0003) {
             element.classList.add('alert-large-green');
         } else {
             element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
         }
     } else {
         // Original buy alert thresholds
-        if (value > 0.0003) {
+        if (value > 0.0006) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0002) {
+        } else if (value > 0.0003) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0001) {
+        } else if (value > 0.0002) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');

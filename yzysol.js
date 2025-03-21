@@ -144,7 +144,7 @@ const yzysol = (() => {
             return totalUSDT / targetYZYSOL;
         };
 
-        const targetFullsend = 89999;
+        const targetFullsend = 149999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const yzysol = (() => {
       const YZYSOL_MINT = '9gyfbPVwwZx4y1hotNSLcqXCQNpNqqz6ZRvo8yTLpump';
       const YZYSOL_DECIMALS = 6;
   
-      // Get USDC needed to buy 44999 YZYSOL
+      // Get USDC needed to buy 149999 YZYSOL
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           YZYSOL_MINT,
-          44999 * 10 ** YZYSOL_DECIMALS,
+          149999 * 10 ** YZYSOL_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 44999 YZYSOL
+      // Get USDC received for selling 149999 YZYSOL
       const usdcReceived = await fetchJupSwapPrice(
           YZYSOL_MINT,
           USDC_MINT,
-          44999 * 10 ** YZYSOL_DECIMALS,
+          149999 * 10 ** YZYSOL_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 44999,  // USDC per YZYSOL (buy)
-          sellPrice: usdcReceived / 44999 // USDC per YZYSOL (sell)
+          buyPrice: usdcNeeded / 149999,  // USDC per YZYSOL (buy)
+          sellPrice: usdcReceived / 149999 // USDC per YZYSOL (sell)
       };
   }
   

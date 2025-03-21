@@ -144,7 +144,7 @@ const pwease = (() => {
             return totalUSDT / targetPWEASE;
         };
 
-        const targetFullsend = 17499;
+        const targetFullsend = 41999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const pwease = (() => {
       const PWEASE_MINT = 'CniPCE4b3s8gSUPhUiyMjXnytrEqUrMfSsnbBjLCpump';
       const PWEASE_DECIMALS = 6;
   
-      // Get USDC needed to buy 17499 PWEASE
+      // Get USDC needed to buy 41999 PWEASE
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           PWEASE_MINT,
-          17499 * 10 ** PWEASE_DECIMALS,
+          41999 * 10 ** PWEASE_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 17499 PWEASE
+      // Get USDC received for selling 41999 PWEASE
       const usdcReceived = await fetchJupSwapPrice(
           PWEASE_MINT,
           USDC_MINT,
-          17499 * 10 ** PWEASE_DECIMALS,
+          41999 * 10 ** PWEASE_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 17499,  // USDC per PWEASE (buy)
-          sellPrice: usdcReceived / 17499 // USDC per PWEASE (sell)
+          buyPrice: usdcNeeded / 41999,  // USDC per PWEASE (buy)
+          sellPrice: usdcReceived / 41999 // USDC per PWEASE (sell)
       };
   }
   
