@@ -221,8 +221,8 @@ const pwease = (() => {
           const sellDiff = formatDiff(jupData.sellPrice - mexcData.ask);
   
           // Update display
-          buyElement.innerHTML = `$${jupBuy} - `
-              + `$${mexcBid}`
+          buyElement.innerHTML = `$${mexcBid} - `
+              + `$${jupBuy}`
               + `<span class="difference">$${buyDiff}</span>`;
   
           sellElement.innerHTML = `$${jupSell} - `
@@ -275,7 +275,7 @@ const pwease = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4800);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

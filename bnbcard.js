@@ -1,4 +1,4 @@
-const TAT = (() => {
+const BNBCARD = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const TAT = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'tat-audio-enable-btn';
+        enableButton.id = 'bnbcard-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -57,7 +57,7 @@ const TAT = (() => {
             }
         });
   
-        const section = document.getElementById('tat-buy-alert').closest('.token-section');
+        const section = document.getElementById('bnbcard-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -87,60 +87,18 @@ const TAT = (() => {
         }
     }
   
+    // Fetch MEXC prices
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/TAT_USDT';
-            const response = await fetch(proxyUrl + apiUrl);
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/BNBCARD_USDT');
             const data = await response.json();
-            
-            const calculateBidPrice = (bids, targetTAT) => {
-                let totalTAT = 0;
-                let totalUSDT = 0;
-                
-                for (const [priceStr, usdtAvailableStr] of bids) {
-                    const price = parseFloat(priceStr);
-                    const usdtAvailable = parseFloat(usdtAvailableStr);
-                    const pweaseAvailable = usdtAvailable / price;
-                    const remaining = targetTAT - totalTAT;
-                    const fillAmount = Math.min(remaining, pweaseAvailable);
-                    
-                    totalUSDT += fillAmount * price;
-                    totalTAT += fillAmount;
-                    
-                    if (totalTAT >= targetTAT) break;
-                }
-                return totalUSDT / targetTAT;
-            };
-    
-            const calculateAskPrice = (asks, targetTAT) => {
-                let totalTAT = 0;
-                let totalUSDT = 0;
-                
-                for (const [priceStr, usdtAvailableStr] of asks) {
-                    const price = parseFloat(priceStr);
-                    const usdtAvailable = parseFloat(usdtAvailableStr);
-                    const pweaseAvailable = usdtAvailable / price;
-                    const remaining = targetTAT - totalTAT;
-                    const fillAmount = Math.min(remaining, pweaseAvailable);
-                    
-                    totalUSDT += fillAmount * price;
-                    totalTAT += fillAmount;
-                    
-                    if (totalTAT >= targetTAT) break;
-                }
-                return totalUSDT / targetTAT;
-            };
-    
-            const targetFullsend = 109999;
-            const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
-            const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
-    
-            if (!bidPrice || !askPrice) throw new Error('Insufficient liquidity');
+        
+            if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
             
             return {
-                bid: bidPrice,
-                ask: askPrice
+                bid: parseFloat(data.data.bids[0][0]),
+                ask: parseFloat(data.data.asks[0][0])
             };
         } catch (error) {
             console.error('MEXC Error:', error);
@@ -167,38 +125,33 @@ const TAT = (() => {
     }
 
     // Corrected price calculation
-// In fetchKyberPrice function, change to:
-async function fetchKyberPrice() {
-    const addresses = {
-        USDT: '0x55d398326f99059fF775485246999027B3197955',
-        TAT: '0x996D1b997203a024E205069a304161ba618d1c61'
-    };
-
-    // Always use full amounts regardless of liquidity
-    const sellAmountTAT = 109999;
-    const buyAmountUSDT = 599;
-
-    try {
-        const [buyAmount, sellAmount] = await Promise.all([
-            fetchKyberSwapPrice(addresses.USDT, addresses.TAT, buyAmountUSDT * 1e18),
-            fetchKyberSwapPrice(addresses.TAT, addresses.USDT, sellAmountTAT * 1e18)
-        ]);
-
-        return {
-            buyPrice: buyAmount ? buyAmountUSDT / (buyAmount / 1e18) : null,
-            sellPrice: sellAmount ? (sellAmount / 1e18) / sellAmountTAT : null
+    async function fetchKyberPrice() {
+        const addresses = {
+            USDT: '0x55d398326f99059fF775485246999027B3197955',
+            BNBCARD: '0xDc06717F367e57A16e06CcE0c4761604460da8Fc'
         };
-    } catch (error) {
-        console.error('Price Calculation Error:', error);
-        return null;
+
+        try {
+            const [buyAmount, sellAmount] = await Promise.all([
+                fetchKyberSwapPrice(addresses.USDT, addresses.BNBCARD, 799 * 1e18),
+                fetchKyberSwapPrice(addresses.BNBCARD, addresses.USDT, 69999 * 1e18)
+            ]);
+
+            return {
+                buyPrice: buyAmount ? 799 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 69999 : null
+            };
+        } catch (error) {
+            console.error('Price Calculation Error:', error);
+            return null;
+        }
     }
-}
 
     // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('tat-buy-alert'),
-            sell: document.getElementById('tat-sell-alert')
+            buy: document.getElementById('bnbcard-buy-alert'),
+            sell: document.getElementById('bnbcard-sell-alert')
         };
 
         try {
@@ -223,16 +176,15 @@ async function fetchKyberPrice() {
             const mexcAsk = formatPrice(mexcData.ask);
 
             // Calculate differences
-// Calculate differences
-const buyDiff = mexcData.bid - kyberData.buyPrice; // MEXC Bid vs Kyber Buy Price
-const sellDiff = kyberData.sellPrice - mexcData.ask; // Kyber Sell vs MEXC Ask
+            const buyDiff = mexcData.bid - kyberData.buyPrice;
+            const sellDiff = kyberData.sellPrice - mexcData.ask;
 
             // Update display with price comparison
-            elements.buy.innerHTML = `$${mexcBid} - $${kyberBuy} ` + 
-            `<span class="difference">$${formatDiff(buyDiff)}</span>`;
-        
-        elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} ` + 
-            `<span class="difference">$${formatDiff(sellDiff)}</span>`;
+            elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
+                + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
+            
+            elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
+                + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
 
             // Apply styles to difference spans
             applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
@@ -244,29 +196,15 @@ const sellDiff = kyberData.sellPrice - mexcData.ask; // Kyber Sell vs MEXC Ask
         }
     }
 
-// Modified alert styling function with separate sell alert thresholds
-function applyAlertStyles(element, value) {
-    element.className = '';
-    let shouldPlaySound = false;
-    const isSellAlert = element.parentElement.id === 'tat-sell-alert';
-
-    if (isSellAlert) {
-        // New sell alert thresholds
-        if (value >= 0.0005) {
-            element.classList.add('alert-flashing-2');
-        } else if (value >= 0.0003) {
-            element.classList.add('alert-flashing-1');
-        } else if (value >= 0.0001) {
-            element.classList.add('alert-large-green');
-        } else {
-            element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
-        }
-    } else {
-        // Original buy alert thresholds
-        if (value > 0.0003) {
+    // Modified alert styling function
+    function applyAlertStyles(element, value) {
+        element.className = '';
+        let shouldPlaySound = false;
+    
+        if (value > 0.0008) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0002) {
+        } else if (value > 0.0003) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
         } else if (value > 0.0001) {
@@ -276,13 +214,12 @@ function applyAlertStyles(element, value) {
         } else {
             element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
         }
+    
+        // Trigger sound only for positive buy alerts
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'bnbcard-buy-alert') {
+            playSystemAlert();
+        }
     }
-
-    // Trigger sound only for positive buy alerts
-    if (shouldPlaySound && audioEnabled && !isSellAlert) {
-        playSystemAlert();
-    }
-}
 
     // Initialize application
     (function init() {
