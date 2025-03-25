@@ -144,7 +144,7 @@ const pwease = (() => {
             return totalUSDT / targetPWEASE;
         };
 
-        const targetFullsend = 41999;
+        const targetFullsend = 61999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const pwease = (() => {
       const PWEASE_MINT = 'CniPCE4b3s8gSUPhUiyMjXnytrEqUrMfSsnbBjLCpump';
       const PWEASE_DECIMALS = 6;
   
-      // Get USDC needed to buy 41999 PWEASE
+      // Get USDC needed to buy 61999 PWEASE
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           PWEASE_MINT,
-          41999 * 10 ** PWEASE_DECIMALS,
+          61999 * 10 ** PWEASE_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 41999 PWEASE
+      // Get USDC received for selling 61999 PWEASE
       const usdcReceived = await fetchJupSwapPrice(
           PWEASE_MINT,
           USDC_MINT,
-          41999 * 10 ** PWEASE_DECIMALS,
+          61999 * 10 ** PWEASE_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 41999,  // USDC per PWEASE (buy)
-          sellPrice: usdcReceived / 41999 // USDC per PWEASE (sell)
+          buyPrice: usdcNeeded / 61999,  // USDC per PWEASE (buy)
+          sellPrice: usdcReceived / 61999 // USDC per PWEASE (sell)
       };
   }
   
@@ -275,7 +275,7 @@ const pwease = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3300);
+        setInterval(updateAlerts, 4800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
