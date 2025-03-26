@@ -144,7 +144,7 @@ const jellyjelly = (() => {
             return totalUSDT / targetJELLYJELLY;
         };
 
-        const targetFullsend = 120000;
+        const targetFullsend = 89999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const jellyjelly = (() => {
       const JELLYJELLY_MINT = 'FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump';
       const JELLYJELLY_DECIMALS = 6;
   
-      // Get USDC needed to buy 120000 JELLYJELLY
+      // Get USDC needed to buy 89999 JELLYJELLY
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           JELLYJELLY_MINT,
-          120000 * 10 ** JELLYJELLY_DECIMALS,
+          89999 * 10 ** JELLYJELLY_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 120000 JELLYJELLY
+      // Get USDC received for selling 89999 JELLYJELLY
       const usdcReceived = await fetchJupSwapPrice(
           JELLYJELLY_MINT,
           USDC_MINT,
-          120000 * 10 ** JELLYJELLY_DECIMALS,
+          89999 * 10 ** JELLYJELLY_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 120000,  // USDC per JELLYJELLY (buy)
-          sellPrice: usdcReceived / 120000 // USDC per JELLYJELLY (sell)
+          buyPrice: usdcNeeded / 89999,  // USDC per JELLYJELLY (buy)
+          sellPrice: usdcReceived / 89999 // USDC per JELLYJELLY (sell)
       };
   }
   
@@ -208,8 +208,8 @@ const jellyjelly = (() => {
           }
   
           // Format prices
-          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
+          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
   
           const jupBuy = formatPrice(jupData.buyPrice);
           const jupSell = formatPrice(jupData.sellPrice);
@@ -221,8 +221,8 @@ const jellyjelly = (() => {
           const sellDiff = formatDiff(jupData.sellPrice - mexcData.ask);
   
           // Update display
-          buyElement.innerHTML = `$${jupBuy} - `
-              + `$${mexcBid}`
+          buyElement.innerHTML = `$${mexcBid} - `
+              + `$${jupBuy}`
               + `<span class="difference">$${buyDiff}</span>`;
   
           sellElement.innerHTML = `$${jupSell} - `
@@ -249,19 +249,19 @@ const jellyjelly = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.0006) {
+      if (difference > 0.002) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.0004) {
+      } else if (difference > 0.0008) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0002) {
+      } else if (difference > 0.0003) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
       } else {
           element.classList.add('alert-negative');
-          if (difference < -0.0008) {
+          if (difference < -0.2) {
               element.classList.add('alert-flashing-negative-2');
               playSound = false;
           }
@@ -275,7 +275,7 @@ const jellyjelly = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 10000);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

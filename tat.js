@@ -132,7 +132,7 @@ const TAT = (() => {
                 return totalUSDT / targetTAT;
             };
     
-            const targetFullsend = 109999;
+            const targetFullsend = 169999;
             const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
             const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
     
@@ -175,7 +175,7 @@ async function fetchKyberPrice() {
     };
 
     // Always use full amounts regardless of liquidity
-    const sellAmountTAT = 109999;
+    const sellAmountTAT = 169999;
     const buyAmountUSDT = 599;
 
     try {

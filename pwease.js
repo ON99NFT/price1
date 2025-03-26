@@ -275,7 +275,7 @@ const pwease = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4800);
+        setInterval(updateAlerts, 9000);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
