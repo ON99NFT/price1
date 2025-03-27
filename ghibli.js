@@ -1,4 +1,4 @@
-const jellyjelly = (() => {
+const ghibli = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const jellyjelly = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'jellyjelly-audio-enable-btn';
+        enableButton.id = 'ghibli-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const jellyjelly = (() => {
             }
         });
   
-        const section = document.getElementById('jellyjelly-buy-alert').closest('.token-section');
+        const section = document.getElementById('ghibli-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -92,7 +92,7 @@ const jellyjelly = (() => {
           const data = await response.json();
           return exactOut 
               ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
-              : data.outAmount / 10 ** decimals; // JELLYJELLY received for ExactIn
+              : data.outAmount / 10 ** decimals; // GHIBLI received for ExactIn
       } catch (error) {
           console.error('JUP Error:', error);
           return null;
@@ -102,49 +102,49 @@ const jellyjelly = (() => {
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/JELLYJELLY_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/GHIBLI_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetJELLYJELLY) => {
-            let totalJELLYJELLY = 0;
+        const calculateBidPrice = (bids, targetGHIBLI) => {
+            let totalGHIBLI = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const jellyjellyAvailable = usdtAvailable / price;
-                const remaining = targetJELLYJELLY - totalJELLYJELLY;
-                const fillAmount = Math.min(remaining, jellyjellyAvailable);
+                const ghibliAvailable = usdtAvailable / price;
+                const remaining = targetGHIBLI - totalGHIBLI;
+                const fillAmount = Math.min(remaining, ghibliAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalJELLYJELLY += fillAmount;
+                totalGHIBLI += fillAmount;
                 
-                if (totalJELLYJELLY >= targetJELLYJELLY) break;
+                if (totalGHIBLI >= targetGHIBLI) break;
             }
-            return totalUSDT / targetJELLYJELLY;
+            return totalUSDT / targetGHIBLI;
         };
 
-        const calculateAskPrice = (asks, targetJELLYJELLY) => {
-            let totalJELLYJELLY = 0;
+        const calculateAskPrice = (asks, targetGHIBLI) => {
+            let totalGHIBLI = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const jellyjellyAvailable = usdtAvailable / price;
-                const remaining = targetJELLYJELLY - totalJELLYJELLY;
-                const fillAmount = Math.min(remaining, jellyjellyAvailable);
+                const ghibliAvailable = usdtAvailable / price;
+                const remaining = targetGHIBLI - totalGHIBLI;
+                const fillAmount = Math.min(remaining, ghibliAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalJELLYJELLY += fillAmount;
+                totalGHIBLI += fillAmount;
                 
-                if (totalJELLYJELLY >= targetJELLYJELLY) break;
+                if (totalGHIBLI >= targetGHIBLI) break;
             }
-            return totalUSDT / targetJELLYJELLY;
+            return totalUSDT / targetGHIBLI;
         };
 
-        const targetFullsend = 149999;
+        const targetFullsend = 89999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -163,38 +163,38 @@ const jellyjelly = (() => {
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const JELLYJELLY_MINT = 'FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump';
-      const JELLYJELLY_DECIMALS = 6;
+      const GHIBLI_MINT = '4TBi66vi32S7J8X1A6eWfaLHYmUXu7CStcEmsJQdpump';
+      const GHIBLI_DECIMALS = 6;
   
-      // Get USDC needed to buy 149999 JELLYJELLY
+      // Get USDC needed to buy 89999 GHIBLI
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
-          JELLYJELLY_MINT,
-          149999 * 10 ** JELLYJELLY_DECIMALS,
+          GHIBLI_MINT,
+          89999 * 10 ** GHIBLI_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 149999 JELLYJELLY
+      // Get USDC received for selling 89999 GHIBLI
       const usdcReceived = await fetchJupSwapPrice(
-          JELLYJELLY_MINT,
+          GHIBLI_MINT,
           USDC_MINT,
-          149999 * 10 ** JELLYJELLY_DECIMALS,
+          89999 * 10 ** GHIBLI_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 149999,  // USDC per JELLYJELLY (buy)
-          sellPrice: usdcReceived / 149999 // USDC per JELLYJELLY (sell)
+          buyPrice: usdcNeeded / 89999,  // USDC per GHIBLI (buy)
+          sellPrice: usdcReceived / 89999 // USDC per GHIBLI (sell)
       };
   }
   
   // Updated alert display
   async function updateAlerts() {
-      const buyElement = document.getElementById('jellyjelly-buy-alert');
-      const sellElement = document.getElementById('jellyjelly-sell-alert');
+      const buyElement = document.getElementById('ghibli-buy-alert');
+      const sellElement = document.getElementById('ghibli-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
@@ -275,7 +275,7 @@ const jellyjelly = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 8800);
+        setInterval(updateAlerts, 5500);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
