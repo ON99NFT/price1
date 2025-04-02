@@ -170,7 +170,7 @@ const pwease = (() => {
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           PWEASE_MINT,
-          61999 * 10 ** PWEASE_DECIMALS,
+          34999 * 10 ** PWEASE_DECIMALS,
           6,
           true
       );
@@ -179,15 +179,15 @@ const pwease = (() => {
       const usdcReceived = await fetchJupSwapPrice(
           PWEASE_MINT,
           USDC_MINT,
-          61999 * 10 ** PWEASE_DECIMALS,
+          34999 * 10 ** PWEASE_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 61999,  // USDC per PWEASE (buy)
-          sellPrice: usdcReceived / 61999 // USDC per PWEASE (sell)
+          buyPrice: usdcNeeded / 34999,  // USDC per PWEASE (buy)
+          sellPrice: usdcReceived / 34999 // USDC per PWEASE (sell)
       };
   }
   
