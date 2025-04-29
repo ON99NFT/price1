@@ -201,13 +201,13 @@ const BANK = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0012) {
+        if (value > 0.0006) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0008) {
+        } else if (value > 0.0004) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0004) {
+        } else if (value > 0.0002) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
