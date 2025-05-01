@@ -275,7 +275,7 @@ const boop = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 7700);
+        setInterval(updateAlerts, 4400);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
