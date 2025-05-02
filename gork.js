@@ -144,7 +144,7 @@ const gork = (() => {
             return totalUSDT / targetGORK;
         };
 
-        const targetFullsend = 12999;
+        const targetFullsend = 69999;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const gork = (() => {
       const GORK_MINT = '38PgzpJYu2HkiYvV8qePFakB8tuobPdGm2FFEn7Dpump';
       const GORK_DECIMALS = 6;
   
-      // Get USDC needed to buy 12999 GORK
+      // Get USDC needed to buy 69999 GORK
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           GORK_MINT,
-          12999 * 10 ** GORK_DECIMALS,
+          69999 * 10 ** GORK_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 12999 GORK
+      // Get USDC received for selling 69999 GORK
       const usdcReceived = await fetchJupSwapPrice(
           GORK_MINT,
           USDC_MINT,
-          12999 * 10 ** GORK_DECIMALS,
+          69999 * 10 ** GORK_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 12999,  // USDC per GORK (buy)
-          sellPrice: usdcReceived / 12999 // USDC per GORK (sell)
+          buyPrice: usdcNeeded / 69999,  // USDC per GORK (buy)
+          sellPrice: usdcReceived / 69999 // USDC per GORK (sell)
       };
   }
   

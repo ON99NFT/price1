@@ -144,7 +144,7 @@ const boop = (() => {
             return totalUSDT / targetBOOP;
         };
 
-        const targetFullsend = 2699;
+        const targetFullsend = 3749;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const boop = (() => {
       const BOOP_MINT = 'boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i';
       const BOOP_DECIMALS = 9;
   
-      // Get USDC needed to buy 2699 BOOP
+      // Get USDC needed to buy 3749 BOOP
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           BOOP_MINT,
-          2699 * 10 ** BOOP_DECIMALS,
+          3749 * 10 ** BOOP_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 2699 BOOP
+      // Get USDC received for selling 3749 BOOP
       const usdcReceived = await fetchJupSwapPrice(
           BOOP_MINT,
           USDC_MINT,
-          2699 * 10 ** BOOP_DECIMALS,
+          3749 * 10 ** BOOP_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 2699,  // USDC per BOOP (buy)
-          sellPrice: usdcReceived / 2699 // USDC per BOOP (sell)
+          buyPrice: usdcNeeded / 3749,  // USDC per BOOP (buy)
+          sellPrice: usdcReceived / 3749 // USDC per BOOP (sell)
       };
   }
   
@@ -249,13 +249,13 @@ const boop = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.02) {
+      if (difference > 0.006) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.01) {
+      } else if (difference > 0.004) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.005) {
+      } else if (difference > 0.002) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
