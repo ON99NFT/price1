@@ -1,4 +1,4 @@
-const boop = (() => {
+const pope = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const boop = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'boop-audio-enable-btn';
+        enableButton.id = 'pope-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const boop = (() => {
             }
         });
   
-        const section = document.getElementById('boop-buy-alert').closest('.token-section');
+        const section = document.getElementById('pope-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -92,7 +92,7 @@ const boop = (() => {
           const data = await response.json();
           return exactOut 
               ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
-              : data.outAmount / 10 ** decimals; // BOOP received for ExactIn
+              : data.outAmount / 10 ** decimals; // POPE received for ExactIn
       } catch (error) {
           console.error('JUP Error:', error);
           return null;
@@ -102,46 +102,46 @@ const boop = (() => {
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/BOOP_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/POPE_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetBOOP) => {
-            let totalBOOP = 0;
+        const calculateBidPrice = (bids, targetPOPE) => {
+            let totalPOPE = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const boopAvailable = usdtAvailable / price;
-                const remaining = targetBOOP - totalBOOP;
-                const fillAmount = Math.min(remaining, boopAvailable);
+                const popeAvailable = usdtAvailable / price;
+                const remaining = targetPOPE - totalPOPE;
+                const fillAmount = Math.min(remaining, popeAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalBOOP += fillAmount;
+                totalPOPE += fillAmount;
                 
-                if (totalBOOP >= targetBOOP) break;
+                if (totalPOPE >= targetPOPE) break;
             }
-            return totalUSDT / targetBOOP;
+            return totalUSDT / targetPOPE;
         };
 
-        const calculateAskPrice = (asks, targetBOOP) => {
-            let totalBOOP = 0;
+        const calculateAskPrice = (asks, targetPOPE) => {
+            let totalPOPE = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const boopAvailable = usdtAvailable / price;
-                const remaining = targetBOOP - totalBOOP;
-                const fillAmount = Math.min(remaining, boopAvailable);
+                const popeAvailable = usdtAvailable / price;
+                const remaining = targetPOPE - totalPOPE;
+                const fillAmount = Math.min(remaining, popeAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalBOOP += fillAmount;
+                totalPOPE += fillAmount;
                 
-                if (totalBOOP >= targetBOOP) break;
+                if (totalPOPE >= targetPOPE) break;
             }
-            return totalUSDT / targetBOOP;
+            return totalUSDT / targetPOPE;
         };
 
         const targetFullsend = 1598;
@@ -163,38 +163,38 @@ const boop = (() => {
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const BOOP_MINT = 'boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i';
-      const BOOP_DECIMALS = 9;
+      const POPE_MINT = '9u8PP725K2GUf4p5bhKebrzHTGgvHp6KDeQPf7jc1F1W';
+      const POPE_DECIMALS = 9;
   
-      // Get USDC needed to buy 1598 BOOP
+      // Get USDC needed to buy 1598 POPE
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
-          BOOP_MINT,
-          1598 * 10 ** BOOP_DECIMALS,
+          POPE_MINT,
+          1598 * 10 ** POPE_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 1598 BOOP
+      // Get USDC received for selling 1598 POPE
       const usdcReceived = await fetchJupSwapPrice(
-          BOOP_MINT,
+          POPE_MINT,
           USDC_MINT,
-          1598 * 10 ** BOOP_DECIMALS,
+          1598 * 10 ** POPE_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 1598,  // USDC per BOOP (buy)
-          sellPrice: usdcReceived / 1598 // USDC per BOOP (sell)
+          buyPrice: usdcNeeded / 1598,  // USDC per POPE (buy)
+          sellPrice: usdcReceived / 1598 // USDC per POPE (sell)
       };
   }
   
   // Updated alert display
   async function updateAlerts() {
-      const buyElement = document.getElementById('boop-buy-alert');
-      const sellElement = document.getElementById('boop-sell-alert');
+      const buyElement = document.getElementById('pope-buy-alert');
+      const sellElement = document.getElementById('pope-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
@@ -275,7 +275,7 @@ const boop = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 6600);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
