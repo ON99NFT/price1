@@ -101,7 +101,7 @@ const boop = (() => {
   
   async function fetchMexcPrice() {
     try {
-        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const proxyUrl = 'https://api.allorigins.win/get?url=',;
         const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/BOOP_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
