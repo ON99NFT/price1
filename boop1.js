@@ -198,7 +198,7 @@ const boop = (() => {
                 return totalUSDT / targetBOOP;
             };
 
-            const targetFullsend = 1798;
+            const targetFullsend = 3098;
             const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
             const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -240,15 +240,15 @@ const boop = (() => {
         const BOOP_DECIMALS = 9;
 
         const [usdcNeeded, usdcReceived] = await Promise.all([
-            fetchJupSwapPrice(USDC_MINT, BOOP_MINT, 1798 * 10 ** BOOP_DECIMALS, 6, true),
-            fetchJupSwapPrice(BOOP_MINT, USDC_MINT, 1798 * 10 ** BOOP_DECIMALS, 6)
+            fetchJupSwapPrice(USDC_MINT, BOOP_MINT, 3098 * 10 ** BOOP_DECIMALS, 6, true),
+            fetchJupSwapPrice(BOOP_MINT, USDC_MINT, 3098 * 10 ** BOOP_DECIMALS, 6)
         ]);
 
         if (!usdcNeeded || !usdcReceived) return null;
 
         return {
-            buyPrice: usdcNeeded / 1798,
-            sellPrice: usdcReceived / 1798
+            buyPrice: usdcNeeded / 3098,
+            sellPrice: usdcReceived / 3098
         };
     }
 
