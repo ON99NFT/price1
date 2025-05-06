@@ -201,13 +201,13 @@ const JAGER = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0006) {
+        if (value > 0.0000000003) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0004) {
+        } else if (value > 0.0000000002) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0002) {
+        } else if (value > 0.00000000001) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
