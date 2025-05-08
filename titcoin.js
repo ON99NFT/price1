@@ -1,4 +1,4 @@
-const boop = (() => {
+const titcoin = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const boop = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'boop-audio-enable-btn';
+        enableButton.id = 'titcoin-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const boop = (() => {
             }
         });
   
-        const section = document.getElementById('boop-buy-alert').closest('.token-section');
+        const section = document.getElementById('titcoin-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -92,7 +92,7 @@ const boop = (() => {
           const data = await response.json();
           return exactOut 
               ? data.inAmount / 10 ** decimals  // USDC needed for ExactOut
-              : data.outAmount / 10 ** decimals; // BOOP received for ExactIn
+              : data.outAmount / 10 ** decimals; // TITCOIN received for ExactIn
       } catch (error) {
           console.error('JUP Error:', error);
           return null;
@@ -102,49 +102,49 @@ const boop = (() => {
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/BOOP_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/TITCOIN_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetBOOP) => {
-            let totalBOOP = 0;
+        const calculateBidPrice = (bids, targetTITCOIN) => {
+            let totalTITCOIN = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const boopAvailable = usdtAvailable / price;
-                const remaining = targetBOOP - totalBOOP;
-                const fillAmount = Math.min(remaining, boopAvailable);
+                const titcoinAvailable = usdtAvailable / price;
+                const remaining = targetTITCOIN - totalTITCOIN;
+                const fillAmount = Math.min(remaining, titcoinAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalBOOP += fillAmount;
+                totalTITCOIN += fillAmount;
                 
-                if (totalBOOP >= targetBOOP) break;
+                if (totalTITCOIN >= targetTITCOIN) break;
             }
-            return totalUSDT / targetBOOP;
+            return totalUSDT / targetTITCOIN;
         };
 
-        const calculateAskPrice = (asks, targetBOOP) => {
-            let totalBOOP = 0;
+        const calculateAskPrice = (asks, targetTITCOIN) => {
+            let totalTITCOIN = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const boopAvailable = usdtAvailable / price;
-                const remaining = targetBOOP - totalBOOP;
-                const fillAmount = Math.min(remaining, boopAvailable);
+                const titcoinAvailable = usdtAvailable / price;
+                const remaining = targetTITCOIN - totalTITCOIN;
+                const fillAmount = Math.min(remaining, titcoinAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalBOOP += fillAmount;
+                totalTITCOIN += fillAmount;
                 
-                if (totalBOOP >= targetBOOP) break;
+                if (totalTITCOIN >= targetTITCOIN) break;
             }
-            return totalUSDT / targetBOOP;
+            return totalUSDT / targetTITCOIN;
         };
 
-        const targetFullsend = 3098;
+        const targetFullsend = 12998;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -163,38 +163,38 @@ const boop = (() => {
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-      const BOOP_MINT = 'boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i';
-      const BOOP_DECIMALS = 9;
+      const TITCOIN_MINT = 'FtUEW73K6vEYHfbkfpdBZfWpxgQar2HipGdbutEhpump';
+      const TITCOIN_DECIMALS = 6;
   
-      // Get USDC needed to buy 3098 BOOP
+      // Get USDC needed to buy 12998 TITCOIN
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
-          BOOP_MINT,
-          3098 * 10 ** BOOP_DECIMALS,
+          TITCOIN_MINT,
+          12998 * 10 ** TITCOIN_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 3098 BOOP
+      // Get USDC received for selling 12998 TITCOIN
       const usdcReceived = await fetchJupSwapPrice(
-          BOOP_MINT,
+          TITCOIN_MINT,
           USDC_MINT,
-          3098 * 10 ** BOOP_DECIMALS,
+          12998 * 10 ** TITCOIN_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 3098,  // USDC per BOOP (buy)
-          sellPrice: usdcReceived / 3098 // USDC per BOOP (sell)
+          buyPrice: usdcNeeded / 12998,  // USDC per TITCOIN (buy)
+          sellPrice: usdcReceived / 12998 // USDC per TITCOIN (sell)
       };
   }
   
   // Updated alert display
   async function updateAlerts() {
-      const buyElement = document.getElementById('boop-buy-alert');
-      const sellElement = document.getElementById('boop-sell-alert');
+      const buyElement = document.getElementById('titcoin-buy-alert');
+      const sellElement = document.getElementById('titcoin-sell-alert');
   
       try {
           const [mexcData, jupData] = await Promise.all([
@@ -249,13 +249,13 @@ const boop = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.006) {
+      if (difference > 0.002) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.004) {
+      } else if (difference > 0.001) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.002) {
+      } else if (difference > 0.0005) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
@@ -275,7 +275,7 @@ const boop = (() => {
     // Initialize
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 6600);
+        setInterval(updateAlerts, 4400);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
