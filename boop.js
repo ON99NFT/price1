@@ -144,7 +144,7 @@ const boop = (() => {
             return totalUSDT / targetBOOP;
         };
 
-        const targetFullsend = 3098;
+        const targetFullsend = 4998;
         const bidPrice = calculateBidPrice(data.data.bids, targetFullsend);
         const askPrice = calculateAskPrice(data.data.asks, targetFullsend);
 
@@ -166,28 +166,28 @@ const boop = (() => {
       const BOOP_MINT = 'boopkpWqe68MSxLqBGogs8ZbUDN4GXaLhFwNP7mpP1i';
       const BOOP_DECIMALS = 9;
   
-      // Get USDC needed to buy 3098 BOOP
+      // Get USDC needed to buy 4998 BOOP
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
           BOOP_MINT,
-          3098 * 10 ** BOOP_DECIMALS,
+          4998 * 10 ** BOOP_DECIMALS,
           6,
           true
       );
   
-      // Get USDC received for selling 3098 BOOP
+      // Get USDC received for selling 4998 BOOP
       const usdcReceived = await fetchJupSwapPrice(
           BOOP_MINT,
           USDC_MINT,
-          3098 * 10 ** BOOP_DECIMALS,
+          4998 * 10 ** BOOP_DECIMALS,
           6
       );
   
       if (!usdcNeeded || !usdcReceived) return null;
   
       return {
-          buyPrice: usdcNeeded / 3098,  // USDC per BOOP (buy)
-          sellPrice: usdcReceived / 3098 // USDC per BOOP (sell)
+          buyPrice: usdcNeeded / 4998,  // USDC per BOOP (buy)
+          sellPrice: usdcReceived / 4998 // USDC per BOOP (sell)
       };
   }
   
