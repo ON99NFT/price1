@@ -1,4 +1,4 @@
-const titcoin = (() => {
+const moonpig = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const titcoin = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'titcoin-audio-enable-btn';
+        enableButton.id = 'moonpig-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const titcoin = (() => {
             }
         });
   
-        const section = document.getElementById('titcoin-buy-alert').closest('.token-section');
+        const section = document.getElementById('moonpig-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
