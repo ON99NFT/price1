@@ -2,7 +2,7 @@ const moonpig = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
-  
+
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
@@ -22,7 +22,7 @@ const moonpig = (() => {
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             transition: all 0.2s ease;
         `;
-  
+
         enableButton.addEventListener('mouseover', () => {
             enableButton.style.transform = 'scale(1.03)';
             enableButton.style.background = '#45a049';
@@ -32,7 +32,7 @@ const moonpig = (() => {
             enableButton.style.transform = 'scale(1)';
             enableButton.style.background = '#4CAF50';
         });
-  
+
         enableButton.addEventListener('click', async () => {
             try {
                 if (!audioContext) {
@@ -53,33 +53,33 @@ const moonpig = (() => {
                 enableButton.style.background = '#f44336';
             }
         });
-  
+
         const section = document.getElementById('moonpig-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
-  
+
     // Sound alert function
     function playAlertSound() {
         if (!audioEnabled || !audioContext) return;
-  
+
         try {
             const osc = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             osc.connect(gainNode);
             gainNode.connect(audioContext.destination);
-  
+
             osc.type = 'sine';
             osc.frequency.setValueAtTime(659.25, audioContext.currentTime); // E5 note
             gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
-  
+
             osc.start();
             osc.stop(audioContext.currentTime + 0.4);
         } catch (error) {
             console.log('Sound playback error:', error);
         }
     }
-  
+
     // Updated JUP swap function with ExactOut support
     async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals, exactOut = false) {
       try {
@@ -98,7 +98,7 @@ const moonpig = (() => {
           return null;
       }
   }
-  
+
   async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
@@ -159,13 +159,13 @@ const moonpig = (() => {
         return null;
     }
 }
-  
+
   // Updated JUP price calculation
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const MOONPIG_MINT = 'Ai3eKAWjzKMV8wRwd41nVP83yqfbAVJykhvJVPxspump';
-      const MOONPIG_DECIMALS = 6;
-  
+      const MOONPIG_DECIMALS = 9;
+
       // Get USDC needed to buy 16998 MOONPIG
       const usdcNeeded = await fetchJupSwapPrice(
           USDC_MINT,
@@ -174,7 +174,7 @@ const moonpig = (() => {
           6,
           true
       );
-  
+
       // Get USDC received for selling 16998 MOONPIG
       const usdcReceived = await fetchJupSwapPrice(
           MOONPIG_MINT,
@@ -182,63 +182,63 @@ const moonpig = (() => {
           16998 * 10 ** MOONPIG_DECIMALS,
           6
       );
-  
+
       if (!usdcNeeded || !usdcReceived) return null;
-  
+
       return {
           buyPrice: usdcNeeded / 16998,  // USDC per MOONPIG (buy)
           sellPrice: usdcReceived / 16998 // USDC per MOONPIG (sell)
       };
   }
-  
+
   // Updated alert display
   async function updateAlerts() {
       const buyElement = document.getElementById('moonpig-buy-alert');
       const sellElement = document.getElementById('moonpig-sell-alert');
-  
+
       try {
           const [mexcData, jupData] = await Promise.all([
               fetchMexcPrice(),
               fetchJupPrice()
           ]);
-  
+
           if (!mexcData || !jupData) {
               buyElement.textContent = sellElement.textContent = 'Error';
               return;
           }
-  
+
           // Format prices
-          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
-          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
-  
+          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+
           const jupBuy = formatPrice(jupData.buyPrice);
           const jupSell = formatPrice(jupData.sellPrice);
           const mexcBid = formatPrice(mexcData.bid);
           const mexcAsk = formatPrice(mexcData.ask);
-  
+
           // Calculate differences
           const buyDiff = formatDiff(mexcData.bid - jupData.buyPrice);
           const sellDiff = formatDiff(jupData.sellPrice - mexcData.ask);
-  
+
           // Update display
           buyElement.innerHTML = `$${mexcBid} - `
               + `$${jupBuy}`
               + `<span class="difference">$${buyDiff}</span>`;
-  
+
           sellElement.innerHTML = `$${jupSell} - `
               + `$${mexcAsk}`
               + `<span class="difference">$${sellDiff}</span>`;
-  
+
           // Apply styles to difference elements
           applyAlertStyles(buyElement.querySelector('.difference'), parseFloat(buyDiff));
           applyAlertStyles(sellElement.querySelector('.difference'), parseFloat(sellDiff));
-  
+
       } catch (error) {
           console.error('Update error:', error);
           buyElement.textContent = sellElement.textContent = 'Error';
       }
   }
-  
+
   // Updated alert styling
   function applyAlertStyles(element, difference) {
       element.classList.remove(
@@ -249,13 +249,13 @@ const moonpig = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.002) {
+      if (difference > 0.006) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.001) {
+      } else if (difference > 0.004) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0005) {
+      } else if (difference > 0.002) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
@@ -266,12 +266,12 @@ const moonpig = (() => {
               playSound = false;
           }
       }
-  
+
       if (playSound && audioEnabled) {
           playAlertSound();
       }
   }
-  
+
     // Initialize
     (function init() {
         updateAlerts();
@@ -280,6 +280,6 @@ const moonpig = (() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
     })();
-  
+
     return { updateAlerts };
-  })();
+})();
