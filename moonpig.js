@@ -113,7 +113,7 @@ const moonpig = (() => {
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const titcoinAvailable = usdtAvailable / price;
+                const moonpigAvailable = usdtAvailable / price;
                 const remaining = targetMOONPIG - totalMOONPIG;
                 const fillAmount = Math.min(remaining, moonpigAvailable);
                 
@@ -132,16 +132,16 @@ const moonpig = (() => {
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const titcoinAvailable = usdtAvailable / price;
+                const moonpigAvailable = usdtAvailable / price;
                 const remaining = targetMOONPIG - totalMOONPIG;
                 const fillAmount = Math.min(remaining, moonpigAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalTITCOIN += fillAmount;
+                totalMOONPIG += fillAmount;
                 
-                if (totalTITCOIN >= targetTITCOIN) break;
+                if (totalMOONPIG >= targetMOONPIG) break;
             }
-            return totalUSDT / targetTITCOIN;
+            return totalUSDT / targetMOONPIG;
         };
 
         const targetFullsend = 16998;
