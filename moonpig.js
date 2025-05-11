@@ -164,7 +164,7 @@ const moonpig = (() => {
   async function fetchJupPrice() {
       const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
       const MOONPIG_MINT = 'Ai3eKAWjzKMV8wRwd41nVP83yqfbAVJykhvJVPxspump';
-      const MOONPIG_DECIMALS = 9;
+      const MOONPIG_DECIMALS = 6;
 
       // Get USDC needed to buy 16998 MOONPIG
       const usdcNeeded = await fetchJupSwapPrice(
