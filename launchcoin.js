@@ -1,4 +1,4 @@
-const moonpig = (() => {
+const launchcoin = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const moonpig = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'moonpig-audio-enable-btn';
+        enableButton.id = 'launchcoin-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const moonpig = (() => {
             }
         });
 
-        const section = document.getElementById('moonpig-buy-alert').closest('.token-section');
+        const section = document.getElementById('launchcoin-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -102,7 +102,7 @@ const moonpig = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/MOONPIG_USDT';
+            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/LAUNCHCOIN_USDT';
             const response = await fetch(proxyUrl + apiUrl);
             const data = await response.json();
         
@@ -121,25 +121,25 @@ const moonpig = (() => {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintmoonpig = 'Ai3eKAWjzKMV8wRwd41nVP83yqfbAVJykhvJVPxspump';
+        const outputMintlaunchcoin = 'Ey59PH7Z4BFU4HjyKnyMdWt5GGN76KazTAwQihoUXRnk';
     
-        const [moonpigAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintmoonpig, 998 * 1e6, 6),
-            fetchJupSwapPrice(outputMintmoonpig, inputMintUSDC, 54998 * 1e6, 6)
+        const [launchcoinAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMintlaunchcoin, 698 * 1e6, 9),
+            fetchJupSwapPrice(outputMintlaunchcoin, inputMintUSDC, 8498 * 1e9, 6)
         ]);
     
-        if (!moonpigAmount || !usdcAmount) return null;
+        if (!launchcoinAmount || !usdcAmount) return null;
     
         return {
-            rateFor500USDC: 998 / moonpigAmount,
-            rateFor4500moonpig: usdcAmount / 54998
+            rateFor500USDC: 698 / launchcoinAmount,
+            rateFor4500launchcoin: usdcAmount / 8498
         };
     }
 
     // Alert update
     async function updateAlerts() {
-        const buyElement = document.getElementById('moonpig-buy-alert');
-        const sellElement = document.getElementById('moonpig-sell-alert');
+        const buyElement = document.getElementById('launchcoin-buy-alert');
+        const sellElement = document.getElementById('launchcoin-sell-alert');
     
         try {
             const [mexcData, jupData] = await Promise.all([
@@ -153,7 +153,7 @@ const moonpig = (() => {
             }
     
             const buyDiff = (mexcData.bid - jupData.rateFor500USDC).toFixed(5);
-            const sellDiff = (jupData.rateFor4500moonpig - mexcData.ask).toFixed(5);
+            const sellDiff = (jupData.rateFor4500launchcoin - mexcData.ask).toFixed(5);
     
             buyElement.textContent = buyDiff;
             sellElement.textContent = sellDiff;
@@ -190,7 +190,7 @@ const moonpig = (() => {
             element.classList.add('alert-negative');
         }
 
-        if (playSound && audioEnabled && element.id === 'moonpig-buy-alert') {
+        if (playSound && audioEnabled && element.id === 'launchcoin-buy-alert') {
             playAlertSound();
         }
     }
