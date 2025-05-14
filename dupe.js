@@ -249,13 +249,13 @@ const dupe = (() => {
       );
       
       let playSound = false;
-      if (difference > 0.001) {
+      if (difference > 0.002) {
           element.classList.add('alert-flashing-2');
           playSound = true;
-      } else if (difference > 0.0006) {
+      } else if (difference > 0.001) {
           element.classList.add('alert-flashing-1');
           playSound = true;
-      } else if (difference > 0.0003) {
+      } else if (difference > 0.0005) {
           element.classList.add('alert-large-green');
       } else if (difference > 0) {
           element.classList.add('alert-positive');
