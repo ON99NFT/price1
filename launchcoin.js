@@ -176,13 +176,13 @@ const launchcoin = (() => {
         element.style.fontSize = '';
         
         let playSound = false;
-        if (difference > 0.006) {
+        if (difference > 0.01) {
             element.classList.add('alert-flashing-2');
             playSound = true;
-        } else if (difference > 0.004) {
+        } else if (difference > 0.006) {
             element.classList.add('alert-flashing-1');
             playSound = true;
-        } else if (difference > 0.002) {
+        } else if (difference > 0.003) {
             element.classList.add('alert-large-green');
         } else if (difference > 0) {
             element.classList.add('alert-positive');
@@ -198,7 +198,7 @@ const launchcoin = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
