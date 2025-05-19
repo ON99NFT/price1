@@ -1,4 +1,4 @@
-const goonc = (() => {
+const collat = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const goonc = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'goonc-audio-enable-btn';
+        enableButton.id = 'collat-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const goonc = (() => {
             }
         });
 
-        const section = document.getElementById('goonc-buy-alert').closest('.token-section');
+        const section = document.getElementById('collat-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -102,7 +102,7 @@ const goonc = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/GOONC_USDT';
+            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/COLLAT_USDT';
             const response = await fetch(proxyUrl + apiUrl);
             const data = await response.json();
         
@@ -121,25 +121,25 @@ const goonc = (() => {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintgoonc = 'ENfpbQUM5xAnNP8ecyEQGFJ6KwbuPjMwv7ZjR29cDuAb';
+        const outputMintcollat = 'C7heQqfNzdMbUFQwcHkL9FvdwsFsDRBnfwZDDyWYCLTZ';
     
-        const [gooncAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintgoonc, 886 * 1e6, 9),
-            fetchJupSwapPrice(outputMintgoonc, inputMintUSDC, 39988 * 1e9, 6)
+        const [collatAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMintcollat, 498 * 1e6, 6),
+            fetchJupSwapPrice(outputMintcollat, inputMintUSDC, 7998 * 1e6, 6)
         ]);
     
-        if (!gooncAmount || !usdcAmount) return null;
+        if (!collatAmount || !usdcAmount) return null;
     
         return {
-            rateFor500USDC: 886 / gooncAmount,
-            rateFor4500goonc: usdcAmount / 39988
+            rateFor500USDC: 498 / collatAmount,
+            rateFor4500collat: usdcAmount / 7998
         };
     }
 
     // Alert update
     async function updateAlerts() {
-        const buyElement = document.getElementById('goonc-buy-alert');
-        const sellElement = document.getElementById('goonc-sell-alert');
+        const buyElement = document.getElementById('collat-buy-alert');
+        const sellElement = document.getElementById('collat-sell-alert');
     
         try {
             const [mexcData, jupData] = await Promise.all([
@@ -153,7 +153,7 @@ const goonc = (() => {
             }
     
             const buyDiff = (mexcData.bid - jupData.rateFor500USDC).toFixed(5);
-            const sellDiff = (jupData.rateFor4500goonc - mexcData.ask).toFixed(5);
+            const sellDiff = (jupData.rateFor4500collat - mexcData.ask).toFixed(5);
     
             buyElement.textContent = buyDiff;
             sellElement.textContent = sellDiff;
@@ -176,13 +176,13 @@ const goonc = (() => {
         element.style.fontSize = '';
         
         let playSound = false;
-        if (difference > 0.0006) {
+        if (difference > 0.006) {
             element.classList.add('alert-flashing-2');
             playSound = true;
-        } else if (difference > 0.0004) {
+        } else if (difference > 0.004) {
             element.classList.add('alert-flashing-1');
             playSound = true;
-        } else if (difference > 0.0002) {
+        } else if (difference > 0.002) {
             element.classList.add('alert-large-green');
         } else if (difference > 0) {
             element.classList.add('alert-positive');
@@ -190,7 +190,7 @@ const goonc = (() => {
             element.classList.add('alert-negative');
         }
 
-        if (playSound && audioEnabled && element.id === 'goonc-buy-alert') {
+        if (playSound && audioEnabled && element.id === 'collat-buy-alert') {
             playAlertSound();
         }
     }

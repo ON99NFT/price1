@@ -176,13 +176,13 @@ const nobody = (() => {
         element.style.fontSize = '';
         
         let playSound = false;
-        if (difference > 0.001) {
+        if (difference > 0.0006) {
             element.classList.add('alert-flashing-2');
             playSound = true;
-        } else if (difference > 0.0005) {
+        } else if (difference > 0.0004) {
             element.classList.add('alert-flashing-1');
             playSound = true;
-        } else if (difference > 0.00025) {
+        } else if (difference > 0.0002) {
             element.classList.add('alert-large-green');
         } else if (difference > 0) {
             element.classList.add('alert-positive');
@@ -198,7 +198,7 @@ const nobody = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 9900);
+        setInterval(updateAlerts, 8500);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
