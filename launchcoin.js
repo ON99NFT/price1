@@ -198,7 +198,7 @@ const launchcoin = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 8500);
+        setInterval(updateAlerts, 5500);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

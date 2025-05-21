@@ -1,30 +1,32 @@
-const nobody = (() => {
+const B = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
-
-    // Audio initialization
+  
+    // Create and manage audio enable button
     function handleAudioInitialization() {
+        // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'nobody-audio-enable-btn';
-        enableButton.innerHTML = '🔇 Enable Alert Sounds';
+        enableButton.id = 'b-audio-enable-btn';
+        enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
             top: 20px;
             right: 20px;
-            padding: 8px 15px;
+            padding: 12px 20px;
             background: #4CAF50;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 5px;
             cursor: pointer;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
+            z-index: 5000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
         `;
-
+  
+        // Add hover effects
         enableButton.addEventListener('mouseover', () => {
-            enableButton.style.transform = 'scale(1.03)';
+            enableButton.style.transform = 'scale(1.05)';
             enableButton.style.background = '#45a049';
         });
         
@@ -32,7 +34,8 @@ const nobody = (() => {
             enableButton.style.transform = 'scale(1)';
             enableButton.style.background = '#4CAF50';
         });
-
+  
+        // Audio enable handler
         enableButton.addEventListener('click', async () => {
             try {
                 if (!audioContext) {
@@ -46,64 +49,49 @@ const nobody = (() => {
                 setTimeout(() => {
                     enableButton.style.opacity = '0';
                     setTimeout(() => enableButton.remove(), 300);
-                }, 1500);
+                }, 2000);
             } catch (error) {
                 console.error('Audio initialization failed:', error);
-                enableButton.innerHTML = '❌ Error';
+                enableButton.innerHTML = '❌ Error Enabling Sounds';
                 enableButton.style.background = '#f44336';
             }
         });
-
-        const section = document.getElementById('nobody-buy-alert').closest('.token-section');
+  
+        const section = document.getElementById('b-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
-
-    // Sound alert function
-    function playAlertSound() {
+  
+    // Modified playSystemAlert function
+    function playSystemAlert() {
         if (!audioEnabled || !audioContext) return;
-
+    
         try {
-            const osc = audioContext.createOscillator();
+            const primaryOsc = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-            osc.connect(gainNode);
+            
+            primaryOsc.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
-            osc.type = 'square';
-            osc.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
-            osc.start();
-            osc.stop(audioContext.currentTime + 0.3);
+    
+            // Pleasant chime configuration
+            primaryOsc.type = 'sine';
+            primaryOsc.frequency.setValueAtTime(784.0, audioContext.currentTime); // G5 note
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            
+            // Create volume envelope
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+            
+            primaryOsc.start();
+            primaryOsc.stop(audioContext.currentTime + 0.5);
         } catch (error) {
             console.log('Sound playback error:', error);
         }
     }
-
-    // JUP swap function
-    async function fetchJupSwapPrice(inputMint, outputMint, amount, decimals) {
-        try {
-            const url = `https://quote-api.jup.ag/v6/quote?inputMint=${inputMint}&outputMint=${outputMint}&amount=${amount}`;
-            const response = await fetch(url);
-        
-            if (!response.ok) {
-                throw new Error(`JUP API error: ${response.status}`);
-            }
-        
-            const data = await response.json();
-            return data.outAmount / 10 ** decimals;
-        } catch (error) {
-            console.error('Error fetching JUP swap price:', error);
-            return null;
-        }
-    }
-
-    // MEXC price fetch
+  
+    // Fetch MEXC prices
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/NOBODY_USDT';
-            const response = await fetch(proxyUrl + apiUrl);
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/B_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -117,37 +105,62 @@ const nobody = (() => {
             return null;
         }
     }
-
-    // JUP price calculation
-    async function fetchJupPrice() {
-        const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintnobody = 'C29ebrgYjYoJPMGPnPSGY1q3mMGk4iDSqnQeQQA7moon';
-    
-        const [nobodyAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintnobody, 498 * 1e6, 9),
-            fetchJupSwapPrice(outputMintnobody, inputMintUSDC, 16998 * 1e9, 6)
-        ]);
-    
-        return {
-            buyPrice: nobodyAmount ? 498 / nobodyAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 16998 : null
-        };
+  
+    // Fetch KyberSwap prices
+    async function fetchKyberSwapPrice(inputToken, outputToken, amount) {
+        try {
+            const amountIn = amount.toLocaleString('fullwide', { useGrouping: false });
+            const response = await fetch(
+                `https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}`
+            );
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            return data.data?.routeSummary?.amountOut || data.data?.outAmount;
+        } catch (error) {
+            console.error('KyberSwap Error:', error);
+            return null;
+        }
     }
 
-    // Alert update
-    async function updateAlerts() {
-        const elements = {
-            buy: document.getElementById('nobody-buy-alert'),
-            sell: document.getElementById('nobody-sell-alert')
+    // Corrected price calculation
+    async function fetchKyberPrice() {
+        const addresses = {
+            USDT: '0x55d398326f99059fF775485246999027B3197955',
+            B: '0x6bdcce4a559076e37755a78ce0c06214e59e4444'
         };
 
         try {
-            const [mexcData, jupData] = await Promise.all([
-                fetchMexcPrice(),
-                fetchJupPrice()
+            const [buyAmount, sellAmount] = await Promise.all([
+                fetchKyberSwapPrice(addresses.USDT, addresses.B, 498 * 1e18),
+                fetchKyberSwapPrice(addresses.B, addresses.USDT, 12498 * 1e18)
             ]);
 
-            if (!mexcData || !jupData) {
+            return {
+                buyPrice: buyAmount ? 498 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 12498 : null
+            };
+        } catch (error) {
+            console.error('Price Calculation Error:', error);
+            return null;
+        }
+    }
+
+    // Updated alert calculation and display
+    async function updateAlerts() {
+        const elements = {
+            buy: document.getElementById('b-buy-alert'),
+            sell: document.getElementById('b-sell-alert')
+        };
+
+        try {
+            const [mexcData, kyberData] = await Promise.all([
+                fetchMexcPrice(),
+                fetchKyberPrice()
+            ]);
+
+            if (!mexcData || !kyberData) {
                 elements.buy.textContent = elements.sell.textContent = 'Error';
                 return;
             }
@@ -157,20 +170,20 @@ const nobody = (() => {
             const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
 
             // Format prices
-            const jupBuy = formatPrice(jupData.buyPrice);
-            const jupSell = formatPrice(jupData.sellPrice);
+            const kyberBuy = formatPrice(kyberData.buyPrice);
+            const kyberSell = formatPrice(kyberData.sellPrice);
             const mexcBid = formatPrice(mexcData.bid);
             const mexcAsk = formatPrice(mexcData.ask);
 
             // Calculate differences
-            const buyDiff = mexcData.bid - jupData.buyPrice;
-            const sellDiff = jupData.sellPrice - mexcData.ask;
+            const buyDiff = mexcData.bid - kyberData.buyPrice;
+            const sellDiff = kyberData.sellPrice - mexcData.ask;
 
             // Update display with price comparison
-            elements.buy.innerHTML = `$${jupBuy} - $${mexcBid} `
+            elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
-            elements.sell.innerHTML = `$${jupSell} - $${mexcAsk} `
+            elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
                 + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
 
             // Apply styles to difference spans
@@ -178,46 +191,44 @@ const nobody = (() => {
             applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
             
         } catch (error) {
-            console.error('Update error:', error);
+            console.error('Update Error:', error);
             elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
         }
     }
 
-    // Alert styling
     // Modified alert styling function
     function applyAlertStyles(element, value) {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0006) {
+        if (value > 0.0009) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0004) {
+        } else if (value > 0.0006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0002) {
+        } else if (value > 0.0003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
         } else {
-            element.classList.add('alert-negative');
+            element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
         }
     
         // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'nobody-buy-alert') {
-            playAlertSound();
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'b-buy-alert') {
+            playSystemAlert();
         }
     }
 
-
-    // Initialization
+    // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 7700);
+        setInterval(updateAlerts, 2500);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
     })();
-
+  
     return { updateAlerts };
 })();
