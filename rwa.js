@@ -1,4 +1,4 @@
-const B = (() => {
+const RWA = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const B = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'b-audio-enable-btn';
+        enableButton.id = 'rwa-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -57,7 +57,7 @@ const B = (() => {
             }
         });
   
-        const section = document.getElementById('b-buy-alert').closest('.token-section');
+        const section = document.getElementById('rwa-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -91,7 +91,7 @@ const B = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/B_USDT');
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/RWA_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -128,18 +128,18 @@ const B = (() => {
     async function fetchKyberPrice() {
         const addresses = {
             USDT: '0x55d398326f99059fF775485246999027B3197955',
-            B: '0x6bdcce4a559076e37755a78ce0c06214e59e4444'
+            RWA: '0x9C8B5CA345247396bDfAc0395638ca9045C6586E'
         };
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.B, 498 * 1e18),
-                fetchKyberSwapPrice(addresses.B, addresses.USDT, 12498 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.RWA, 778 * 1e18),
+                fetchKyberSwapPrice(addresses.RWA, addresses.USDT, 74998 * 1e18)
             ]);
 
             return {
-                buyPrice: buyAmount ? 498 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 12498 : null
+                buyPrice: buyAmount ? 778 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 74998 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
@@ -150,8 +150,8 @@ const B = (() => {
     // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('b-buy-alert'),
-            sell: document.getElementById('b-sell-alert')
+            buy: document.getElementById('rwa-buy-alert'),
+            sell: document.getElementById('rwa-sell-alert')
         };
 
         try {
@@ -201,13 +201,13 @@ const B = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0024) {
+        if (value > 0.0009) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0016) {
+        } else if (value > 0.0006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0008) {
+        } else if (value > 0.0003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -216,7 +216,7 @@ const B = (() => {
         }
     
         // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'b-buy-alert') {
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'rwa-buy-alert') {
             playSystemAlert();
         }
     }
