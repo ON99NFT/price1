@@ -224,7 +224,7 @@ const B = (() => {
     // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 2500);
+        setInterval(updateAlerts, 1250);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

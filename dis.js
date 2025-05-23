@@ -189,13 +189,13 @@ const dis = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0006) {
+        if (value > 0.002) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0004) {
+        } else if (value > 0.001) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0002) {
+        } else if (value > 0.0005) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -213,7 +213,7 @@ const dis = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
