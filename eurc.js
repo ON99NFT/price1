@@ -239,7 +239,7 @@ const EURC = (() => {
   // Initialize application
   (function init() {
       updateAlerts();
-      setInterval(updateAlerts, 2000);
+      setInterval(updateAlerts, 1250);
       setTimeout(() => {
           if (!audioEnabled && !enableButton) handleAudioInitialization();
       }, 5000);

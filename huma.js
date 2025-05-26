@@ -1,4 +1,4 @@
-const dis = (() => {
+const huma = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const dis = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'dis-audio-enable-btn';
+        enableButton.id = 'huma-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const dis = (() => {
             }
         });
 
-        const section = document.getElementById('dis-buy-alert').closest('.token-section');
+        const section = document.getElementById('huma-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -102,53 +102,53 @@ const dis = (() => {
 async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/DIS_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/HUMA_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetDIS) => {
-            let totalDIS = 0;
+        const calculateBidPrice = (bids, targetHUMA) => {
+            let totalHUMA = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const disAvailable = usdtAvailable / price;
-                const remaining = targetDIS - totalDIS;
-                const fillAmount = Math.min(remaining, disAvailable);
+                const humaAvailable = usdtAvailable / price;
+                const remaining = targetHUMA - totalHUMA;
+                const fillAmount = Math.min(remaining, humaAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalDIS += fillAmount;
+                totalHUMA += fillAmount;
                 
-                if (totalDIS >= targetDIS) break;
+                if (totalHUMA >= targetHUMA) break;
             }
-            if (totalDIS < targetDIS) throw new Error('Insufficient bid liquidity');
-            return totalUSDT / targetDIS;
+            if (totalHUMA < targetHUMA) throw new Error('Insufficient bid liquidity');
+            return totalUSDT / targetHUMA;
         };
 
-        const calculateAskPrice = (asks, targetDIS) => {
-            let totalDIS = 0;
+        const calculateAskPrice = (asks, targetHUMA) => {
+            let totalHUMA = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const disAvailable = usdtAvailable / price;
-                const remaining = targetDIS - totalDIS;
-                const fillAmount = Math.min(remaining, disAvailable);
+                const humaAvailable = usdtAvailable / price;
+                const remaining = targetHUMA - totalHUMA;
+                const fillAmount = Math.min(remaining, humaAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalDIS += fillAmount;
+                totalHUMA += fillAmount;
                 
-                if (totalDIS >= targetDIS) break;
+                if (totalHUMA >= targetHUMA) break;
             }
-            if (totalDIS < targetDIS) throw new Error('Insufficient ask liquidity');
-            return totalUSDT / targetDIS;
+            if (totalHUMA < targetHUMA) throw new Error('Insufficient ask liquidity');
+            return totalUSDT / targetHUMA;
         };
 
-        const targetDIS = 7498; // Matches JUP's sell amount
-        const bidPrice = calculateBidPrice(data.data.bids, targetDIS);
-        const askPrice = calculateAskPrice(data.data.asks, targetDIS);
+        const targetHUMA = 19998; // Matches JUP's sell amount
+        const bidPrice = calculateBidPrice(data.data.bids, targetHUMA);
+        const askPrice = calculateAskPrice(data.data.asks, targetHUMA);
 
         return {
             bid: bidPrice,
@@ -163,24 +163,24 @@ async function fetchMexcPrice() {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintdis = '2AEU9yWk3dEGnVwRaKv4div5TarC4dn7axFLyz6zG4Pf';
+        const outputMinthuma = 'HUMA1821qVDKta3u2ovmfDQeW2fSQouSKE8fkF44wvGw';
     
-        const [disAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintdis, 498 * 1e6, 9),
-            fetchJupSwapPrice(outputMintdis, inputMintUSDC, 14998 * 1e9, 6)
+        const [humaAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMinthuma, 1498 * 1e6, 6),
+            fetchJupSwapPrice(outputMinthuma, inputMintUSDC, 19998 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: disAmount ? 498 / disAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 14998 : null
+            buyPrice: humaAmount ? 1498 / humaAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 19998 : null
         };
     }
 
     // Alert update
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('dis-buy-alert'),
-            sell: document.getElementById('dis-sell-alert')
+            buy: document.getElementById('huma-buy-alert'),
+            sell: document.getElementById('huma-sell-alert')
         };
 
         try {
@@ -208,7 +208,7 @@ async function fetchMexcPrice() {
             const buyDiff = mexcData.bid - jupData.buyPrice;
             const sellDiff = jupData.sellPrice - mexcData.ask;
 
-            // Update display with price comparison
+            // Update humaplay with price comparison
             elements.buy.innerHTML = `$${jupBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
@@ -246,7 +246,7 @@ async function fetchMexcPrice() {
         }
     
         // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'dis-buy-alert') {
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'huma-buy-alert') {
             playAlertSound();
         }
     }
@@ -255,7 +255,7 @@ async function fetchMexcPrice() {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 7200);
+        setInterval(updateAlerts, 4700);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
