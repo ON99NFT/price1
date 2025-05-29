@@ -111,7 +111,7 @@ const EURC = (() => {
       try {
           const amountIn = amount.toLocaleString('fullwide', { useGrouping: false });
           const response = await fetch(
-              `https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}`
+              `https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}&excludedSources=dexalot`
           );
           
           if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -166,8 +166,8 @@ const EURC = (() => {
           }
 
           // Formatting functions
-          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
-          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+          const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+          const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
 
           // Format prices
           const kyberBuy = formatPrice(kyberData.buyPrice);
@@ -203,29 +203,36 @@ const EURC = (() => {
 
     if (isBuyAlert) {
         // New buy alert conditions
-        if (value >= 0.0003) {
+        if (value >= 0.0005) {
             element.classList.add('alert-large-green');
-        } else if (value >= -0.0000001) {
-            element.classList.add('alert-flashing-1');
-            shouldPlaySound = true;
-        } else if (value >= -0.0003) {
+          } else if (value >= 0.0001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
+        } else if (value >= -0.0003) {
+            element.classList.add('alert-flashing-1');
+            shouldPlaySound = true;
+        } else if (value >= -0.0005) {
+            element.classList.add('alert-large-green');
+
         } else {
             element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
         }
     } else {
         // Original sell alert conditions
-        if (value > 0.0016) {
+        if (value > 0.0018) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
         } else if (value > 0.0014) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0012) {
+        } else if (value > 0.001) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
+          } else if (value > -0.0004) {
+            element.classList.add('alert-flashing-1');      
+          } else if (value > -0.0008) {
+            element.classList.add('alert-flashing-2'); 
         } else {
             element.classList.add('alert-negative');
         }
@@ -239,7 +246,7 @@ const EURC = (() => {
   // Initialize application
   (function init() {
       updateAlerts();
-      setInterval(updateAlerts, 1250);
+      setInterval(updateAlerts, 2550);
       setTimeout(() => {
           if (!audioEnabled && !enableButton) handleAudioInitialization();
       }, 5000);
