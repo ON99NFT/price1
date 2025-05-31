@@ -196,28 +196,43 @@ const RDO = (() => {
         }
     }
 
-    // Modified alert styling function
     function applyAlertStyles(element, value) {
         element.className = '';
         let shouldPlaySound = false;
+        const isBuyAlert = element.parentElement.id === 'pokt-buy-alert';
     
-        if (value > 0.00009) {
-            element.classList.add('alert-flashing-2');
-            shouldPlaySound = true;
-        } else if (value > 0.00006) {
-            element.classList.add('alert-flashing-1');
-            shouldPlaySound = true;
-        } else if (value > 0.00003) {
-            element.classList.add('alert-large-green');
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
+        if (isBuyAlert) {
+            // Buy alert conditions
+            if (value > 0.00009) {
+                element.classList.add('alert-flashing-2');
+                shouldPlaySound = true;
+            } else if (value > 0.00006) {
+                element.classList.add('alert-flashing-1');
+                shouldPlaySound = true;
+            } else if (value > 0.00003) {
+                element.classList.add('alert-large-green');
+            } else {
+                element.classList.add('alert-negative');
+            }
         } else {
-            element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
+            // Sell alert conditions
+            if (value > 0.00009) {
+                element.classList.add('alert-flashing-2');
+                shouldPlaySound = true;
+            } else if (value > 0.00006) {
+                element.classList.add('alert-flashing-1');
+                shouldPlaySound = true;
+            } else if (value > 0.00003) {
+                element.classList.add('alert-large-green');
+            } else if (value > 0) {
+                element.classList.add('alert-positive');
+            } else {
+                element.classList.add('alert-negative');
+            }
         }
     
-        // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'rdo-buy-alert') {
-            playSystemAlert();
+        if (shouldPlaySound && audioEnabled) {
+            playAlertSound();
         }
     }
 
