@@ -229,10 +229,6 @@ const EURC = (() => {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
-          } else if (value > -0.0004) {
-            element.classList.add('alert-flashing-1');      
-          } else if (value > -0.0008) {
-            element.classList.add('alert-flashing-2'); 
         } else {
             element.classList.add('alert-negative');
         }

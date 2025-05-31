@@ -201,13 +201,13 @@ const RDO = (() => {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.00024) {
+        if (value > 0.00009) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.00016) {
+        } else if (value > 0.00006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.00008) {
+        } else if (value > 0.00003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
