@@ -225,31 +225,45 @@ async function fetchMexcPrice() {
         }
     }
 
-    // Alert styling
-    // Modified alert styling function
-    function applyAlertStyles(element, value) {
-        element.className = '';
-        let shouldPlaySound = false;
-    
-        if (value > 0.0012) {
+// Updated alert styling function for POKT
+function applyAlertStyles(element, value) {
+    element.className = '';
+    let shouldPlaySound = false;
+    const isBuyAlert = element.parentElement.id === 'pokt-buy-alert';
+
+    if (isBuyAlert) {
+        // Buy alert conditions
+        if (value > 0.001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0008) {
+        } else if (value > 0.0005) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0004) {
+        } else if (value > 0.0002) {
+            element.classList.add('alert-large-green');
+        } else {
+            element.classList.add('alert-negative');
+        }
+    } else {
+        // Sell alert conditions
+        if (value > 0.003) {
+            element.classList.add('alert-flashing-2');
+            shouldPlaySound = true;
+        } else if (value > 0.002) {
+            element.classList.add('alert-flashing-1');
+        } else if (value > 0.001) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
         } else {
             element.classList.add('alert-negative');
         }
-    
-        // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'pokt-buy-alert') {
-            playAlertSound();
-        }
     }
+
+    if (shouldPlaySound && audioEnabled) {
+        playAlertSound();
+    }
+}
 
 
     // Initialization
