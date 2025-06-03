@@ -146,7 +146,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetPOKT;
         };
 
-        const targetPOKT = 6998; // Matches JUP's sell amount
+        const targetPOKT = 3998; // Matches JUP's sell amount
         const bidPrice = calculateBidPrice(data.data.bids, targetPOKT);
         const askPrice = calculateAskPrice(data.data.asks, targetPOKT);
 
@@ -166,13 +166,13 @@ async function fetchMexcPrice() {
         const outputMintpokt = '6CAsXfiCXZfP8APCG6Vma2DFMindopxiqYQN4LSQfhoC';
     
         const [poktAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintpokt, 498 * 1e6, 6),
-            fetchJupSwapPrice(outputMintpokt, inputMintUSDC, 6998 * 1e6, 6)
+            fetchJupSwapPrice(inputMintUSDC, outputMintpokt, 298 * 1e6, 6),
+            fetchJupSwapPrice(outputMintpokt, inputMintUSDC, 3998 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: poktAmount ? 498 / poktAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 6998 : null
+            buyPrice: poktAmount ? 298 / poktAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 3998 : null
         };
     }
 
@@ -233,23 +233,23 @@ function applyAlertStyles(element, value) {
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.005) {
+        if (value > 0.002) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0024) {
+        } else if (value > 0.0015) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0007) {
+        } else if (value > 0.001) {
             element.classList.add('alert-large-green');
         } else {
             element.classList.add('alert-negative');
         }
     } else {
         // Sell alert conditions
-        if (value > 0.0005) {
+        if (value > 0.000) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.000) {
+        } else if (value > -0.0005) {
             element.classList.add('alert-flashing-1');
         } else if (value > -0.001) {
             element.classList.add('alert-large-green');
