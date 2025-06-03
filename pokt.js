@@ -254,6 +254,8 @@ function applyAlertStyles(element, value) {
             shouldPlaySound = true;
         } else if (value > 0.0005) {
             element.classList.add('alert-large-green');
+        } else if (value > 0) {
+            element.classList.add('alert-positive');
         } else {
             element.classList.add('alert-negative');
         }

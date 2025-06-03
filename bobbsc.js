@@ -1,4 +1,4 @@
-const POKT = (() => {
+const BOBBSC = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const POKT = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'poktbase-audio-enable-btn';
+        enableButton.id = 'bobbsc-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -57,7 +57,7 @@ const POKT = (() => {
             }
         });
   
-        const section = document.getElementById('poktbase-buy-alert').closest('.token-section');
+        const section = document.getElementById('bobbsc-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -91,7 +91,7 @@ const POKT = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/POKT_USDT');
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/BOBBSC_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -111,7 +111,7 @@ const POKT = (() => {
         try {
             const amountIn = amount.toLocaleString('fullwide', { useGrouping: false });
             const response = await fetch(
-                `https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}&excludedSources=dexalot`
+                `https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}`
             );
             
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -123,69 +123,69 @@ const POKT = (() => {
             return null;
         }
     }
-  
+
     // Corrected price calculation
     async function fetchKyberPrice() {
         const addresses = {
-            USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-            POKT: '0x764a726d9ced0433a8d7643335919deb03a9a935'
+            USDT: '0x55d398326f99059fF775485246999027B3197955',
+            BOBBSC: '0x51363F073b1E4920fdA7AA9E9d84BA97EdE1560e'
         };
-  
+
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDC, addresses.POKT, 298 * 1e6),
-                fetchKyberSwapPrice(addresses.POKT, addresses.USDC, 3498 * 1e6)
+                fetchKyberSwapPrice(addresses.USDT, addresses.BOBBSC, 798 * 1e18),
+                fetchKyberSwapPrice(addresses.BOBBSC, addresses.USDT, 6999999998 * 1e18)
             ]);
-  
+
             return {
-                buyPrice: buyAmount ? 298 / (buyAmount / 1e6) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e6) / 3498 : null
+                buyPrice: buyAmount ? 798 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 6999999998 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
             return null;
         }
     }
-  
+
     // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('poktbase-buy-alert'),
-            sell: document.getElementById('poktbase-sell-alert')
+            buy: document.getElementById('bobbsc-buy-alert'),
+            sell: document.getElementById('bobbsc-sell-alert')
         };
-  
+
         try {
             const [mexcData, kyberData] = await Promise.all([
                 fetchMexcPrice(),
                 fetchKyberPrice()
             ]);
-  
+
             if (!mexcData || !kyberData) {
                 elements.buy.textContent = elements.sell.textContent = 'Error';
                 return;
             }
-  
+
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
-  
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(10);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(10);
+
             // Format prices
             const kyberBuy = formatPrice(kyberData.buyPrice);
             const kyberSell = formatPrice(kyberData.sellPrice);
             const mexcBid = formatPrice(mexcData.bid);
             const mexcAsk = formatPrice(mexcData.ask);
-  
+
             // Calculate differences
             const buyDiff = mexcData.bid - kyberData.buyPrice;
             const sellDiff = kyberData.sellPrice - mexcData.ask;
-  
+
             // Update display with price comparison
             elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
             elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
                 + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
-  
+
             // Apply styles to difference spans
             applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
             applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
@@ -195,7 +195,7 @@ const POKT = (() => {
             elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
         }
     }
-  
+
 // Updated alert styling function for POKT
 function applyAlertStyles(element, value) {
     element.className = '';
@@ -204,26 +204,25 @@ function applyAlertStyles(element, value) {
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.002) {
+        if (value > 0.0000000035) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.0000000025) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0005) {
+        } else if (value > 0.0000000015) {
             element.classList.add('alert-large-green');
         } else {
             element.classList.add('alert-negative');
         }
     } else {
         // Sell alert conditions
-        if (value > 0.002) {
+        if (value > 0.0000000035) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0010) {
+        } else if (value > 0.0000000025) {
             element.classList.add('alert-flashing-1');
-            shouldPlaySound = true;
-        } else if (value > 0.0005) {
+        } else if (value > 0.0000000015) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -236,15 +235,15 @@ function applyAlertStyles(element, value) {
         playAlertSound();
     }
 }
-  
+
     // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 2550);
+        setInterval(updateAlerts, 2500);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
     })();
   
     return { updateAlerts };
-  })();
+})();
