@@ -236,25 +236,24 @@ function applyAlertStyles(element, value) {
         if (value > 0.002) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0015) {
+        } else if (value > 0.001) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.0005) {
             element.classList.add('alert-large-green');
         } else {
             element.classList.add('alert-negative');
         }
     } else {
         // Sell alert conditions
-        if (value > 0.000) {
+        if (value > 0.002) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > -0.0005) {
+        } else if (value > 0.0010) {
             element.classList.add('alert-flashing-1');
-        } else if (value > -0.001) {
+            shouldPlaySound = true;
+        } else if (value > 0.0005) {
             element.classList.add('alert-large-green');
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
         } else {
             element.classList.add('alert-negative');
         }
