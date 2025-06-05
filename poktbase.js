@@ -240,7 +240,7 @@ function applyAlertStyles(element, value) {
     // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
