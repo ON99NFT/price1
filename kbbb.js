@@ -1,4 +1,4 @@
-const pokt = (() => {
+const kbbb = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const pokt = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'pokt-audio-enable-btn';
+        enableButton.id = 'kbbb-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const pokt = (() => {
             }
         });
 
-        const section = document.getElementById('pokt-buy-alert').closest('.token-section');
+        const section = document.getElementById('kbbb-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -102,53 +102,53 @@ const pokt = (() => {
 async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/POKT_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/KBBB_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetPOKT) => {
-            let totalPOKT = 0;
+        const calculateBidPrice = (bids, targetKBBB) => {
+            let totalKBBB = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const poktAvailable = usdtAvailable / price;
-                const remaining = targetPOKT - totalPOKT;
-                const fillAmount = Math.min(remaining, poktAvailable);
+                const kbbbAvailable = usdtAvailable / price;
+                const remaining = targetKBBB - totalKBBB;
+                const fillAmount = Math.min(remaining, kbbbAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalPOKT += fillAmount;
+                totalKBBB += fillAmount;
                 
-                if (totalPOKT >= targetPOKT) break;
+                if (totalKBBB >= targetKBBB) break;
             }
-            if (totalPOKT < targetPOKT) throw new Error('Insufficient bid liquidity');
-            return totalUSDT / targetPOKT;
+            if (totalKBBB < targetKBBB) throw new Error('Insufficient bid liquidity');
+            return totalUSDT / targetKBBB;
         };
 
-        const calculateAskPrice = (asks, targetPOKT) => {
-            let totalPOKT = 0;
+        const calculateAskPrice = (asks, targetKBBB) => {
+            let totalKBBB = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const poktAvailable = usdtAvailable / price;
-                const remaining = targetPOKT - totalPOKT;
-                const fillAmount = Math.min(remaining, poktAvailable);
+                const kbbbAvailable = usdtAvailable / price;
+                const remaining = targetKBBB - totalKBBB;
+                const fillAmount = Math.min(remaining, kbbbAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalPOKT += fillAmount;
+                totalKBBB += fillAmount;
                 
-                if (totalPOKT >= targetPOKT) break;
+                if (totalKBBB >= targetKBBB) break;
             }
-            if (totalPOKT < targetPOKT) throw new Error('Insufficient ask liquidity');
-            return totalUSDT / targetPOKT;
+            if (totalKBBB < targetKBBB) throw new Error('Insufficient ask liquidity');
+            return totalUSDT / targetKBBB;
         };
 
-        const targetPOKT = 3998; // Matches JUP's sell amount
-        const bidPrice = calculateBidPrice(data.data.bids, targetPOKT);
-        const askPrice = calculateAskPrice(data.data.asks, targetPOKT);
+        const targetKBBB = 16498; // Matches JUP's sell amount
+        const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
+        const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
 
         return {
             bid: bidPrice,
@@ -163,24 +163,24 @@ async function fetchMexcPrice() {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintpokt = '6CAsXfiCXZfP8APCG6Vma2DFMindopxiqYQN4LSQfhoC';
+        const outputMintkbbb = 'npB9cxTzwUiGt7jk2dXZa52xZve8SgVD6Et9Bpipump';
     
-        const [poktAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintpokt, 298 * 1e6, 6),
-            fetchJupSwapPrice(outputMintpokt, inputMintUSDC, 3998 * 1e6, 6)
+        const [kbbbAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 498 * 1e6, 6),
+            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 16498 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: poktAmount ? 298 / poktAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 3998 : null
+            buyPrice: kbbbAmount ? 498 / kbbbAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 16498 : null
         };
     }
 
     // Alert update
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('pokt-buy-alert'),
-            sell: document.getElementById('pokt-sell-alert')
+            buy: document.getElementById('kbbb-buy-alert'),
+            sell: document.getElementById('kbbb-sell-alert')
         };
 
         try {
@@ -208,7 +208,7 @@ async function fetchMexcPrice() {
             const buyDiff = mexcData.bid - jupData.buyPrice;
             const sellDiff = jupData.sellPrice - mexcData.ask;
 
-            // Update poktplay with price comparison
+            // Update kbbbplay with price comparison
             elements.buy.innerHTML = `$${jupBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
@@ -225,46 +225,31 @@ async function fetchMexcPrice() {
         }
     }
 
-// Updated alert styling function for POKT
-function applyAlertStyles(element, value) {
-    element.className = '';
-    let shouldPlaySound = false;
-    const isBuyAlert = element.parentElement.id === 'pokt-buy-alert';
-
-    if (isBuyAlert) {
-        // Buy alert conditions
-        if (value > 0.002) {
+    // Alert styling
+    // Modified alert styling function
+    function applyAlertStyles(element, value) {
+        element.className = '';
+        let shouldPlaySound = false;
+    
+        if (value > 0.001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.0006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0005) {
-            element.classList.add('alert-large-green');
-        } else {
-            element.classList.add('alert-negative');
-        }
-    } else {
-        // Sell alert conditions
-        if (value > 0.02) {
-            element.classList.add('alert-flashing-2');
-            shouldPlaySound = true;
-        } else if (value > 0.010) {
-            element.classList.add('alert-flashing-1');
-            shouldPlaySound = true;
-        } else if (value > 0.005) {
+        } else if (value > 0.0003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
         } else {
             element.classList.add('alert-negative');
         }
+    
+        // Trigger sound only for positive buy alerts
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'kbbb-buy-alert') {
+            playAlertSound();
+        }
     }
-
-    if (shouldPlaySound && audioEnabled) {
-        playAlertSound();
-    }
-}
 
 
     // Initialization
