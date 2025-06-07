@@ -146,7 +146,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetKBBB;
         };
 
-        const targetKBBB = 16498; // Matches JUP's sell amount
+        const targetKBBB = 176498; // Matches JUP's sell amount
         const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
         const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
 
@@ -166,13 +166,13 @@ async function fetchMexcPrice() {
         const outputMintkbbb = 'npB9cxTzwUiGt7jk2dXZa52xZve8SgVD6Et9Bpipump';
     
         const [kbbbAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 498 * 1e6, 6),
-            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 16498 * 1e6, 6)
+            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 998 * 1e6, 6),
+            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 176498 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: kbbbAmount ? 498 / kbbbAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 16498 : null
+            buyPrice: kbbbAmount ? 998 / kbbbAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 176498 : null
         };
     }
 
@@ -195,8 +195,8 @@ async function fetchMexcPrice() {
             }
 
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
 
             // Format prices
             const jupBuy = formatPrice(jupData.buyPrice);
@@ -231,13 +231,13 @@ async function fetchMexcPrice() {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.001) {
+        if (value > 0.0001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0006) {
+        } else if (value > 0.00006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0003) {
+        } else if (value > 0.00003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -255,7 +255,7 @@ async function fetchMexcPrice() {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 5500);
+        setInterval(updateAlerts, 4400);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

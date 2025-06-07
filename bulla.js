@@ -1,4 +1,4 @@
-const CUDIS = (() => {
+const BULLA = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const CUDIS = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'cudis-audio-enable-btn';
+        enableButton.id = 'bulla-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -57,7 +57,7 @@ const CUDIS = (() => {
             }
         });
   
-        const section = document.getElementById('cudis-buy-alert').closest('.token-section');
+        const section = document.getElementById('bulla-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -91,7 +91,7 @@ const CUDIS = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/CUDIS_USDT');
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/BULLA_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -128,18 +128,18 @@ const CUDIS = (() => {
     async function fetchKyberPrice() {
         const addresses = {
             USDT: '0x55d398326f99059fF775485246999027B3197955',
-            CUDIS: '0xc1353d3ee02fdbd4f65f92eee543cfd709049cb1'
+            BULLA: '0x595e21b20e78674f8a64c1566a20b2b316bc3511'
         };
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.CUDIS, 598 * 1e18),
-                fetchKyberSwapPrice(addresses.CUDIS, addresses.USDT, 6498 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.BULLA, 598 * 1e18),
+                fetchKyberSwapPrice(addresses.BULLA, addresses.USDT, 4498 * 1e18)
             ]);
 
             return {
                 buyPrice: buyAmount ? 598 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 6498 : null
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 4498 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
@@ -150,8 +150,8 @@ const CUDIS = (() => {
     // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('cudis-buy-alert'),
-            sell: document.getElementById('cudis-sell-alert')
+            buy: document.getElementById('bulla-buy-alert'),
+            sell: document.getElementById('bulla-sell-alert')
         };
 
         try {
@@ -204,13 +204,13 @@ function applyAlertStyles(element, value) {
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.0035) {
+        if (value > 0.008) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0025) {
+        } else if (value > 0.004) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0015) {
+        } else if (value > 0.002) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -219,12 +219,13 @@ function applyAlertStyles(element, value) {
         }
     } else {
         // Sell alert conditions
-        if (value > 0.0035) {
+        if (value > 0.008) {
             element.classList.add('alert-flashing-2');
-            shouldPlaySound = true;
-        } else if (value > 0.0025) {
+
+        } else if (value > 0.004) {
             element.classList.add('alert-flashing-1');
-        } else if (value > 0.0015) {
+
+        } else if (value > 0.002) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');

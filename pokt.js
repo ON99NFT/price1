@@ -248,13 +248,13 @@ function applyAlertStyles(element, value) {
         }
     } else {
         // Sell alert conditions
-        if (value > 0.02) {
+        if (value > 0.002) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.01) {
+        } else if (value > 0.001) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.005) {
+        } else if (value > 0.0005) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');

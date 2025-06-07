@@ -1,4 +1,4 @@
-const cudis = (() => {
+const asrr = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const cudis = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'cudis-audio-enable-btn';
+        enableButton.id = 'asrr-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -54,7 +54,7 @@ const cudis = (() => {
             }
         });
 
-        const section = document.getElementById('cudissol-buy-alert').closest('.token-section');
+        const section = document.getElementById('asrr-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -102,53 +102,53 @@ const cudis = (() => {
 async function fetchMexcPrice() {
     try {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/CUDIS_USDT';
+        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/ASRR_USDT';
         const response = await fetch(proxyUrl + apiUrl);
         const data = await response.json();
         
-        const calculateBidPrice = (bids, targetCUDIS) => {
-            let totalCUDIS = 0;
+        const calculateBidPrice = (bids, targetASRR) => {
+            let totalASRR = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of bids) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const cudisAvailable = usdtAvailable / price;
-                const remaining = targetCUDIS - totalCUDIS;
-                const fillAmount = Math.min(remaining, cudisAvailable);
+                const asrrAvailable = usdtAvailable / price;
+                const remaining = targetASRR - totalASRR;
+                const fillAmount = Math.min(remaining, asrrAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalCUDIS += fillAmount;
+                totalASRR += fillAmount;
                 
-                if (totalCUDIS >= targetCUDIS) break;
+                if (totalASRR >= targetASRR) break;
             }
-            if (totalCUDIS < targetCUDIS) throw new Error('Insufficient bid liquidity');
-            return totalUSDT / targetCUDIS;
+            if (totalASRR < targetASRR) throw new Error('Insufficient bid liquidity');
+            return totalUSDT / targetASRR;
         };
 
-        const calculateAskPrice = (asks, targetCUDIS) => {
-            let totalCUDIS = 0;
+        const calculateAskPrice = (asks, targetASRR) => {
+            let totalASRR = 0;
             let totalUSDT = 0;
             
             for (const [priceStr, usdtAvailableStr] of asks) {
                 const price = parseFloat(priceStr);
                 const usdtAvailable = parseFloat(usdtAvailableStr);
-                const cudisAvailable = usdtAvailable / price;
-                const remaining = targetCUDIS - totalCUDIS;
-                const fillAmount = Math.min(remaining, cudisAvailable);
+                const asrrAvailable = usdtAvailable / price;
+                const remaining = targetASRR - totalASRR;
+                const fillAmount = Math.min(remaining, asrrAvailable);
                 
                 totalUSDT += fillAmount * price;
-                totalCUDIS += fillAmount;
+                totalASRR += fillAmount;
                 
-                if (totalCUDIS >= targetCUDIS) break;
+                if (totalASRR >= targetASRR) break;
             }
-            if (totalCUDIS < targetCUDIS) throw new Error('Insufficient ask liquidity');
-            return totalUSDT / targetCUDIS;
+            if (totalASRR < targetASRR) throw new Error('Insufficient ask liquidity');
+            return totalUSDT / targetASRR;
         };
 
-        const targetCUDIS = 6498; // Matches JUP's sell amount
-        const bidPrice = calculateBidPrice(data.data.bids, targetCUDIS);
-        const askPrice = calculateAskPrice(data.data.asks, targetCUDIS);
+        const targetASRR = 1498; // Matches JUP's sell amount
+        const bidPrice = calculateBidPrice(data.data.bids, targetASRR);
+        const askPrice = calculateAskPrice(data.data.asks, targetASRR);
 
         return {
             bid: bidPrice,
@@ -163,24 +163,24 @@ async function fetchMexcPrice() {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintcudis = 'CudisfkgWvMKnZ3TWf6iCuHm8pN2ikXhDcWytwz6f6RN';
+        const outputMintasrr = 'ASRRjA1R4RHVk5H9QKKm1jaQqMkxvv6nh5EypPrvwmxQ';
     
-        const [cudisAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintcudis, 598 * 1e6, 9),
-            fetchJupSwapPrice(outputMintcudis, inputMintUSDC, 6498 * 1e9, 6)
+        const [asrrAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMintasrr, 498 * 1e6, 9),
+            fetchJupSwapPrice(outputMintasrr, inputMintUSDC, 1498 * 1e9, 6)
         ]);
     
         return {
-            buyPrice: cudisAmount ? 598 / cudisAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 6498 : null
+            buyPrice: asrrAmount ? 498 / asrrAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 1498 : null
         };
     }
 
     // Alert update
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('cudissol-buy-alert'),
-            sell: document.getElementById('cudissol-sell-alert')
+            buy: document.getElementById('asrr-buy-alert'),
+            sell: document.getElementById('asrr-sell-alert')
         };
 
         try {
@@ -208,7 +208,7 @@ async function fetchMexcPrice() {
             const buyDiff = mexcData.bid - jupData.buyPrice;
             const sellDiff = jupData.sellPrice - mexcData.ask;
 
-            // Update cudisplay with price comparison
+            // Update asrrplay with price comparison
             elements.buy.innerHTML = `$${jupBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
@@ -225,53 +225,37 @@ async function fetchMexcPrice() {
         }
     }
 
-// Updated alert styling function for CUDIS
-function applyAlertStyles(element, value) {
-    element.className = '';
-    let shouldPlaySound = false;
-    const isBuyAlert = element.parentElement.id === 'cudissol-buy-alert';
-
-    if (isBuyAlert) {
-        // Buy alert conditions
-        if (value > 0.0035) {
+    // Alert styling
+    // Modified alert styling function
+    function applyAlertStyles(element, value) {
+        element.className = '';
+        let shouldPlaySound = false;
+    
+        if (value > 0.012) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.0025) {
+        } else if (value > 0.008) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0015) {
+        } else if (value > 0.004) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
         } else {
             element.classList.add('alert-negative');
         }
-    } else {
-        // Sell alert conditions
-        if (value > 0.0035) {
-            element.classList.add('alert-flashing-2');
-            shouldPlaySound = true;
-        } else if (value > 0.0025) {
-            element.classList.add('alert-flashing-1');
-        } else if (value > 0.0015) {
-            element.classList.add('alert-large-green');
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
-        } else {
-            element.classList.add('alert-negative');
+    
+        // Trigger sound only for positive buy alerts
+        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'asrr-buy-alert') {
+            playAlertSound();
         }
     }
-
-    if (shouldPlaySound && audioEnabled) {
-        playAlertSound();
-    }
-}
 
 
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 9900);
+        setInterval(updateAlerts, 3300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
