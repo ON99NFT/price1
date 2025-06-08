@@ -255,7 +255,7 @@ async function fetchMexcPrice() {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3300);
+        setInterval(updateAlerts, 3700);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
