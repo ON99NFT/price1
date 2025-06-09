@@ -195,8 +195,8 @@ async function fetchMexcPrice() {
             }
 
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
 
             // Format prices
             const jupBuy = formatPrice(jupData.buyPrice);
@@ -231,13 +231,13 @@ async function fetchMexcPrice() {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0005) {
+        if (value > 0.0001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.00003) {
+        } else if (value > 0.00006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.000015) {
+        } else if (value > 0.00003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -255,7 +255,7 @@ async function fetchMexcPrice() {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3700);
+        setInterval(updateAlerts, 4400);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
