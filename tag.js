@@ -204,13 +204,13 @@ function applyAlertStyles(element, value) {
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.000008) {
+        if (value > 0.00003) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.000005) {
+        } else if (value > 0.00001) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.0000025) {
+        } else if (value > -0.00001) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');

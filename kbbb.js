@@ -146,7 +146,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetKBBB;
         };
 
-        const targetKBBB = 176498; // Matches JUP's sell amount
+        const targetKBBB = 676498; // Matches JUP's sell amount
         const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
         const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
 
@@ -167,12 +167,12 @@ async function fetchMexcPrice() {
     
         const [kbbbAmount, usdcAmount] = await Promise.all([
             fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 998 * 1e6, 6),
-            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 176498 * 1e6, 6)
+            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 676498 * 1e6, 6)
         ]);
     
         return {
             buyPrice: kbbbAmount ? 998 / kbbbAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 176498 : null
+            sellPrice: usdcAmount ? usdcAmount / 676498 : null
         };
     }
 
@@ -195,8 +195,8 @@ async function fetchMexcPrice() {
             }
 
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(6);
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
 
             // Format prices
             const jupBuy = formatPrice(jupData.buyPrice);
@@ -231,13 +231,13 @@ async function fetchMexcPrice() {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.0001) {
+        if (value > 0.000045) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.00006) {
+        } else if (value > 0.00003) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.00003) {
+        } else if (value > 0.000015) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
