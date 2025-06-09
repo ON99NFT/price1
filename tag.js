@@ -200,7 +200,7 @@ const TAG = (() => {
 function applyAlertStyles(element, value) {
     element.className = '';
     let shouldPlaySound = false;
-    const isBuyAlert = element.parentElement.id === 'pokt-buy-alert';
+    const isBuyAlert = element.parentElement.id === 'tag-buy-alert';
 
     if (isBuyAlert) {
         // Buy alert conditions

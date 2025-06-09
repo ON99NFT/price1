@@ -1,4 +1,4 @@
-const EGL1 = (() => {
+const SKATE = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const EGL1 = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'egl1-audio-enable-btn';
+        enableButton.id = 'skate-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -57,7 +57,7 @@ const EGL1 = (() => {
             }
         });
   
-        const section = document.getElementById('egl1-buy-alert').closest('.token-section');
+        const section = document.getElementById('skate-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -91,7 +91,7 @@ const EGL1 = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/EGL1_USDT');
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/SKATE_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -128,18 +128,18 @@ const EGL1 = (() => {
     async function fetchKyberPrice() {
         const addresses = {
             USDT: '0x55d398326f99059fF775485246999027B3197955',
-            EGL1: '0xf4b385849f2e817e92bffbfb9aeb48f950ff4444'
+            SKATE: '0x61dbbbb552dc893ab3aad09f289f811e67cef285'
         };
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.EGL1, 598 * 1e18),
-                fetchKyberSwapPrice(addresses.EGL1, addresses.USDT, 6998 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.SKATE, 1298 * 1e18),
+                fetchKyberSwapPrice(addresses.SKATE, addresses.USDT, 21998 * 1e18)
             ]);
 
             return {
-                buyPrice: buyAmount ? 598 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 6998 : null
+                buyPrice: buyAmount ? 1298 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 21998 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
@@ -150,8 +150,8 @@ const EGL1 = (() => {
     // Updated alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('egl1-buy-alert'),
-            sell: document.getElementById('egl1-sell-alert')
+            buy: document.getElementById('skate-buy-alert'),
+            sell: document.getElementById('skate-sell-alert')
         };
 
         try {
@@ -196,21 +196,21 @@ const EGL1 = (() => {
         }
     }
 
-// Updated alert styling function for POKT
+// Updated alert styling function for SKATE
 function applyAlertStyles(element, value) {
     element.className = '';
     let shouldPlaySound = false;
-    const isBuyAlert = element.parentElement.id === 'egl1-buy-alert';
+    const isBuyAlert = element.parentElement.id === 'skate-buy-alert';
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.004) {
+        if (value > 0.00035) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.00025) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > -0.001) {
+        } else if (value > 0.00015) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -219,13 +219,12 @@ function applyAlertStyles(element, value) {
         }
     } else {
         // Sell alert conditions
-        if (value > 0.016) {
+        if (value > 0.00035) {
             element.classList.add('alert-flashing-2');
-
-        } else if (value > 0.008) {
+            shouldPlaySound = true;
+        } else if (value > 0.00025) {
             element.classList.add('alert-flashing-1');
-
-        } else if (value > 0.004) {
+        } else if (value > 0.00015) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
