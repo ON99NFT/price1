@@ -133,13 +133,13 @@ const IDOL = (() => {
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.IDOL, 298 * 1e18),
-                fetchKyberSwapPrice(addresses.IDOL, addresses.USDT, 5998 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.IDOL, 398 * 1e18),
+                fetchKyberSwapPrice(addresses.IDOL, addresses.USDT, 17998 * 1e18)
             ]);
 
             return {
-                buyPrice: buyAmount ? 298 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 5998 : null
+                buyPrice: buyAmount ? 398 / (buyAmount / 1e18) : null,
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 17998 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
