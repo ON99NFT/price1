@@ -166,8 +166,8 @@ const IDOL = (() => {
             }
 
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
 
             // Format prices
             const kyberBuy = formatPrice(kyberData.buyPrice);
