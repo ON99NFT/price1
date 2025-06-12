@@ -213,7 +213,6 @@ const EURC = (() => {
             shouldPlaySound = true;
         } else if (value >= -0.0005) {
             element.classList.add('alert-large-green');
-
         } else {
             element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
         }
