@@ -204,13 +204,13 @@ function applyAlertStyles(element, value) {
 
     if (isBuyAlert) {
         // Buy alert conditions
-        if (value > 0.004) {
+        if (value > 0.003) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.002) {
+        } else if (value > 0.001) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.0001) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -219,12 +219,12 @@ function applyAlertStyles(element, value) {
         }
     } else {
         // Sell alert conditions
-        if (value > 0.02) {
+        if (value > 0.009) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.01) {
-            element.classList.add('alert-flashing-1');
         } else if (value > 0.005) {
+            element.classList.add('alert-flashing-1');
+        } else if (value > 0.003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
