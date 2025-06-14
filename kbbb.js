@@ -146,7 +146,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetKBBB;
         };
 
-        const targetKBBB = 676498; // Matches JUP's sell amount
+        const targetKBBB = 396498; // Matches JUP's sell amount
         const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
         const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
 
@@ -166,13 +166,13 @@ async function fetchMexcPrice() {
         const outputMintkbbb = 'npB9cxTzwUiGt7jk2dXZa52xZve8SgVD6Et9Bpipump';
     
         const [kbbbAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 998 * 1e6, 6),
-            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 676498 * 1e6, 6)
+            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 298 * 1e6, 6),
+            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 396498 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: kbbbAmount ? 998 / kbbbAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 676498 : null
+            buyPrice: kbbbAmount ? 298 / kbbbAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 396498 : null
         };
     }
 
