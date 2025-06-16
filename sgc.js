@@ -1,4 +1,4 @@
-const LIBERTY = (() => {
+const SGC = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -7,7 +7,7 @@ const LIBERTY = (() => {
     function handleAudioInitialization() {
         // Create floating enable button
         enableButton = document.createElement('button');
-        enableButton.id = 'liberty-audio-enable-btn';
+        enableButton.id = 'sgc-audio-enable-btn';
         enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -58,7 +58,7 @@ const LIBERTY = (() => {
             }
         });
   
-        const section = document.getElementById('liberty-buy-alert').closest('.token-section');
+        const section = document.getElementById('sgc-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
   
@@ -102,7 +102,7 @@ const LIBERTY = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/LIBERTY_USDT');
+            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/SGC_USDT');
             const data = await response.json();
         
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
@@ -139,18 +139,18 @@ const LIBERTY = (() => {
     async function fetchKyberPrice() {
         const addresses = {
             USDT: '0x55d398326f99059fF775485246999027B3197955',
-            LIBERTY: '0x6ea8211a1e47dbd8b55c487c0b906ebc57b94444'
+            SGC: '0xe0a441d23cedb44822dfc8562e4d8d39c6b7f946'
         };
 
         try {
             const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.LIBERTY, 298 * 1e18),
-                fetchKyberSwapPrice(addresses.LIBERTY, addresses.USDT, 5998 * 1e18)
+                fetchKyberSwapPrice(addresses.USDT, addresses.SGC, 198 * 1e18),
+                fetchKyberSwapPrice(addresses.SGC, addresses.USDT, 25998 * 1e18)
             ]);
 
             return {
                 buyPrice: buyAmount ? 298 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 5998 : null
+                sellPrice: sellAmount ? (sellAmount / 1e18) / 25998 : null
             };
         } catch (error) {
             console.error('Price Calculation Error:', error);
@@ -161,8 +161,8 @@ const LIBERTY = (() => {
     // Alert calculation and display
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('liberty-buy-alert'),
-            sell: document.getElementById('liberty-sell-alert')
+            buy: document.getElementById('sgc-buy-alert'),
+            sell: document.getElementById('sgc-sell-alert')
         };
 
         try {
@@ -212,34 +212,34 @@ const LIBERTY = (() => {
         element.className = '';
         let shouldPlaySound = false;
         let volume = 0.2; // Default volume
-        const isBuyAlert = element.parentElement.id === 'liberty-buy-alert';
+        const isBuyAlert = element.parentElement.id === 'sgc-buy-alert';
 
         if (isBuyAlert) {
             // Buy alert conditions
-            if (value > 0.0004) {
+            if (value > 0.006) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.0002) {
+            } else if (value > 0.004) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.0001) {
+            } else if (value > 0.002) {
                 element.classList.add('alert-large-green');
             } else {
                 element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
             }
         } else {
             // Sell alert conditions
-            if (value > 0.0006) {
+            if (value > 0.006) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.0004) {
+            } else if (value > 0.004) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.0002) {
+            } else if (value > 0.002) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -256,7 +256,7 @@ const LIBERTY = (() => {
     // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);

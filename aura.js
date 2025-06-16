@@ -146,7 +146,7 @@ async function fetchMexcPrice() {
             return totalUSDT / targetAURA;
         };
 
-        const targetAURA = 5498; // Matches JUP's sell amount
+        const targetAURA = 1998; // Matches JUP's sell amount
         const bidPrice = calculateBidPrice(data.data.bids, targetAURA);
         const askPrice = calculateAskPrice(data.data.asks, targetAURA);
 
@@ -166,13 +166,13 @@ async function fetchMexcPrice() {
         const outputMintaura = 'DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2';
     
         const [auraAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintaura, 598 * 1e6, 6),
-            fetchJupSwapPrice(outputMintaura, inputMintUSDC, 5498 * 1e6, 6)
+            fetchJupSwapPrice(inputMintUSDC, outputMintaura, 298 * 1e6, 6),
+            fetchJupSwapPrice(outputMintaura, inputMintUSDC, 1998 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: auraAmount ? 598 / auraAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 5498 : null
+            buyPrice: auraAmount ? 298 / auraAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 1998 : null
         };
     }
 
