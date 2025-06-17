@@ -231,13 +231,13 @@ async function fetchMexcPrice() {
         element.className = '';
         let shouldPlaySound = false;
     
-        if (value > 0.000045) {
+        if (value > 0.00001) {
             element.classList.add('alert-flashing-2');
             shouldPlaySound = true;
-        } else if (value > 0.00003) {
+        } else if (value > 0.000006) {
             element.classList.add('alert-flashing-1');
             shouldPlaySound = true;
-        } else if (value > 0.000015) {
+        } else if (value > 0.000003) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
@@ -255,7 +255,7 @@ async function fetchMexcPrice() {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
