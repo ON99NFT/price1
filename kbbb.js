@@ -21,6 +21,7 @@ const kbbb = (() => {
             z-index: 100;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             transition: all 0.2s ease;
+            pointer-events: auto !important;
         `;
 
         enableButton.addEventListener('mouseover', () => {
@@ -58,25 +59,34 @@ const kbbb = (() => {
         section.appendChild(enableButton);
     }
 
-    // Sound alert function
-    function playAlertSound() {
+    // Sound alert function with volume control
+    async function playAlertSound(volume = 0.15) {
         if (!audioEnabled || !audioContext) return;
 
         try {
+            // Ensure audio context is active
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
             const osc = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             osc.connect(gainNode);
             gainNode.connect(audioContext.destination);
 
-            osc.type = 'square';
+            osc.type = 'sine'; // Softer sound than square
             osc.frequency.setValueAtTime(523.25, audioContext.currentTime);
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            gainNode.gain.value = volume; // Direct volume control
 
             osc.start();
-            osc.stop(audioContext.currentTime + 0.3);
+            osc.stop(audioContext.currentTime + 0.2); // Shorter duration
         } catch (error) {
             console.log('Sound playback error:', error);
+            // Show error on button if exists
+            if (enableButton) {
+                enableButton.innerHTML = '❌ Sound Error';
+                enableButton.style.background = '#f44336';
+            }
         }
     }
 
@@ -98,67 +108,67 @@ const kbbb = (() => {
         }
     }
 
-// MEXC price fetch with orderbook average
-async function fetchMexcPrice() {
-    try {
-        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/KBBB_USDT';
-        const response = await fetch(proxyUrl + apiUrl);
-        const data = await response.json();
-        
-        const calculateBidPrice = (bids, targetKBBB) => {
-            let totalKBBB = 0;
-            let totalUSDT = 0;
+    // MEXC price fetch with orderbook average
+    async function fetchMexcPrice() {
+        try {
+            const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/KBBB_USDT';
+            const response = await fetch(proxyUrl + apiUrl);
+            const data = await response.json();
             
-            for (const [priceStr, usdtAvailableStr] of bids) {
-                const price = parseFloat(priceStr);
-                const usdtAvailable = parseFloat(usdtAvailableStr);
-                const kbbbAvailable = usdtAvailable / price;
-                const remaining = targetKBBB - totalKBBB;
-                const fillAmount = Math.min(remaining, kbbbAvailable);
+            const calculateBidPrice = (bids, targetKBBB) => {
+                let totalKBBB = 0;
+                let totalUSDT = 0;
                 
-                totalUSDT += fillAmount * price;
-                totalKBBB += fillAmount;
-                
-                if (totalKBBB >= targetKBBB) break;
-            }
-            if (totalKBBB < targetKBBB) throw new Error('Insufficient bid liquidity');
-            return totalUSDT / targetKBBB;
-        };
+                for (const [priceStr, usdtAvailableStr] of bids) {
+                    const price = parseFloat(priceStr);
+                    const usdtAvailable = parseFloat(usdtAvailableStr);
+                    const kbbbAvailable = usdtAvailable / price;
+                    const remaining = targetKBBB - totalKBBB;
+                    const fillAmount = Math.min(remaining, kbbbAvailable);
+                    
+                    totalUSDT += fillAmount * price;
+                    totalKBBB += fillAmount;
+                    
+                    if (totalKBBB >= targetKBBB) break;
+                }
+                if (totalKBBB < targetKBBB) throw new Error('Insufficient bid liquidity');
+                return totalUSDT / targetKBBB;
+            };
 
-        const calculateAskPrice = (asks, targetKBBB) => {
-            let totalKBBB = 0;
-            let totalUSDT = 0;
-            
-            for (const [priceStr, usdtAvailableStr] of asks) {
-                const price = parseFloat(priceStr);
-                const usdtAvailable = parseFloat(usdtAvailableStr);
-                const kbbbAvailable = usdtAvailable / price;
-                const remaining = targetKBBB - totalKBBB;
-                const fillAmount = Math.min(remaining, kbbbAvailable);
+            const calculateAskPrice = (asks, targetKBBB) => {
+                let totalKBBB = 0;
+                let totalUSDT = 0;
                 
-                totalUSDT += fillAmount * price;
-                totalKBBB += fillAmount;
-                
-                if (totalKBBB >= targetKBBB) break;
-            }
-            if (totalKBBB < targetKBBB) throw new Error('Insufficient ask liquidity');
-            return totalUSDT / targetKBBB;
-        };
+                for (const [priceStr, usdtAvailableStr] of asks) {
+                    const price = parseFloat(priceStr);
+                    const usdtAvailable = parseFloat(usdtAvailableStr);
+                    const kbbbAvailable = usdtAvailable / price;
+                    const remaining = targetKBBB - totalKBBB;
+                    const fillAmount = Math.min(remaining, kbbbAvailable);
+                    
+                    totalUSDT += fillAmount * price;
+                    totalKBBB += fillAmount;
+                    
+                    if (totalKBBB >= targetKBBB) break;
+                }
+                if (totalKBBB < targetKBBB) throw new Error('Insufficient ask liquidity');
+                return totalUSDT / targetKBBB;
+            };
 
-        const targetKBBB = 676498; // Matches JUP's sell amount
-        const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
-        const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
+            const targetKBBB = 676498; // Matches JUP's sell amount
+            const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
+            const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
 
-        return {
-            bid: bidPrice,
-            ask: askPrice
-        };
-    } catch (error) {
-        console.error('MEXC Error:', error);
-        return null;
+            return {
+                bid: bidPrice,
+                ask: askPrice
+            };
+        } catch (error) {
+            console.error('MEXC Error:', error);
+            return null;
+        }
     }
-}
 
     // JUP price calculation
     async function fetchJupPrice() {
@@ -208,7 +218,7 @@ async function fetchMexcPrice() {
             const buyDiff = mexcData.bid - jupData.buyPrice;
             const sellDiff = jupData.sellPrice - mexcData.ask;
 
-            // Update kbbbplay with price comparison
+            // Update display with price comparison
             elements.buy.innerHTML = `$${jupBuy} - $${mexcBid} `
                 + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
@@ -216,8 +226,8 @@ async function fetchMexcPrice() {
                 + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
 
             // Apply styles to difference spans
-            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
-            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
+            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff, true);
+            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff, false);
             
         } catch (error) {
             console.error('Update error:', error);
@@ -225,32 +235,52 @@ async function fetchMexcPrice() {
         }
     }
 
-    // Alert styling
-    // Modified alert styling function
-    function applyAlertStyles(element, value) {
+    // Alert styling with separate buy/sell logic
+    function applyAlertStyles(element, value, isBuy) {
         element.className = '';
         let shouldPlaySound = false;
-    
-        if (value > 0.00001) {
-            element.classList.add('alert-flashing-2');
-            shouldPlaySound = true;
-        } else if (value > 0.000006) {
-            element.classList.add('alert-flashing-1');
-            shouldPlaySound = true;
-        } else if (value > 0.000003) {
-            element.classList.add('alert-large-green');
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
+        let volume = 0.15; // Default volume
+
+        if (isBuy) {
+            // Buy alert conditions
+            if (value > 0.00001) {
+                element.classList.add('alert-flashing-2');
+                shouldPlaySound = true;
+                volume = 0.15; // Normal volume
+            } else if (value > 0.000006) {
+                element.classList.add('alert-flashing-1');
+                shouldPlaySound = true;
+                volume = 0.05; // Lower volume
+            } else if (value > 0.000003) {
+                element.classList.add('alert-large-green');
+            } else if (value > 0) {
+                element.classList.add('alert-positive');
+            } else {
+                element.classList.add('alert-negative');
+            }
         } else {
-            element.classList.add('alert-negative');
+            // Sell alert conditions
+            if (value > 0.000003) {
+                element.classList.add('alert-flashing-2');
+                shouldPlaySound = true;
+                volume = 0.15; // Normal volume
+            } else if (value > -0.000001) {
+                element.classList.add('alert-flashing-1');
+                shouldPlaySound = true;
+                volume = 0.05; // Lower volume
+            } else if (value > -0.000002) {
+                element.classList.add('alert-large-green');
+            } else if (value > 0) {
+                element.classList.add('alert-positive');
+            } else {
+                element.classList.add('alert-negative');
+            }
         }
-    
-        // Trigger sound only for positive buy alerts
-        if (shouldPlaySound && audioEnabled && element.parentElement.id === 'kbbb-buy-alert') {
-            playAlertSound();
+
+        if (shouldPlaySound && audioEnabled) {
+            playAlertSound(volume);
         }
     }
-
 
     // Initialization
     (function init() {
