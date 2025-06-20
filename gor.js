@@ -1,4 +1,4 @@
-const kbbb = (() => {
+const gor = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -6,7 +6,7 @@ const kbbb = (() => {
     // Audio initialization
     function handleAudioInitialization() {
         enableButton = document.createElement('button');
-        enableButton.id = 'kbbb-audio-enable-btn';
+        enableButton.id = 'gor-audio-enable-btn';
         enableButton.innerHTML = '🔇 Enable Alert Sounds';
         enableButton.style.cssText = `
             position: absolute;
@@ -55,7 +55,7 @@ const kbbb = (() => {
             }
         });
 
-        const section = document.getElementById('kbbb-buy-alert').closest('.token-section');
+        const section = document.getElementById('gor-buy-alert').closest('.token-section');
         section.appendChild(enableButton);
     }
 
@@ -112,53 +112,53 @@ const kbbb = (() => {
     async function fetchMexcPrice() {
         try {
             const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/KBBB_USDT';
+            const apiUrl = 'https://contract.mexc.com/api/v1/contract/depth/GOR_USDT';
             const response = await fetch(proxyUrl + apiUrl);
             const data = await response.json();
             
-            const calculateBidPrice = (bids, targetKBBB) => {
-                let totalKBBB = 0;
+            const calculateBidPrice = (bids, targetGOR) => {
+                let totalGOR = 0;
                 let totalUSDT = 0;
                 
                 for (const [priceStr, usdtAvailableStr] of bids) {
                     const price = parseFloat(priceStr);
                     const usdtAvailable = parseFloat(usdtAvailableStr);
-                    const kbbbAvailable = usdtAvailable / price;
-                    const remaining = targetKBBB - totalKBBB;
-                    const fillAmount = Math.min(remaining, kbbbAvailable);
+                    const gorAvailable = usdtAvailable / price;
+                    const remaining = targetGOR - totalGOR;
+                    const fillAmount = Math.min(remaining, gorAvailable);
                     
                     totalUSDT += fillAmount * price;
-                    totalKBBB += fillAmount;
+                    totalGOR += fillAmount;
                     
-                    if (totalKBBB >= targetKBBB) break;
+                    if (totalGOR >= targetGOR) break;
                 }
-                if (totalKBBB < targetKBBB) throw new Error('Insufficient bid liquidity');
-                return totalUSDT / targetKBBB;
+                if (totalGOR < targetGOR) throw new Error('Insufficient bid liquidity');
+                return totalUSDT / targetGOR;
             };
 
-            const calculateAskPrice = (asks, targetKBBB) => {
-                let totalKBBB = 0;
+            const calculateAskPrice = (asks, targetGOR) => {
+                let totalGOR = 0;
                 let totalUSDT = 0;
                 
                 for (const [priceStr, usdtAvailableStr] of asks) {
                     const price = parseFloat(priceStr);
                     const usdtAvailable = parseFloat(usdtAvailableStr);
-                    const kbbbAvailable = usdtAvailable / price;
-                    const remaining = targetKBBB - totalKBBB;
-                    const fillAmount = Math.min(remaining, kbbbAvailable);
+                    const gorAvailable = usdtAvailable / price;
+                    const remaining = targetGOR - totalGOR;
+                    const fillAmount = Math.min(remaining, gorAvailable);
                     
                     totalUSDT += fillAmount * price;
-                    totalKBBB += fillAmount;
+                    totalGOR += fillAmount;
                     
-                    if (totalKBBB >= targetKBBB) break;
+                    if (totalGOR >= targetGOR) break;
                 }
-                if (totalKBBB < targetKBBB) throw new Error('Insufficient ask liquidity');
-                return totalUSDT / targetKBBB;
+                if (totalGOR < targetGOR) throw new Error('Insufficient ask liquidity');
+                return totalUSDT / targetGOR;
             };
 
-            const targetKBBB = 676498; // Matches JUP's sell amount
-            const bidPrice = calculateBidPrice(data.data.bids, targetKBBB);
-            const askPrice = calculateAskPrice(data.data.asks, targetKBBB);
+            const targetGOR = 5998; // Matches JUP's sell amount
+            const bidPrice = calculateBidPrice(data.data.bids, targetGOR);
+            const askPrice = calculateAskPrice(data.data.asks, targetGOR);
 
             return {
                 bid: bidPrice,
@@ -173,24 +173,24 @@ const kbbb = (() => {
     // JUP price calculation
     async function fetchJupPrice() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintkbbb = 'npB9cxTzwUiGt7jk2dXZa52xZve8SgVD6Et9Bpipump';
+        const outputMintgor = '71Jvq4Epe2FCJ7JFSF7jLXdNk1Wy4Bhqd9iL6bEFELvg';
     
-        const [kbbbAmount, usdcAmount] = await Promise.all([
-            fetchJupSwapPrice(inputMintUSDC, outputMintkbbb, 298 * 1e6, 6),
-            fetchJupSwapPrice(outputMintkbbb, inputMintUSDC, 676498 * 1e6, 6)
+        const [gorAmount, usdcAmount] = await Promise.all([
+            fetchJupSwapPrice(inputMintUSDC, outputMintgor, 298 * 1e6, 6),
+            fetchJupSwapPrice(outputMintgor, inputMintUSDC, 5998 * 1e6, 6)
         ]);
     
         return {
-            buyPrice: kbbbAmount ? 298 / kbbbAmount : null,
-            sellPrice: usdcAmount ? usdcAmount / 676498 : null
+            buyPrice: gorAmount ? 298 / gorAmount : null,
+            sellPrice: usdcAmount ? usdcAmount / 5998 : null
         };
     }
 
     // Alert update
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('kbbb-buy-alert'),
-            sell: document.getElementById('kbbb-sell-alert')
+            buy: document.getElementById('gor-buy-alert'),
+            sell: document.getElementById('gor-sell-alert')
         };
 
         try {
@@ -205,8 +205,8 @@ const kbbb = (() => {
             }
 
             // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(7);
+            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
+            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(5);
 
             // Format prices
             const jupBuy = formatPrice(jupData.buyPrice);
@@ -243,15 +243,15 @@ const kbbb = (() => {
 
         if (isBuy) {
             // Buy alert conditions
-            if (value > 0.00001) {
+            if (value > 0.004) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.000006) {
+            } else if (value > 0.002) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.000003) {
+            } else if (value > 0.001) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -260,15 +260,15 @@ const kbbb = (() => {
             }
         } else {
             // Sell alert conditions
-            if (value > 0.000004) {
+            if (value > 0.004) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.000002) {
+            } else if (value > 0.002) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.0000001) {
+            } else if (value > 0.001) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -285,7 +285,7 @@ const kbbb = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4300);
+        setInterval(updateAlerts, 9800);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
