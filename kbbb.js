@@ -285,7 +285,7 @@ const kbbb = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 5300);
+        setInterval(updateAlerts, 5700);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
