@@ -285,7 +285,7 @@ const gor = (() => {
     // Initialization
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 9800);
+        setInterval(updateAlerts, 5300);
         setTimeout(() => {
             if (!audioEnabled && !enableButton) handleAudioInitialization();
         }, 5000);
