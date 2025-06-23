@@ -216,30 +216,30 @@ const BOMB = (() => {
 
         if (isBuyAlert) {
             // Buy alert conditions
-            if (value > 0.00003) {
+            if (value > 0.00002) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.00001) {
+            } else if (value > 0.0000) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.0000001) {
+            } else if (value > -0.00001) {
                 element.classList.add('alert-large-green');
             } else {
                 element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
             }
         } else {
             // Sell alert conditions
-            if (value > 0.00018) {
+            if (value > 0.00015) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.00012) {
+            } else if (value > 0.0001) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.00006) {
+            } else if (value > 0.00005) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');

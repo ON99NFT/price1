@@ -243,15 +243,15 @@ const gor = (() => {
 
         if (isBuy) {
             // Buy alert conditions
-            if (value > 0.004) {
+            if (value > 0.0005) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.002) {
+            } else if (value > 0.0003) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.001) {
+            } else if (value > 0.0001) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -260,15 +260,15 @@ const gor = (() => {
             }
         } else {
             // Sell alert conditions
-            if (value > 0.004) {
+            if (value > 0.0006) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.002) {
+            } else if (value > 0.0003) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.001) {
+            } else if (value > 0.0001) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
