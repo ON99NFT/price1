@@ -243,15 +243,15 @@ const kbbb = (() => {
 
         if (isBuy) {
             // Buy alert conditions
-            if (value > 0.000009) {
+            if (value > 0.000015) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.000006) {
+            } else if (value > 0.00001) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.000003) {
+            } else if (value > 0.000005) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -260,15 +260,15 @@ const kbbb = (() => {
             }
         } else {
             // Sell alert conditions
-            if (value > 0.000006) {
+            if (value > 0.000015) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.15; // Normal volume
-            } else if (value > 0.000004) {
+            } else if (value > 0.00001) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.000002) {
+            } else if (value > 0.000005) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');

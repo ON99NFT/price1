@@ -216,30 +216,30 @@ const NEWT = (() => {
 
         if (isBuyAlert) {
             // Buy alert conditions
-            if (value > 0.03) {
+            if (value > 0.002) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.02) {
+            } else if (value > 0.0002) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.01) {
+            } else if (value > 0.0001) {
                 element.classList.add('alert-large-green');
             } else {
                 element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
             }
         } else {
             // Sell alert conditions
-            if (value > 0.03) {
+            if (value > 0.009) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.02) {
+            } else if (value > 0.006) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.01) {
+            } else if (value > 0.003) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
