@@ -117,69 +117,94 @@ const NEWTM = (() => {
         }
     }
 
-    // Fetch MEXC spot prices
-    async function fetchMexcSpotPrice() {
+// Updated spot price function using order book
+async function fetchMexcSpotPrice() {
+    try {
+        // Direct API call for spot order book
+        const response = await fetch('https://api.mexc.com/api/v3/depth?symbol=NEWTUSDT&limit=5', {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        
+        // Extract best bid and ask from order book
+        const bestBid = data.bids?.[0]?.[0]; // Highest bid price
+        const bestAsk = data.asks?.[0]?.[0]; // Lowest ask price
+        
+        if (!bestBid || !bestAsk) throw new Error('Invalid MEXC Spot order book');
+        
+        return {
+            bid: parseFloat(bestBid),
+            ask: parseFloat(bestAsk),
+            mid: (parseFloat(bestBid) + parseFloat(bestAsk)) / 2 // Mid price for reference
+        };
+    } catch (error) {
+        console.error('MEXC Spot Error:', error);
+        // Fallback to proxy if needed
         try {
-            const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://www.mexc.com/open/api/v2/market/ticker?symbol=NEWT_USDT');
-            const data = await response.json();
-            
-            if (!data?.data?.[0]?.last) throw new Error('Invalid MEXC Spot response');
-            
-            return parseFloat(data.data[0].last);
-        } catch (error) {
-            console.error('MEXC Spot Error:', error);
+            const proxyResponse = await fetch('https://api.codetabs.com/v1/proxy/?quest=https://api.mexc.com/api/v3/depth?symbol=NEWTUSDT&limit=5');
+            const proxyData = await proxyResponse.json();
+            const bestBid = proxyData.bids?.[0]?.[0];
+            const bestAsk = proxyData.asks?.[0]?.[0];
+            if (!bestBid || !bestAsk) throw new Error('Fallback proxy spot order book invalid');
+            return {
+                bid: parseFloat(bestBid),
+                ask: parseFloat(bestAsk),
+                mid: (parseFloat(bestBid) + parseFloat(bestAsk)) / 2
+            };
+        } catch (fallbackError) {
+            console.error('Fallback proxy failed:', fallbackError);
             return null;
         }
     }
+}
 
-    // Alert calculation and display
-    async function updateAlerts() {
-        const elements = {
-            buy: document.getElementById('newtm-buy-alert'),
-            sell: document.getElementById('newtm-sell-alert')
-        };
+async function updateAlerts() {
+    const elements = {
+        buy: document.getElementById('newtm-buy-alert'),
+        sell: document.getElementById('newtm-sell-alert')
+    };
 
-        try {
-            const [contractData, spotPrice] = await Promise.all([
-                fetchMexcContractPrice(),
-                fetchMexcSpotPrice()
-            ]);
+    try {
+        const [contractData, spotData] = await Promise.all([
+            fetchMexcContractPrice(),
+            fetchMexcSpotPrice()
+        ]);
 
-            if (!contractData || spotPrice === null) {
-                elements.buy.textContent = elements.sell.textContent = 'Error';
-                return;
-            }
-
-            // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-
-            // Format prices
-            const spot = formatPrice(spotPrice);
-            const contractBid = formatPrice(contractData.bid);
-            const contractAsk = formatPrice(contractData.ask);
-
-            // Calculate differences
-            const buyDiff = contractData.bid - spotPrice;
-            const sellDiff = spotPrice - contractData.ask;
-
-            // Update display with price comparison
-            elements.buy.innerHTML = `Spot: $${spot} - Contract: $${contractBid} `
-                + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
-            
-            elements.sell.innerHTML = `Spot: $${spot} - Contract: $${contractAsk} `
-                + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
-
-            // Apply styles to difference spans
-            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
-            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
-            
-        } catch (error) {
-            console.error('Update Error:', error);
-            elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
+        if (!contractData || !spotData) {
+            elements.buy.textContent = elements.sell.textContent = 'Error';
+            return;
         }
+
+        // Formatting functions
+        const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+        const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
+
+        // Calculate differences - now using actual bid/ask prices
+        const buyDiff = contractData.bid - spotData.ask; // Can buy on spot at ask, sell on contract at bid
+        const sellDiff = spotData.bid - contractData.ask; // Can buy on contract at ask, sell on spot at bid
+
+        // Update display with accurate price comparison
+        elements.buy.innerHTML = `Spot Ask: $${formatPrice(spotData.ask)} - Contract Bid: $${formatPrice(contractData.bid)} `
+            + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
+        
+        elements.sell.innerHTML = `Spot Bid: $${formatPrice(spotData.bid)} - Contract Ask: $${formatPrice(contractData.ask)} `
+            + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
+
+        // Apply styles to difference spans
+        applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
+        applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
+        
+    } catch (error) {
+        console.error('Update Error:', error);
+        elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
     }
+}
 
     // Alert styling function
     function applyAlertStyles(element, value) {
@@ -190,15 +215,15 @@ const NEWTM = (() => {
 
         if (isBuyAlert) {
             // Buy alert conditions
-            if (value > 0.03) {
+            if (value > 0.04) {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.015) {
+            } else if (value > 0.03) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.01) {
+            } else if (value > 0.02) {
                 element.classList.add('alert-large-green');
             } else {
                 element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
@@ -209,11 +234,11 @@ const NEWTM = (() => {
                 element.classList.add('alert-flashing-2');
                 shouldPlaySound = true;
                 volume = 0.2; // Normal volume
-            } else if (value > 0.005) {
+            } else if (value > -0.01) {
                 element.classList.add('alert-flashing-1');
                 shouldPlaySound = true;
                 volume = 0.05; // Lower volume
-            } else if (value > 0.0001) {
+            } else if (value > -0.015) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
