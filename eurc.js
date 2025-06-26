@@ -180,7 +180,7 @@ async function fetchForexPrice() {
             // Formatting helper
             const format = (val) => {
                 if (val === null || isNaN(val)) return 'N/A';
-                return val.toFixed(5);
+                return val.toFixed(4);
             };
             
             // Update Kyber vs Contract
