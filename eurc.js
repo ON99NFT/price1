@@ -3,38 +3,17 @@ const EURC = (() => {
     let audioEnabled = false;
     let enableButton = null;
   
-    // Create and manage audio enable button
-    function handleAudioInitialization() {
-        // Create floating enable button
-        enableButton = document.createElement('button');
-        enableButton.id = 'eurc-audio-enable-btn';
-        enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
-        enableButton.style.cssText = `
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 5000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-        `;
-  
-        // Add hover effects
-        enableButton.addEventListener('mouseover', () => {
-            enableButton.style.transform = 'scale(1.05)';
-            enableButton.style.background = '#45a049';
-        });
+    // Create audio enable button
+    function createAudioEnableButton(tokenId) {
+        // Create container for the button
+        const btnContainer = document.createElement('div');
+        btnContainer.className = 'audio-btn-container';
         
-        enableButton.addEventListener('mouseout', () => {
-            enableButton.style.transform = 'scale(1)';
-            enableButton.style.background = '#4CAF50';
-        });
-  
+        // Create the button
+        const enableButton = document.createElement('button');
+        enableButton.className = 'token-audio-btn';
+        enableButton.innerHTML = '<span class="audio-icon">🔇</span> Enable';
+        
         // Audio enable handler
         enableButton.addEventListener('click', async () => {
             try {
@@ -45,55 +24,73 @@ const EURC = (() => {
                     await audioContext.resume();
                 }
                 audioEnabled = true;
-                enableButton.innerHTML = '🔊 Sounds Enabled!';
+                enableButton.innerHTML = '<span class="audio-icon">🔊</span> On!';
+                
+                // Change icon and add success styling
+                enableButton.style.background = '#2E7D32';
+                
                 setTimeout(() => {
-                    enableButton.style.opacity = '0';
-                    setTimeout(() => enableButton.remove(), 300);
+                    btnContainer.style.opacity = '0';
+                    setTimeout(() => {
+                        if (btnContainer.parentNode) {
+                            btnContainer.parentNode.removeChild(btnContainer);
+                        }
+                    }, 300);
                 }, 2000);
             } catch (error) {
                 console.error('Audio initialization failed:', error);
-                enableButton.innerHTML = '❌ Error Enabling Sounds';
-                enableButton.style.background = '#f44336';
+                enableButton.innerHTML = '<span class="audio-icon">❌</span> Error';
+                enableButton.style.background = '#c62828';
             }
         });
-  
-        const section = document.getElementById('eurc-buy-alert').closest('.token-section');
-        section.appendChild(enableButton);
-    }
-  
-    // Modified playSystemAlert function
-    function playSystemAlert() {
-        if (!audioEnabled || !audioContext) return;
-    
-        try {
-            const primaryOsc = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            
-            primaryOsc.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-    
-            // Pleasant chime configuration
-            primaryOsc.type = 'sine';
-            primaryOsc.frequency.setValueAtTime(784.0, audioContext.currentTime); // G5 note
-            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-            
-            // Create volume envelope
-            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-            
-            primaryOsc.start();
-            primaryOsc.stop(audioContext.currentTime + 0.5);
-        } catch (error) {
-            console.log('Sound playback error:', error);
+
+        // Add button to container
+        btnContainer.appendChild(enableButton);
+        
+        // Add container to token section
+        const section = document.getElementById(`${tokenId}-kyber-buy-alert`)?.closest('.token-section') || 
+                        document.getElementById(`${tokenId}-buy-alert`)?.closest('.token-section');
+        
+        if (section) {
+            section.appendChild(btnContainer);
         }
     }
-  
-    // Fetch MEXC prices
-    async function fetchMexcPrice() {
-        try {
-            const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/EUR_USDT');
-            const data = await response.json();
+
+    // Play system alert
+    async function playSystemAlert(volume = 0.2) {
+        if (!audioEnabled || !audioContext) return;
         
+        try {
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 784; // G5
+            gainNode.gain.value = volume;
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
+        } catch (error) {
+            console.error('Sound playback failed:', error);
+        }
+    }
+
+    // Fetch MEXC contract prices
+    async function fetchMexcContractPrice() {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const url = 'https://contract.mexc.com/api/v1/contract/depth/EUR_USDT';
+        
+        try {
+            const response = await fetch(proxyUrl + url);
+            const data = await response.json();
+            
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
             
             return {
@@ -101,151 +98,185 @@ const EURC = (() => {
                 ask: parseFloat(data.data.asks[0][0])
             };
         } catch (error) {
-            console.error('MEXC Error:', error);
+            console.error('MEXC Contract Error:', error);
             return null;
         }
     }
-  
+
+
+// Fetch Forex EUR/USD rates with real-time bid/ask
+async function fetchForexPrice() {
+    const url = 'https://marketdata.tradermade.com/api/v1/live?currency=EURUSD&api_key=NOQUnfnweVLykBStOCF7';
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data?.quotes?.[0]?.bid && data?.quotes?.[0]?.ask) {
+            return {
+                bid: parseFloat(data.quotes[0].bid),
+                ask: parseFloat(data.quotes[0].ask)
+            };
+        } else {
+            throw new Error('Invalid Forex response');
+        }
+    } catch (error) {
+        console.error('Forex Error:', error);
+        return {
+            bid: 1.1686,
+            ask: 1.1687
+        };
+    }
+}
+
     // Fetch KyberSwap prices
-    async function fetchKyberSwapPrice(inputToken, outputToken, amount) {
-        try {
-            const amountIn = amount.toLocaleString('fullwide', { useGrouping: false });
-            const response = await fetch(
-                `https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}&excludedSources=dexalot`
-            );
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            
-            return data.data?.routeSummary?.amountOut || data.data?.outAmount;
-        } catch (error) {
-            console.error('KyberSwap Error:', error);
-            return null;
-        }
-    }
-  
-    // Corrected price calculation
     async function fetchKyberPrice() {
         const addresses = {
             USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
             EURC: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42'
         };
-  
+
         try {
-            const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDC, addresses.EURC, 26998 * 1e6),
-                fetchKyberSwapPrice(addresses.EURC, addresses.USDC, 30698 * 1e6)
+            // Format amounts properly without scientific notation
+            const buyAmount = "20333000000"; // 20333 USDC with 18 decimals
+            const sellAmount = "17500000000"; // 17500 EURC with 18 decimals
+            
+            const [buyResponse, sellResponse] = await Promise.all([
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}`),
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.EURC}&tokenOut=${addresses.USDC}&amountIn=${sellAmount}`)
             ]);
-  
+
+            const buyData = await buyResponse.json();
+            const sellData = await sellResponse.json();
+            
             return {
-                buyPrice: buyAmount ? 26998 / (buyAmount / 1e6) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e6) / 30698 : null
+                buyPrice: buyData.data?.routeSummary?.amountOut ? 
+                    20333 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e6) : null,
+                sellPrice: sellData.data?.routeSummary?.amountOut ? 
+                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e6) / 17500 : null
             };
         } catch (error) {
-            console.error('Price Calculation Error:', error);
-            return null;
+            console.error('Kyber Error:', error);
+            return { buyPrice: null, sellPrice: null };
         }
     }
-  
-    // Updated alert calculation and display
+
+    // Update token alerts
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('eurc-buy-alert'),
-            sell: document.getElementById('eurc-sell-alert')
+            kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
+            kyberSell: document.getElementById('eurc-kyber-sell-alert'),
+            mexcBuy: document.getElementById('eurc-mexc-buy-alert'),
+            mexcSell: document.getElementById('eurc-mexc-sell-alert')
         };
-  
+
         try {
-            const [mexcData, kyberData] = await Promise.all([
-                fetchMexcPrice(),
-                fetchKyberPrice()
+            const [kyberData, contractData, forexData] = await Promise.all([
+                fetchKyberPrice(),
+                fetchMexcContractPrice(),
+                fetchForexPrice()
             ]);
-  
-            if (!mexcData || !kyberData) {
-                elements.buy.textContent = elements.sell.textContent = 'Error';
-                return;
-            }
-  
-            // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-  
-            // Format prices
-            const kyberBuy = formatPrice(kyberData.buyPrice);
-            const kyberSell = formatPrice(kyberData.sellPrice);
-            const mexcBid = formatPrice(mexcData.bid);
-            const mexcAsk = formatPrice(mexcData.ask);
-  
-            // Calculate differences
-            const buyDiff = mexcData.bid - kyberData.buyPrice;
-            const sellDiff = kyberData.sellPrice - mexcData.ask;
-  
-            // Update display with price comparison
-            elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
-                + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
-            elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
-                + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
-  
-            // Apply styles to difference spans
-            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
-            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
+            // Formatting helper
+            const format = (val) => {
+                if (val === null || isNaN(val)) return 'N/A';
+                return val.toFixed(5);
+            };
+            
+            // Update Kyber vs Contract
+            if (kyberData && contractData) {
+                const kyberBuyDiff = contractData.bid - kyberData.buyPrice;
+                const kyberSellDiff = kyberData.sellPrice - contractData.ask;
+                
+                elements.kyberBuy.innerHTML = 
+                    `K: $${format(kyberData.buyPrice)} | M: $${format(contractData.bid)} ` +
+                    `<span class="difference">$${format(kyberBuyDiff)}</span>`;
+                    
+                elements.kyberSell.innerHTML = 
+                    `K: $${format(kyberData.sellPrice)} | M: $${format(contractData.ask)} ` +
+                    `<span class="difference">$${format(kyberSellDiff)}</span>`;
+                
+                applyAlertStyles(elements.kyberBuy.querySelector('.difference'), kyberBuyDiff, true);
+                applyAlertStyles(elements.kyberSell.querySelector('.difference'), kyberSellDiff, false);
+            }
+            
+            // Update Contract vs Forex
+            if (contractData && forexData) {
+                const contractBuyDiff = contractData.bid - forexData.ask;
+                const contractSellDiff = forexData.bid - contractData.ask;
+                
+                elements.mexcBuy.innerHTML = 
+                    `C: $${format(contractData.bid)} | FX: $${format(forexData.ask)} ` +
+                    `<span class="difference">$${format(contractBuyDiff)}</span>`;
+                    
+                elements.mexcSell.innerHTML = 
+                    `C: $${format(contractData.ask)} | FX: $${format(forexData.bid)} ` +
+                    `<span class="difference">$${format(contractSellDiff)}</span>`;
+                
+                applyAlertStyles(elements.mexcBuy.querySelector('.difference'), contractBuyDiff, true);
+                applyAlertStyles(elements.mexcSell.querySelector('.difference'), contractSellDiff, false);
+            }
             
         } catch (error) {
             console.error('Update Error:', error);
-            elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
+            Object.values(elements).forEach(el => {
+                if (el) el.textContent = 'Error';
+            });
         }
     }
-  
-    function applyAlertStyles(element, value) {
-      element.className = '';
-      let shouldPlaySound = false;
-      const isBuyAlert = element.parentElement.id === 'eurc-buy-alert';
-  
-      if (isBuyAlert) {
-          // New buy alert conditions
-          if (value >= 0.0005) {
-              element.classList.add('alert-large-green');
-            } else if (value >= 0.0001) {
-              element.classList.add('alert-flashing-2');
-              shouldPlaySound = true;
-          } else if (value >= -0.0003) {
-              element.classList.add('alert-flashing-1');
-              shouldPlaySound = true;
-          } else if (value >= -0.0005) {
-              element.classList.add('alert-large-green');
-          } else {
-              element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
-          }
-      } else {
-          // Original sell alert conditions
-          if (value > 0.0018) {
-              element.classList.add('alert-flashing-2');
-              shouldPlaySound = true;
-          } else if (value > 0.0014) {
-              element.classList.add('alert-flashing-1');
-              shouldPlaySound = true;
-          } else if (value > 0.001) {
-              element.classList.add('alert-large-green');
-          } else if (value > 0) {
-              element.classList.add('alert-positive');
-          } else {
-              element.classList.add('alert-negative');
-          }
-      }
-  
-      if (shouldPlaySound && audioEnabled && isBuyAlert) {
-          playSystemAlert();
-      }
-  }
-  
-    // Initialize application
+
+    function applyAlertStyles(element, value, isBuy) {
+        if (!element) return;
+        
+        // Clear classes and previous icons
+        element.className = 'difference';
+        const existingIcon = element.querySelector('.direction-icon');
+        if (existingIcon) existingIcon.remove();
+        
+        let shouldPlaySound = false;
+        let volume = 0.2;
+        
+        // Add direction indicator
+        const direction = document.createElement('span');
+        direction.className = 'direction-icon';
+        direction.textContent = isBuy ? ' ↑' : ' ↓';
+        element.appendChild(direction);
+    
+        // Determine alert level - new eye-friendly version
+        if (value > 0.0015) {
+            element.classList.add('alert-high-positive');
+            shouldPlaySound = true;
+        } else if (value > 0.0011) {
+            element.classList.add('alert-medium-positive');
+            shouldPlaySound = true;
+            volume = 0.1;
+        } else if (value > 0.0006) {
+            element.classList.add('alert-large-green');
+        } else if (value > 0) {
+            element.classList.add('alert-positive');
+        } else if (value < 0) {
+            element.classList.add('alert-negative');
+        }
+
+        if (shouldPlaySound && audioEnabled) {
+            playSystemAlert(volume);
+        }
+    }
+
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4400);
+        setInterval(updateAlerts, 3000);
         setTimeout(() => {
-            if (!audioEnabled && !enableButton) handleAudioInitialization();
+            if (!audioEnabled) {
+                const section = document.getElementById('eurc-kyber-buy-alert')?.closest('.token-section') || 
+                                document.getElementById('eurc-buy-alert')?.closest('.token-section');
+                
+                if (section && !section.querySelector('.audio-btn-container')) {
+                    createAudioEnableButton('eurc');
+                }
+            }
         }, 5000);
     })();
   
     return { updateAlerts };
-  })();
+})();

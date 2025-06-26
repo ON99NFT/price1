@@ -3,108 +3,94 @@ const H = (() => {
     let audioEnabled = false;
     let enableButton = null;
   
-    // Create and manage audio enable button
-    function handleAudioInitialization() {
-        // Create floating enable button
-        enableButton = document.createElement('button');
-        enableButton.id = 'h-audio-enable-btn';
-        enableButton.innerHTML = '🔇 Click to Enable Alert Sounds';
-        enableButton.style.cssText = `
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            z-index: 5000;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            pointer-events: auto !important;
-        `;
-  
-        // Add hover effects
-        enableButton.addEventListener('mouseover', () => {
-            enableButton.style.transform = 'scale(1.05)';
-            enableButton.style.background = '#45a049';
-        });
-        
-        enableButton.addEventListener('mouseout', () => {
-            enableButton.style.transform = 'scale(1)';
-            enableButton.style.background = '#4CAF50';
-        });
-  
-        // Audio enable handler
-        enableButton.addEventListener('click', async () => {
-            try {
-                if (!audioContext) {
-                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                }
-                if (audioContext.state === 'suspended') {
-                    await audioContext.resume();
-                }
-                audioEnabled = true;
-                enableButton.innerHTML = '🔊 Sounds Enabled!';
-                setTimeout(() => {
-                    enableButton.style.opacity = '0';
-                    setTimeout(() => enableButton.remove(), 300);
-                }, 2000);
-            } catch (error) {
-                console.error('Audio initialization failed:', error);
-                enableButton.innerHTML = '❌ Error Enabling Sounds';
-                enableButton.style.background = '#f44336';
+// Create audio enable button
+function createAudioEnableButton(tokenId) {
+    // Create container for the button
+    const btnContainer = document.createElement('div');
+    btnContainer.className = 'audio-btn-container';
+    
+    // Create the button
+    const enableButton = document.createElement('button');
+    enableButton.className = 'token-audio-btn';
+    enableButton.innerHTML = '<span class="audio-icon">🔇</span> Enable';
+    
+    // Audio enable handler
+    enableButton.addEventListener('click', async () => {
+        try {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
             }
-        });
-  
-        const section = document.getElementById('h-buy-alert').closest('.token-section');
-        section.appendChild(enableButton);
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            audioEnabled = true;
+            enableButton.innerHTML = '<span class="audio-icon">🔊</span> On!';
+            
+            // Change icon and add success styling
+            enableButton.style.background = '#2E7D32';
+            
+            setTimeout(() => {
+                btnContainer.style.opacity = '0';
+                setTimeout(() => {
+                    if (btnContainer.parentNode) {
+                        btnContainer.parentNode.removeChild(btnContainer);
+                    }
+                }, 300);
+            }, 2000);
+        } catch (error) {
+            console.error('Audio initialization failed:', error);
+            enableButton.innerHTML = '<span class="audio-icon">❌</span> Error';
+            enableButton.style.background = '#c62828';
+        }
+    });
+
+    // Add button to container
+    btnContainer.appendChild(enableButton);
+    
+    // Add container to token section
+    const section = document.getElementById(`${tokenId}-kyber-buy-alert`)?.closest('.token-section') || 
+                    document.getElementById(`${tokenId}-buy-alert`)?.closest('.token-section');
+    
+    if (section) {
+        section.appendChild(btnContainer);
     }
-  
-    // Audio playback function with volume control
+}
+
+    // Play system alert
     async function playSystemAlert(volume = 0.2) {
         if (!audioEnabled || !audioContext) return;
         
         try {
-            // Check context state
             if (audioContext.state === 'suspended') {
                 await audioContext.resume();
             }
             
-            const primaryOsc = audioContext.createOscillator();
+            const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
             
-            primaryOsc.connect(gainNode);
+            oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-    
-            // Pleasant chime configuration
-            primaryOsc.type = 'sine';
-            primaryOsc.frequency.setValueAtTime(784.0, audioContext.currentTime); // G5 note
-            
-            // Apply volume parameter - SIMPLIFIED APPROACH
+
+            oscillator.type = 'sine';
+            oscillator.frequency.value = 784; // G5
             gainNode.gain.value = volume;
             
-            primaryOsc.start();
-            primaryOsc.stop(audioContext.currentTime + 0.2); // Short beep
-            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.2);
         } catch (error) {
             console.error('Sound playback failed:', error);
-            // Show error on button if exists
-            if (enableButton) {
-                enableButton.innerHTML = '❌ Sound Error';
-                enableButton.style.background = '#f44336';
-            }
         }
     }
-  
-    // Fetch MEXC prices
-    async function fetchMexcPrice() {
-        try {
-            const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-            const response = await fetch(proxyUrl + 'https://contract.mexc.com/api/v1/contract/depth/H_USDT');
-            const data = await response.json();
+
+    // Fetch MEXC contract prices
+    async function fetchMexcContractPrice() {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const url = 'https://contract.mexc.com/api/v1/contract/depth/H_USDT';
         
+        try {
+            const response = await fetch(proxyUrl + url);
+            const data = await response.json();
+            
             if (!data?.data?.bids?.[0]?.[0]) throw new Error('Invalid MEXC response');
             
             return {
@@ -112,30 +98,36 @@ const H = (() => {
                 ask: parseFloat(data.data.asks[0][0])
             };
         } catch (error) {
-            console.error('MEXC Error:', error);
-            return null;
-        }
-    }
-  
-    // Fetch KyberSwap prices
-    async function fetchKyberSwapPrice(inputToken, outputToken, amount) {
-        try {
-            const amountIn = amount.toLocaleString('fullwide', { useGrouping: false });
-            const response = await fetch(
-                `https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${inputToken}&tokenOut=${outputToken}&amountIn=${amountIn}`
-            );
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            const data = await response.json();
-            
-            return data.data?.routeSummary?.amountOut || data.data?.outAmount;
-        } catch (error) {
-            console.error('KyberSwap Error:', error);
+            console.error('MEXC Contract Error:', error);
             return null;
         }
     }
 
-    // Price calculation
+    // Fetch MEXC spot prices
+    async function fetchMexcSpotPrice() {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const url = 'https://api.mexc.com/api/v3/depth?symbol=HUSDT&limit=5';
+        
+        try {
+            const response = await fetch(proxyUrl + encodeURIComponent(url));
+            const data = await response.json();
+            
+            const bestBid = data.bids?.[0]?.[0];
+            const bestAsk = data.asks?.[0]?.[0];
+            
+            if (!bestBid || !bestAsk) throw new Error('Invalid spot order book');
+            
+            return {
+                bid: parseFloat(bestBid),
+                ask: parseFloat(bestAsk)
+            };
+        } catch (error) {
+            console.error('MEXC Spot Error:', error);
+            return null;
+        }
+    }
+
+    // Fetch KyberSwap prices
     async function fetchKyberPrice() {
         const addresses = {
             USDT: '0x55d398326f99059fF775485246999027B3197955',
@@ -143,122 +135,146 @@ const H = (() => {
         };
 
         try {
-            const [buyAmount, sellAmount] = await Promise.all([
-                fetchKyberSwapPrice(addresses.USDT, addresses.H, 198 * 1e18),
-                fetchKyberSwapPrice(addresses.H, addresses.USDT, 2798 * 1e18)
+            // Format amounts properly without scientific notation
+            const buyAmount = "198000000000000000000"; // 198 USDT with 18 decimals
+            const sellAmount = "2798000000000000000000"; // 2798 H with 18 decimals
+            
+            const [buyResponse, sellResponse] = await Promise.all([
+                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.USDT}&tokenOut=${addresses.H}&amountIn=${buyAmount}`),
+                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.H}&tokenOut=${addresses.USDT}&amountIn=${sellAmount}`)
             ]);
 
+            const buyData = await buyResponse.json();
+            const sellData = await sellResponse.json();
+            
             return {
-                buyPrice: buyAmount ? 198 / (buyAmount / 1e18) : null,
-                sellPrice: sellAmount ? (sellAmount / 1e18) / 2798 : null
+                buyPrice: buyData.data?.routeSummary?.amountOut ? 
+                    198 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e18) : null,
+                sellPrice: sellData.data?.routeSummary?.amountOut ? 
+                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e18) / 2798 : null
             };
         } catch (error) {
-            console.error('Price Calculation Error:', error);
-            return null;
+            console.error('Kyber Error:', error);
+            return { buyPrice: null, sellPrice: null };
         }
     }
 
-    // Alert calculation and display
+    // Update token alerts
     async function updateAlerts() {
         const elements = {
-            buy: document.getElementById('h-buy-alert'),
-            sell: document.getElementById('h-sell-alert')
+            kyberBuy: document.getElementById('h-kyber-buy-alert'),
+            kyberSell: document.getElementById('h-kyber-sell-alert'),
+            mexcBuy: document.getElementById('h-mexc-buy-alert'),
+            mexcSell: document.getElementById('h-mexc-sell-alert')
         };
 
         try {
-            const [mexcData, kyberData] = await Promise.all([
-                fetchMexcPrice(),
-                fetchKyberPrice()
+            const [kyberData, contractData, spotData] = await Promise.all([
+                fetchKyberPrice(),
+                fetchMexcContractPrice(),
+                fetchMexcSpotPrice()
             ]);
-
-            if (!mexcData || !kyberData) {
-                elements.buy.textContent = elements.sell.textContent = 'Error';
-                return;
-            }
-
-            // Formatting functions
-            const formatPrice = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-            const formatDiff = (val) => isNaN(val) ? 'N/A' : val.toFixed(4);
-
-            // Format prices
-            const kyberBuy = formatPrice(kyberData.buyPrice);
-            const kyberSell = formatPrice(kyberData.sellPrice);
-            const mexcBid = formatPrice(mexcData.bid);
-            const mexcAsk = formatPrice(mexcData.ask);
-
-            // Calculate differences
-            const buyDiff = mexcData.bid - kyberData.buyPrice;
-            const sellDiff = kyberData.sellPrice - mexcData.ask;
-
-            // Update display with price comparison
-            elements.buy.innerHTML = `$${kyberBuy} - $${mexcBid} `
-                + `<span class="difference">$${formatDiff(buyDiff)}</span>`;
             
-            elements.sell.innerHTML = `$${kyberSell} - $${mexcAsk} `
-                + `<span class="difference">$${formatDiff(sellDiff)}</span>`;
-
-            // Apply styles to difference spans
-            applyAlertStyles(elements.buy.querySelector('.difference'), buyDiff);
-            applyAlertStyles(elements.sell.querySelector('.difference'), sellDiff);
+            // Formatting helper
+            const format = (val) => {
+                if (val === null || isNaN(val)) return 'N/A';
+                return val.toFixed(5);
+            };
+            
+            // Update Kyber vs Contract
+            if (kyberData && contractData) {
+                const kyberBuyDiff = contractData.bid - kyberData.buyPrice;
+                const kyberSellDiff = kyberData.sellPrice - contractData.ask;
+                
+                elements.kyberBuy.innerHTML = 
+                    `K: $${format(kyberData.buyPrice)} | M: $${format(contractData.bid)} ` +
+                    `<span class="difference">$${format(kyberBuyDiff)}</span>`;
+                    
+                elements.kyberSell.innerHTML = 
+                    `K: $${format(kyberData.sellPrice)} | M: $${format(contractData.ask)} ` +
+                    `<span class="difference">$${format(kyberSellDiff)}</span>`;
+                
+                applyAlertStyles(elements.kyberBuy.querySelector('.difference'), kyberBuyDiff, true);
+                applyAlertStyles(elements.kyberSell.querySelector('.difference'), kyberSellDiff, false);
+            }
+            
+            // Update Contract vs Spot
+            if (contractData && spotData) {
+                const contractBuyDiff = contractData.bid - spotData.ask;
+                const contractSellDiff = spotData.bid - contractData.ask;
+                
+                elements.mexcBuy.innerHTML = 
+                    `C: $${format(contractData.bid)} | S: $${format(spotData.ask)} ` +
+                    `<span class="difference">$${format(contractBuyDiff)}</span>`;
+                    
+                elements.mexcSell.innerHTML = 
+                    `C: $${format(contractData.ask)} | S: $${format(spotData.bid)} ` +
+                    `<span class="difference">$${format(contractSellDiff)}</span>`;
+                
+                applyAlertStyles(elements.mexcBuy.querySelector('.difference'), contractBuyDiff, true);
+                applyAlertStyles(elements.mexcSell.querySelector('.difference'), contractSellDiff, false);
+            }
             
         } catch (error) {
             console.error('Update Error:', error);
-            elements.buy.innerHTML = elements.sell.innerHTML = 'Error';
+            Object.values(elements).forEach(el => {
+                if (el) el.textContent = 'Error';
+            });
         }
     }
 
-    // Alert styling function
-    function applyAlertStyles(element, value) {
-        element.className = '';
+    function applyAlertStyles(element, value, isBuy) {
+        if (!element) return;
+        
+        // Clear classes and previous icons
+        element.className = 'difference';
+        const existingIcon = element.querySelector('.direction-icon');
+        if (existingIcon) existingIcon.remove();
+        
         let shouldPlaySound = false;
-        let volume = 0.2; // Default volume
-        const isBuyAlert = element.parentElement.id === 'h-buy-alert';
-
-        if (isBuyAlert) {
-            // Buy alert conditions
-            if (value > 0.009) {
-                element.classList.add('alert-flashing-2');
-                shouldPlaySound = true;
-                volume = 0.2; // Normal volume
-            } else if (value > 0.006) {
-                element.classList.add('alert-flashing-1');
-                shouldPlaySound = true;
-                volume = 0.05; // Lower volume
-            } else if (value > 0.003) {
-                element.classList.add('alert-large-green');
-            } else {
-                element.classList.add(value >= 0 ? 'alert-positive' : 'alert-negative');
-            }
-        } else {
-            // Sell alert conditions
-            if (value > 0.009) {
-                element.classList.add('alert-flashing-2');
-                shouldPlaySound = true;
-                volume = 0.2; // Normal volume
-            } else if (value > 0.006) {
-                element.classList.add('alert-flashing-1');
-                shouldPlaySound = true;
-                volume = 0.05; // Lower volume
-            } else if (value > 0.003) {
-                element.classList.add('alert-large-green');
-            } else if (value > 0) {
-                element.classList.add('alert-positive');
-            } else {
-                element.classList.add('alert-negative');
-            }
+        let volume = 0.2;
+        
+        // Add direction indicator
+        const direction = document.createElement('span');
+        direction.className = 'direction-icon';
+        direction.textContent = isBuy ? ' ↑' : ' ↓';
+        element.appendChild(direction);
+    
+        // Determine alert level - new eye-friendly version
+        if (value > 0.0003) {
+            element.classList.add('alert-high-positive');
+            shouldPlaySound = true;
+        } else if (value > 0.0002) {
+            element.classList.add('alert-medium-positive');
+            shouldPlaySound = true;
+            volume = 0.1;
+        } else if (value > 0.0001) {
+            element.classList.add('alert-large-green');
+        } else if (value > 0) {
+            element.classList.add('alert-positive');
+        } else if (value < 0) {
+            element.classList.add('alert-negative');
         }
-
+    
         if (shouldPlaySound && audioEnabled) {
             playSystemAlert(volume);
         }
     }
 
-    // Initialize application
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3100);
+        setInterval(updateAlerts, 3000);
         setTimeout(() => {
-            if (!audioEnabled && !enableButton) handleAudioInitialization();
+            if (!audioEnabled) {
+                // Check only within H's token section
+                const section = document.getElementById('h-kyber-buy-alert')?.closest('.token-section') || 
+                                document.getElementById('h-buy-alert')?.closest('.token-section');
+                
+                // Create button only if section exists and has no audio button
+                if (section && !section.querySelector('.audio-btn-container')) {
+                    createAudioEnableButton('h');
+                }
+            }
         }, 5000);
     })();
   
