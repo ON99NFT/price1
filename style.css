@@ -269,3 +269,14 @@ body {
 .token-audio-btn:active {
   transform: scale(0.98);
 }
+
+/* Add to your existing CSS */
+.error {
+  color: #ff6b6b;
+  font-size: 0.9em;
+  margin-top: 5px;
+  font-weight: bold;
+  background: rgba(255, 0, 0, 0.1);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
