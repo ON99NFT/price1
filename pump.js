@@ -266,16 +266,16 @@ function fetchHyperliquidFuturePrice() {
         
         // Different thresholds for buy and sell opportunities
         if (type === 'buy') {
-            if (value > 0.0002) {
+            if (value > 0.00024) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 1046; // Higher pitch for buy (C6)
-            } else if (value > 0.00015) {
+            } else if (value > 0.00019) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 880; // A5
-            } else if (value > 0.0001) {
+            } else if (value > 0.00014) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
@@ -283,16 +283,16 @@ function fetchHyperliquidFuturePrice() {
                 element.classList.add('alert-negative');
             }
         } else if (type === 'sell') {
-            if (value > 0) {
+            if (value > -0.00006) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 523; // Lower pitch for sell (C5)
-            } else if (value > -0.00006) {
+            } else if (value > -0.000011) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 587; // D5
-            } else if (value > -0.00009) {
+            } else if (value > -0.000016) {
                 element.classList.add('alert-large-green');
             } else if (value > 0) {
                 element.classList.add('alert-positive');
