@@ -266,38 +266,30 @@ function fetchHyperliquidFuturePrice() {
         
         // Different thresholds for buy and sell opportunities
         if (type === 'buy') {
-            if (value > 0.00029) {
+            if (value > 0.0003) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 1046; // Higher pitch for buy (C6)
-            } else if (value > 0.00021) {
+            } else if (value > 0.00025) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 880; // A5
-            } else if (value > 0.00016) {
+            } else if (value > 0.0002) {
                 element.classList.add('alert-large-green');
-            } else if (value > 0) {
-                element.classList.add('alert-positive');
-            } else if (value < 0) {
-                element.classList.add('alert-negative');
             }
         } else if (type === 'sell') {
-            if (value > -0.00006) {
+            if (value > -0.00005) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 523; // Lower pitch for sell (C5)
-            } else if (value > -0.000011) {
+            } else if (value > -0.0001) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 587; // D5
-            } else if (value > -0.000016) {
+            } else if (value > -0.00015) {
                 element.classList.add('alert-large-green');
-            } else if (value > 0) {
-                element.classList.add('alert-positive');
-            } else if (value < 0) {
-                element.classList.add('alert-negative');
             }
         }
 
