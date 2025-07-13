@@ -214,16 +214,16 @@ function fetchHyperliquidFuturePrice() {
             };
             
             if (mexcData && hyperData) {
-                const buyOpportunity = hyperData.bid - mexcData.ask;
-                const sellOpportunity = mexcData.bid - hyperData.ask;
+                const buyOpportunity = mexcData.bid - hyperData.ask;
+                const sellOpportunity = hyperData.bid - mexcData.ask;
                 
                 elements.buyAlert.innerHTML = 
-                    `H: $${format(hyperData.bid)} | M: $${format(mexcData.ask)} ` +
-                    `<span class="difference">$${format(buyOpportunity)}</span>`;
-                    
+                `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
+                `<span class="difference">$${format(buyOpportunity)}</span>`;
+                
                 elements.sellAlert.innerHTML = 
-                    `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
-                    `<span class="difference">$${format(sellOpportunity)}</span>`;
+                `H: $${format(hyperData.bid)} | M: $${format(mexcData.ask)} ` +
+                `<span class="difference">$${format(sellOpportunity)}</span>`;
                 
                 applyAlertStyles(
                     elements.buyAlert.querySelector('.difference'), 
@@ -266,29 +266,29 @@ function fetchHyperliquidFuturePrice() {
         
         // Different thresholds for buy and sell opportunities
         if (type === 'buy') {
-            if (value > 0.00012) {
+            if (value > 0.00003) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 1046; // Higher pitch for buy (C6)
-            } else if (value > 0.00008) {
+            } else if (value > -0.00003) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 880; // A5
-            } else if (value > 0.00004) {
+            } else if (value > -0.00006) {
                 element.classList.add('alert-large-green');
             }
         } else if (type === 'sell') {
-            if (value > 0.00005) {
+            if (value > 0.00018) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 523; // Lower pitch for sell (C5)
-            } else if (value > 0.00001) {
+            } else if (value > 0.00012) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = 587; // D5
-            } else if (value > -0.00003) {
+            } else if (value > 0.00006) {
                 element.classList.add('alert-large-green');
             }
         }
@@ -300,7 +300,7 @@ function fetchHyperliquidFuturePrice() {
 
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 2500);
+        setInterval(updateAlerts, 2000);
         setTimeout(() => {
             if (!audioEnabled) {
                 const section = document.getElementById('pump-mexc-buy-alert')?.closest('.token-section');

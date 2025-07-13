@@ -2,6 +2,8 @@ const EURC = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
+    let retryDelay = 3000; // Initial retry delay in ms
+    let consecutiveErrors = 0; // Track consecutive errors
   
     // Create audio enable button
     function createAudioEnableButton(tokenId) {
@@ -103,31 +105,43 @@ const EURC = (() => {
         }
     }
 
-
-// Fetch Forex EUR/USD rates with real-time bid/ask
-async function fetchForexPrice() {
-    const url = 'https://marketdata.tradermade.com/api/v1/live?currency=EURUSD&api_key=NOQUnfnweVLykBStOCF7';
-    
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
+    // Fetch Forex EUR/USD rates using Finnhub API
+    async function fetchForexPrice() {
+        const API_KEY = 'd1pep6hr01qu436eb0agd1pep6hr01qu436eb0b0';
+        const url = `https://finnhub.io/api/v1/forex/rates?base=USD&token=${API_KEY}`;
         
-        if (data?.quotes?.[0]?.bid && data?.quotes?.[0]?.ask) {
+        try {
+            const response = await fetch(url);
+            
+            // Handle 403 specifically with detailed error message
+            if (response.status === 403) {
+                const errorData = await response.json();
+                throw new Error(`API key error: ${errorData.error || 'Invalid API key'}`);
+            }
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (!data?.quote?.EUR) {
+                throw new Error('Invalid Forex response structure');
+            }
+            
+            // Convert EUR/USD rate to USD/EUR (1 EUR = ? USD)
+            const eurUsdRate = 1 / data.quote.EUR;
+            
+            // Apply a small spread (0.0002) to simulate bid/ask
             return {
-                bid: parseFloat(data.quotes[0].bid),
-                ask: parseFloat(data.quotes[0].ask)
+                bid: eurUsdRate - 0.0001,
+                ask: eurUsdRate + 0.0001
             };
-        } else {
-            throw new Error('Invalid Forex response');
+        } catch (error) {
+            console.error('Forex Error:', error);
+            throw error; // Rethrow to handle in caller
         }
-    } catch (error) {
-        console.error('Forex Error:', error);
-        return {
-            bid: 1.1686,
-            ask: 1.1687
-        };
     }
-}
 
     // Fetch KyberSwap prices
     async function fetchKyberPrice() {
@@ -174,8 +188,16 @@ async function fetchForexPrice() {
             const [kyberData, contractData, forexData] = await Promise.all([
                 fetchKyberPrice(),
                 fetchMexcContractPrice(),
-                fetchForexPrice()
+                fetchForexPrice().catch(error => {
+                    // Handle forex errors specifically
+                    console.error('Forex fetch failed:', error);
+                    return { error: error.message };
+                })
             ]);
+            
+            // Reset retry delay on successful fetch
+            consecutiveErrors = 0;
+            retryDelay = 3000;
             
             // Formatting helper
             const format = (val) => {
@@ -198,6 +220,15 @@ async function fetchForexPrice() {
                 
                 applyAlertStyles(elements.kyberBuy.querySelector('.difference'), kyberBuyDiff, true);
                 applyAlertStyles(elements.kyberSell.querySelector('.difference'), kyberSellDiff, false);
+            } else {
+                if (!kyberData) {
+                    elements.kyberBuy.textContent = 'Kyber data error';
+                    elements.kyberSell.textContent = 'Kyber data error';
+                }
+                if (!contractData) {
+                    elements.kyberBuy.textContent = 'MEXC contract error';
+                    elements.kyberSell.textContent = 'MEXC contract error';
+                }
             }
             
             // Update Contract vs Forex
@@ -215,13 +246,33 @@ async function fetchForexPrice() {
                 
                 applyAlertStyles(elements.mexcBuy.querySelector('.difference'), contractBuyDiff, true);
                 applyAlertStyles(elements.mexcSell.querySelector('.difference'), contractSellDiff, false);
+            } else {
+                if (forexData?.error) {
+                    elements.mexcBuy.innerHTML = `<span class="error">API Key Error</span>`;
+                    elements.mexcSell.innerHTML = `<span class="error">${forexData.error}</span>`;
+                } else if (!forexData) {
+                    elements.mexcBuy.innerHTML = `<span class="error">Forex API Error</span>`;
+                    elements.mexcSell.innerHTML = `<span class="error">Data unavailable</span>`;
+                }
+                if (!contractData) {
+                    elements.mexcBuy.textContent = 'MEXC contract error';
+                    elements.mexcSell.textContent = 'MEXC contract error';
+                }
             }
             
         } catch (error) {
             console.error('Update Error:', error);
+            
+            // Implement exponential backoff
+            consecutiveErrors++;
+            retryDelay = Math.min(30000, 3000 * Math.pow(2, consecutiveErrors));
+            
             Object.values(elements).forEach(el => {
-                if (el) el.textContent = 'Error';
+                if (el) el.textContent = `Error - retrying in ${Math.round(retryDelay/1000)}s`;
             });
+        } finally {
+            // Schedule next update with dynamic delay
+            setTimeout(updateAlerts, retryDelay);
         }
     }
 
@@ -265,7 +316,6 @@ async function fetchForexPrice() {
 
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 3000);
         setTimeout(() => {
             if (!audioEnabled) {
                 const section = document.getElementById('eurc-kyber-buy-alert')?.closest('.token-section') || 
