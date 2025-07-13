@@ -294,19 +294,15 @@ const EURC = (() => {
         element.appendChild(direction);
     
         // Determine alert level - new eye-friendly version
-        if (value > 0.0015) {
+        if (value > 0.002) {
             element.classList.add('alert-high-positive');
             shouldPlaySound = true;
-        } else if (value > 0.0011) {
+        } else if (value > 0.0015) {
             element.classList.add('alert-medium-positive');
             shouldPlaySound = true;
             volume = 0.1;
-        } else if (value > 0.0006) {
+        } else if (value > 0.001) {
             element.classList.add('alert-large-green');
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
-        } else if (value < 0) {
-            element.classList.add('alert-negative');
         }
 
         if (shouldPlaySound && audioEnabled) {
