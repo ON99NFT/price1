@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SPY Price Comparison</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: #e0f7fa;
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      padding: 30px 0;
+      margin-bottom: 30px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 15px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    h1 {
+      font-size: 2.8rem;
+      margin-bottom: 10px;
+      color: #4fc3f7;
+      text-shadow: 0 0 15px rgba(79, 195, 247, 0.5);
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.8;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .card-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-top: 20px;
+    }
+    
+    .card {
+      background: rgba(20, 30, 48, 0.7);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, #4fc3f7, #3949ab);
+    }
+    
+    .card-header {
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      color: #4fc3f7;
+    }
+    
+    .logo {
+      width: 50px;
+      height: 50px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+    }
+    
+    .price-container {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .price-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 10px 0;
+      color: #e1f5fe;
+    }
+    
+    .price-change {
+      font-size: 1.1rem;
+      padding: 5px 15px;
+      border-radius: 20px;
+      display: inline-block;
+    }
+    
+    .change-positive {
+      background: rgba(46, 125, 50, 0.3);
+      color: #a5d6a7;
+    }
+    
+    .change-negative {
+      background: rgba(198, 40, 40, 0.3);
+      color: #ffab91;
+    }
+    
+    .comparison-section {
+      background: rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .comparison-title {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #80deea;
+      font-size: 1.3rem;
+    }
+    
+    .comparison-value {
+      font-size: 2.2rem;
+      text-align: center;
+      margin: 15px 0;
+      font-weight: bold;
+    }
+    
+    .difference {
+      text-align: center;
+      font-size: 1.5rem;
+      padding: 10px;
+      border-radius: 8px;
+      margin-top: 15px;
+      transition: all 0.3s ease;
+    }
+    
+    .difference-positive {
+      background: linear-gradient(145deg, #00aa00, #008800);
+      box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+      animation: pulse-green 2s infinite;
+    }
+    
+    .difference-negative {
+      background: linear-gradient(145deg, #aa0000, #880000);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+      animation: pulse-red 2s infinite;
+    }
+    
+    .last-updated {
+      text-align: center;
+      margin-top: 20px;
+      opacity: 0.7;
+      font-size: 0.9rem;
+    }
+    
+    .alert {
+      text-align: center;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-weight: bold;
+      background: rgba(255, 152, 0, 0.2);
+      border: 1px solid rgba(255, 152, 0, 0.4);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 5px solid rgba(79, 195, 247, 0.3);
+      border-radius: 50%;
+      border-top-color: #4fc3f7;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    .explanation {
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      margin-top: 20px;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+    
+    .explanation h3 {
+      color: #4fc3f7;
+      margin-bottom: 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse-green {
+      0% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(0, 255, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(0, 255, 0, 0); }
+    }
+    
+    @keyframes pulse-red {
+      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0.7;
+    }
+    
+    @media (max-width: 768px) {
+      .card-container {
+        grid-template-columns: 1fr;
+      }
+      
+      h1 {
+        font-size: 2.2rem;
+      }
+      
+      .price-value {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>SPY Price Comparison</h1>
+      <p class="subtitle">Compare SPYX token price on MEXC with real-time SPY price from stock market</p>
+    </header>
+    
+    <div class="card-container">
+      <!-- MEXC Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">MEXC Spot (SPYX)</h2>
+          <div class="logo">M</div>
+        </div>
+        <div class="price-container">
+          <p>Current Price (USDT)</p>
+          <div id="mexc-price" class="price-value">$6.2362</div>
+          <div id="mexc-change" class="price-change change-positive">+0.12%</div>
+          <p class="note">(1 SPYX = 1/100 SPY share)</p>
+        </div>
+        <div class="last-updated">Last updated: <span id="mexc-updated">Just now</span></div>
+      </div>
+      
+      <!-- Finnhub Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Stock Market (SPY)</h2>
+          <div class="logo">S</div>
+        </div>
+        <div class="price-container">
+          <p>Current Price (USD)</p>
+          <div id="spy-price" class="price-value">$623.62</div>
+          <div id="spy-change" class="price-change change-positive">+0.15%</div>
+          <p class="note">(Actual SPDR S&P 500 ETF)</p>
+        </div>
+        <div class="last-updated">Last updated: <span id="spy-updated">Just now</span></div>
+      </div>
+      
+      <!-- Comparison Card -->
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Price Comparison</h2>
+          <div class="logo">↔</div>
+        </div>
+        <div class="comparison-section">
+          <div class="comparison-title">MEXC SPYX Equivalent vs Actual SPY</div>
+          <div id="comparison-value" class="comparison-value">$623.62 vs $623.62</div>
+          <div id="difference" class="difference difference-positive">Premium: $0.00 (0.00%)</div>
+          <div class="alert">
+            Positive difference indicates SPYX is trading at a premium to SPY
+          </div>
+        </div>
+        <div class="last-updated">Last comparison: <span id="comparison-updated">Just now</span></div>
+      </div>
+    </div>
+    
+    <div class="explanation">
+      <h3>Understanding the Price Relationship</h3>
+      <p>MEXC's SPYX token represents 1/100th of a SPY share. This means:</p>
+      <ul>
+        <li>Actual SPY price: $623.62</li>
+        <li>SPYX token price: $6.2362 (623.62 / 100)</li>
+        <li>Equivalent SPYX value: $623.62 (6.2362 × 100)</li>
+      </ul>
+      <p>The comparison shows the equivalent value of 100 SPYX tokens against the actual SPY price. A premium or discount may occur due to market liquidity, trading hours differences, or arbitrage opportunities.</p>
+    </div>
+    
+    <div class="footer">
+      <p>Data updates every 5 seconds | SPYX is MEXC's tokenized version of SPDR S&P 500 ETF</p>
+      <p>Note: Prices are for demonstration purposes only</p>
+    </div>
+  </div>
+
+  <script>
+    // DOM elements
+    const mexcPriceEl = document.getElementById('mexc-price');
+    const mexcChangeEl = document.getElementById('mexc-change');
+    const mexcUpdatedEl = document.getElementById('mexc-updated');
+    
+    const spyPriceEl = document.getElementById('spy-price');
+    const spyChangeEl = document.getElementById('spy-change');
+    const spyUpdatedEl = document.getElementById('spy-updated');
+    
+    const comparisonValueEl = document.getElementById('comparison-value');
+    const differenceEl = document.getElementById('difference');
+    const comparisonUpdatedEl = document.getElementById('comparison-updated');
+    
+    // Initial state
+    let mexcPrice = 6.2362;
+    let spyPrice = 623.62;
+    let lastMexcPrice = 6.2345;
+    let lastSpyPrice = 623.52;
+    
+    // Format price to 4 decimal places for SPYX, 2 for SPY
+    function formatPrice(price, isMexc = false) {
+      return isMexc ? parseFloat(price).toFixed(4) : parseFloat(price).toFixed(2);
+    }
+    
+    // Format percentage change
+    function formatChange(change) {
+      return change >= 0 ? `+${change.toFixed(2)}%` : `${change.toFixed(2)}%`;
+    }
+    
+    // Update price display with animation
+    function updatePriceDisplay(element, newPrice, oldPrice, isMexc = false) {
+      const formattedPrice = isMexc ? `$${formatPrice(newPrice, true)}` : `$${formatPrice(newPrice)}`;
+      
+      if (!oldPrice) {
+        element.textContent = formattedPrice;
+        return;
+      }
+      
+      if (parseFloat(newPrice) > parseFloat(oldPrice)) {
+        element.style.color = '#a5d6a7';
+        setTimeout(() => element.style.color = '#e1f5fe', 1000);
+      } else if (parseFloat(newPrice) < parseFloat(oldPrice)) {
+        element.style.color = '#ffab91';
+        setTimeout(() => element.style.color = '#e1f5fe', 1000);
+      }
+      
+      element.textContent = formattedPrice;
+    }
+    
+    // Simulate fetching MEXC SPYX price
+    function fetchMexcPrice() {
+      // In real implementation, this would be an API call
+      const change = (Math.random() - 0.5) * 0.1;
+      lastMexcPrice = mexcPrice;
+      mexcPrice = 6.2362 + change;
+      
+      updatePriceDisplay(mexcPriceEl, mexcPrice, lastMexcPrice, true);
+      
+      // Calculate change percentage
+      if (lastMexcPrice) {
+        const changePct = ((mexcPrice - lastMexcPrice) / lastMexcPrice) * 100;
+        mexcChangeEl.textContent = formatChange(changePct);
+        mexcChangeEl.className = changePct >= 0 ? 
+          'price-change change-positive' : 'price-change change-negative';
+      }
+      
+      mexcUpdatedEl.textContent = new Date().toLocaleTimeString();
+      return mexcPrice;
+    }
+    
+    // Simulate fetching actual SPY price
+    function fetchSpyPrice() {
+      // In real implementation, this would be an API call
+      const change = (Math.random() - 0.5) * 0.2;
+      lastSpyPrice = spyPrice;
+      spyPrice = 623.62 + change;
+      
+      updatePriceDisplay(spyPriceEl, spyPrice, lastSpyPrice);
+      
+      // Calculate change percentage
+      if (lastSpyPrice) {
+        const changePct = ((spyPrice - lastSpyPrice) / lastSpyPrice) * 100;
+        spyChangeEl.textContent = formatChange(changePct);
+        spyChangeEl.className = changePct >= 0 ? 
+          'price-change change-positive' : 'price-change change-negative';
+      }
+      
+      spyUpdatedEl.textContent = new Date().toLocaleTimeString();
+      return spyPrice;
+    }
+    
+    // Update comparison
+    function updateComparison() {
+      const mexcEquivalent = mexcPrice * 100;
+      const difference = mexcEquivalent - spyPrice;
+      const percentageDiff = (difference / spyPrice) * 100;
+      
+      comparisonValueEl.textContent = `$${formatPrice(mexcEquivalent)} vs $${formatPrice(spyPrice)}`;
+      
+      differenceEl.textContent = `Difference: $${formatPrice(Math.abs(difference))} ` + 
+        `(${percentageDiff >= 0 ? '+' : ''}${percentageDiff.toFixed(2)}%)`;
+      
+      if (difference > 0) {
+        differenceEl.className = 'difference difference-positive';
+        differenceEl.textContent = `Premium: $${formatPrice(Math.abs(difference))} (+${percentageDiff.toFixed(2)}%)`;
+      } else if (difference < 0) {
+        differenceEl.className = 'difference difference-negative';
+        differenceEl.textContent = `Discount: $${formatPrice(Math.abs(difference))} (${percentageDiff.toFixed(2)}%)`;
+      } else {
+        differenceEl.className = 'difference';
+        differenceEl.textContent = 'No difference';
+      }
+      
+      comparisonUpdatedEl.textContent = new Date().toLocaleTimeString();
+    }
+    
+    // Update all data
+    function updateData() {
+      fetchMexcPrice();
+      fetchSpyPrice();
+      updateComparison();
+    }
+    
+    // Initialize
+    updateData();
+    setInterval(updateData, 5000);
+  </script>
+</body>
+</html>
