@@ -6,42 +6,72 @@
   <meta name="description" content="Crypto Alerts">
   <title>Combined Alerts</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Add custom styles for the new grid layout */
+    #pumpfun-section .comparison-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    
+    .comparison-group {
+      background: #1e1e2e;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    /* Responsive layout */
+    @media (max-width: 768px) {
+      #pumpfun-section .comparison-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 <body>
 
-  <div class="token-section">
-    <h2>pump Token Alerts</h2>
+  <!-- pumpfun Section with rearranged comparisons -->
+  <div class="token-section" id="pumpfun-section">
+    <h2>pumpfun Token Alerts</h2>
     <div class="comparison-container">
+      <!-- Top Left: MEXC Future vs Hyperliquid Future -->
       <div class="comparison-group">
-        <h3>MEXC Future vs Hyperliquid Future</h3>
+        <h3>Jupiter vs Hyperliquid Future</h3>
         <div class="price-container">
-          <p>Buy in HL: <span id="pump-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell in HL: <span id="pump-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+          <p>Buy Alert: <span id="pumpfun-jupiter-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="pumpfun-jupiter-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+      
+      <!-- Top Right: Jupiter vs Hyperliquid Future -->
+      <div class="comparison-group">
+        <h3>MEXC Future vs HL Future</h3>
+        <div class="price-container">
+          <p>Buy in HL: <span id="pumpfun-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell in HL: <span id="pumpfun-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+      
+      <!-- Bottom Left: Jupiter vs MEXC Contract -->
+      <div class="comparison-group">
+        <h3>Jupiter vs MEXC Contract</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="pumpfun-jupiter-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="pumpfun-jupiter-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+      
+      <!-- Bottom Right: MEXC Contract vs Spot -->
+      <div class="comparison-group">
+        <h3>MEXC Contract vs Spot</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="pumpfun-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="pumpfun-mexc-sell-alert" aria-live="polite">Loading...</span></p>
         </div>
       </div>
     </div>
   </div>
-  
- <!-- pumpfun Section -->
- <div class="token-section">
-  <h2>pumpfun Token Alerts</h2>
-  <div class="comparison-container">
-    <div class="comparison-group">
-      <h3>KyberSwap vs MEXC Contract</h3>
-      <div class="price-container">
-        <p>Buy Alert: <span id="pumpfun-jupiter-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert: <span id="pumpfun-jupiter-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-    <div class="comparison-group">
-      <h3>MEXC Contract vs Spot</h3>
-      <div class="price-container">
-        <p>Buy Alert: <span id="pumpfun-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert: <span id="pumpfun-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-  </div>
- </div>
 
   <!-- eurc Section -->
   <div class="token-section">
@@ -62,10 +92,9 @@
         </div>
       </div>
     </div>
-   </div>
+  </div>
 
- <script src="pump.js"></script>
- <script src="pumpfun.js"></script>
- <script src="eurc.js"></script>
+  <script src="pumpfun.js"></script>
+  <script src="eurc.js"></script>
 </body>
 </html>
