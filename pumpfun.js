@@ -247,14 +247,14 @@ const PUMPFUN = (() => {
         element.appendChild(direction);
     
         // Alert thresholds
-        if (value > 0.002) {
+        if (value > 0.0002) {
             element.classList.add('alert-high-positive');
             shouldPlaySound = true;
-        } else if (value > 0.001) {
+        } else if (value > 0.0001) {
             element.classList.add('alert-medium-positive');
             shouldPlaySound = true;
             volume = 0.1;
-        } else if (value > 0.0005) {
+        } else if (value > 0.00005) {
             element.classList.add('alert-large-green');
         } else if (value > 0) {
             element.classList.add('alert-positive');
