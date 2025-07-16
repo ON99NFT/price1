@@ -2,21 +2,16 @@ const EURC = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
-    let retryDelay = 3000; // Initial retry delay in ms
-    let consecutiveErrors = 0; // Track consecutive errors
-  
+
     // Create audio enable button
-    function createAudioEnableButton(tokenId) {
-        // Create container for the button
+    function createAudioEnableButton() {
         const btnContainer = document.createElement('div');
         btnContainer.className = 'audio-btn-container';
         
-        // Create the button
-        const enableButton = document.createElement('button');
+        enableButton = document.createElement('button');
         enableButton.className = 'token-audio-btn';
         enableButton.innerHTML = '<span class="audio-icon">🔇</span> Enable';
         
-        // Audio enable handler
         enableButton.addEventListener('click', async () => {
             try {
                 if (!audioContext) {
@@ -27,8 +22,6 @@ const EURC = (() => {
                 }
                 audioEnabled = true;
                 enableButton.innerHTML = '<span class="audio-icon">🔊</span> On!';
-                
-                // Change icon and add success styling
                 enableButton.style.background = '#2E7D32';
                 
                 setTimeout(() => {
@@ -46,20 +39,15 @@ const EURC = (() => {
             }
         });
 
-        // Add button to container
         btnContainer.appendChild(enableButton);
-        
-        // Add container to token section
-        const section = document.getElementById(`${tokenId}-kyber-buy-alert`)?.closest('.token-section') || 
-                        document.getElementById(`${tokenId}-buy-alert`)?.closest('.token-section');
-        
+        const section = document.getElementById('eurc-kyber-buy-alert')?.closest('.token-section');
         if (section) {
             section.appendChild(btnContainer);
         }
     }
 
-    // Play system alert
-    async function playSystemAlert(volume = 0.2) {
+    // Play alert sound with custom frequency
+    async function playSystemAlert(volume = 0.2, frequency = 784) {
         if (!audioEnabled || !audioContext) return;
         
         try {
@@ -74,7 +62,7 @@ const EURC = (() => {
             gainNode.connect(audioContext.destination);
 
             oscillator.type = 'sine';
-            oscillator.frequency.value = 784; // G5
+            oscillator.frequency.value = frequency;
             gainNode.gain.value = volume;
             
             oscillator.start();
@@ -139,14 +127,14 @@ const EURC = (() => {
             };
         } catch (error) {
             console.error('Forex Error:', error);
-            throw error; // Rethrow to handle in caller
+            return { error: error.message };
         }
     }
 
     // Fetch KyberSwap prices
     async function fetchKyberPrice() {
         const addresses = {
-            USDC: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+            USDC: '0x833589fCD6eDb6E08f4c7c32D4f71b54bdA02913',
             EURC: '0x60a3e35cc302bfa44cb288bc5a4f316fdb1adb42'
         };
 
@@ -175,7 +163,7 @@ const EURC = (() => {
         }
     }
 
-    // Update token alerts
+    // Update alerts with pumpfun-like system
     async function updateAlerts() {
         const elements = {
             kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
@@ -188,16 +176,8 @@ const EURC = (() => {
             const [kyberData, contractData, forexData] = await Promise.all([
                 fetchKyberPrice(),
                 fetchMexcContractPrice(),
-                fetchForexPrice().catch(error => {
-                    // Handle forex errors specifically
-                    console.error('Forex fetch failed:', error);
-                    return { error: error.message };
-                })
+                fetchForexPrice()
             ]);
-            
-            // Reset retry delay on successful fetch
-            consecutiveErrors = 0;
-            retryDelay = 3000;
             
             // Formatting helper
             const format = (val) => {
@@ -205,7 +185,7 @@ const EURC = (() => {
                 return val.toFixed(4);
             };
             
-            // Update Kyber vs Contract
+            // Kyber vs MEXC Contract
             if (kyberData && contractData) {
                 const kyberBuyDiff = contractData.bid - kyberData.buyPrice;
                 const kyberSellDiff = kyberData.sellPrice - contractData.ask;
@@ -218,21 +198,20 @@ const EURC = (() => {
                     `K: $${format(kyberData.sellPrice)} | M: $${format(contractData.ask)} ` +
                     `<span class="difference">$${format(kyberSellDiff)}</span>`;
                 
-                applyAlertStyles(elements.kyberBuy.querySelector('.difference'), kyberBuyDiff, true);
-                applyAlertStyles(elements.kyberSell.querySelector('.difference'), kyberSellDiff, false);
-            } else {
-                if (!kyberData) {
-                    elements.kyberBuy.textContent = 'Kyber data error';
-                    elements.kyberSell.textContent = 'Kyber data error';
-                }
-                if (!contractData) {
-                    elements.kyberBuy.textContent = 'MEXC contract error';
-                    elements.kyberSell.textContent = 'MEXC contract error';
-                }
+                applyAlertStyles(
+                    elements.kyberBuy.querySelector('.difference'), 
+                    kyberBuyDiff,
+                    'kyber_buy'
+                );
+                applyAlertStyles(
+                    elements.kyberSell.querySelector('.difference'), 
+                    kyberSellDiff,
+                    'kyber_sell'
+                );
             }
             
-            // Update Contract vs Forex
-            if (contractData && forexData) {
+            // MEXC Contract vs Forex
+            if (contractData && forexData && !forexData.error) {
                 const contractBuyDiff = contractData.bid - forexData.ask;
                 const contractSellDiff = forexData.bid - contractData.ask;
                 
@@ -244,9 +223,18 @@ const EURC = (() => {
                     `C: $${format(contractData.ask)} | FX: $${format(forexData.bid)} ` +
                     `<span class="difference">$${format(contractSellDiff)}</span>`;
                 
-                applyAlertStyles(elements.mexcBuy.querySelector('.difference'), contractBuyDiff, true);
-                applyAlertStyles(elements.mexcSell.querySelector('.difference'), contractSellDiff, false);
+                applyAlertStyles(
+                    elements.mexcBuy.querySelector('.difference'), 
+                    contractBuyDiff,
+                    'contract_forex_buy'
+                );
+                applyAlertStyles(
+                    elements.mexcSell.querySelector('.difference'), 
+                    contractSellDiff,
+                    'contract_forex_sell'
+                );
             } else {
+                // Handle errors
                 if (forexData?.error) {
                     elements.mexcBuy.innerHTML = `<span class="error">API Key Error</span>`;
                     elements.mexcSell.innerHTML = `<span class="error">${forexData.error}</span>`;
@@ -262,65 +250,103 @@ const EURC = (() => {
             
         } catch (error) {
             console.error('Update Error:', error);
-            
-            // Implement exponential backoff
-            consecutiveErrors++;
-            retryDelay = Math.min(30000, 3000 * Math.pow(2, consecutiveErrors));
-            
             Object.values(elements).forEach(el => {
-                if (el) el.textContent = `Error - retrying in ${Math.round(retryDelay/1000)}s`;
+                if (el) el.textContent = 'Error';
             });
-        } finally {
-            // Schedule next update with dynamic delay
-            setTimeout(updateAlerts, retryDelay);
         }
     }
 
-    function applyAlertStyles(element, value, isBuy) {
+    function applyAlertStyles(element, value, type) {
         if (!element) return;
         
-        // Clear classes and previous icons
         element.className = 'difference';
         const existingIcon = element.querySelector('.direction-icon');
         if (existingIcon) existingIcon.remove();
         
         let shouldPlaySound = false;
         let volume = 0.2;
+        let frequency = 784; // Default frequency (G5)
         
-        // Add direction indicator
+        // Add direction icon
         const direction = document.createElement('span');
         direction.className = 'direction-icon';
-        direction.textContent = isBuy ? ' ↑' : ' ↓';
+        direction.textContent = value > 0 ? ' ↑' : ' ↓';
         element.appendChild(direction);
-    
-        // Determine alert level - new eye-friendly version
-        if (value > 0.0029) {
-            element.classList.add('alert-high-positive');
-            shouldPlaySound = true;
-        } else if (value > 0.0019) {
-            element.classList.add('alert-medium-positive');
-            shouldPlaySound = true;
-            volume = 0.1;
-        } else if (value > 0) {
-            element.classList.add('alert-positive');
-        } else if (value < 0) {
-            element.classList.add('alert-negative');
+        
+        // Different thresholds and sounds for each comparison type
+        switch(type) {
+            // Kyber vs MEXC Contract - Buy
+            case 'kyber_buy':
+                if (value > 0.0004) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > -0.0004) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            // Kyber vs MEXC Contract - Sell
+            case 'kyber_sell':
+                if (value > 0.0015) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.001) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
+                
+            // Contract vs Forex - Buy
+            case 'contract_forex_buy':
+                if (value > 0.0003) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > -0.0002) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            // Contract vs Forex - Sell
+            case 'contract_forex_sell':
+                if (value > 0.0014) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.0007) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
         }
 
         if (shouldPlaySound && audioEnabled) {
-            playSystemAlert(volume);
+            playSystemAlert(volume, frequency);
         }
     }
 
     (function init() {
         updateAlerts();
+        // Set refresh rate to match pumpfun
+        setInterval(updateAlerts, 2500);
+        
         setTimeout(() => {
             if (!audioEnabled) {
-                const section = document.getElementById('eurc-kyber-buy-alert')?.closest('.token-section') || 
-                                document.getElementById('eurc-buy-alert')?.closest('.token-section');
-                
+                const section = document.getElementById('eurc-kyber-buy-alert')?.closest('.token-section');
                 if (section && !section.querySelector('.audio-btn-container')) {
-                    createAudioEnableButton('eurc');
+                    createAudioEnableButton();
                 }
             }
         }, 5000);
