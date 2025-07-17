@@ -431,11 +431,11 @@ const PUMPFUN = (() => {
         switch(type) {
             // Jupiter vs Hyperliquid
             case 'jup_hyper_buy':
-                if (value > 0.00008) {
+                if (value > 0.00005) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.00004) {
+                } else if (value > 0.000025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -458,11 +458,11 @@ const PUMPFUN = (() => {
                 
             // Jupiter vs MEXC Contract
             case 'jup_contract_buy':
-                if (value > 0.00008) {
+                if (value > 0.00005) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.00003) {
+                } else if (value > 0.000025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -512,11 +512,11 @@ const PUMPFUN = (() => {
                 
             // MEXC Future vs Hyperliquid Future
             case 'mexc_hyper_buy':
-                if (value > 0) {
+                if (value > 0.00002) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.000009) {
+                } else if (value > 0.00001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -525,11 +525,11 @@ const PUMPFUN = (() => {
                 break;
                 
             case 'mexc_hyper_sell':
-                if (value > 0.000064) {
+                if (value > 0.00004) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.000032) {
+                } else if (value > 0.00002) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
