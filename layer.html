@@ -30,6 +30,26 @@
   </style>
 </head>
 <body>
+  <!-- eurc Section -->
+  <div class="token-section">
+    <h2>eurc Token Alerts</h2>
+    <div class="comparison-container">
+      <div class="comparison-group">
+        <h3>KyberSwap vs MEXC</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="eurc-kyber-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="eurc-kyber-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+      <div class="comparison-group">
+        <h3>MEXC Contract vs Spot</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="eurc-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="eurc-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- pumpfun Section with rearranged comparisons -->
   <div class="token-section" id="pumpfun-section">
@@ -72,29 +92,9 @@
       </div>
     </div>
   </div>
-
-  <!-- eurc Section -->
-  <div class="token-section">
-    <h2>eurc Token Alerts</h2>
-    <div class="comparison-container">
-      <div class="comparison-group">
-        <h3>KyberSwap vs MEXC</h3>
-        <div class="price-container">
-          <p>Buy Alert: <span id="eurc-kyber-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell Alert: <span id="eurc-kyber-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-      <div class="comparison-group">
-        <h3>MEXC Contract vs Spot</h3>
-        <div class="price-container">
-          <p>Buy Alert: <span id="eurc-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell Alert: <span id="eurc-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="pumpfun.js"></script>
+  
   <script src="eurc.js"></script>
+  <script src="pumpfun.js"></script>
+
 </body>
 </html>

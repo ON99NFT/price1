@@ -277,11 +277,11 @@ const EURC = (() => {
         switch(type) {
             // Kyber vs MEXC Contract - Buy
             case 'kyber_buy':
-                if (value > 0.0004) {
+                if (value > 0.0008) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.0004) {
+                } else if (value > 0.0002) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
