@@ -140,8 +140,8 @@ const EURC = (() => {
 
         try {
             // Format amounts properly without scientific notation
-            const buyAmount = "20333000000"; // 20333 USDC with 18 decimals
-            const sellAmount = "17500000000"; // 17500 EURC with 18 decimals
+            const buyAmount = "11500000000"; // 11500 USDC with 18 decimals
+            const sellAmount = "10000000000"; // 10000 EURC with 18 decimals
             
             const [buyResponse, sellResponse] = await Promise.all([
                 fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}`),
@@ -153,12 +153,36 @@ const EURC = (() => {
             
             return {
                 buyPrice: buyData.data?.routeSummary?.amountOut ? 
-                    20333 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e6) : null,
+                    11500 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e6) : null,
                 sellPrice: sellData.data?.routeSummary?.amountOut ? 
-                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e6) / 17500 : null
+                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e6) / 10000 : null
             };
         } catch (error) {
             console.error('Kyber Error:', error);
+            return { buyPrice: null, sellPrice: null };
+        }
+    }
+
+    // Fetch Jupiter prices for EURC
+    async function fetchJupPriceForEURC() {
+        const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+        const outputMintEURC = 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr';
+        
+        try {
+            const [buyResponse, sellResponse] = await Promise.all([
+                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintEURC}&amount=11500000000`), // 6000 USDC
+                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${outputMintEURC}&outputMint=${inputMintUSDC}&amount=10000000000`)  // 5000 EURC
+            ]);
+            
+            const buyData = await buyResponse.json();
+            const sellData = await sellResponse.json();
+            
+            return {
+                buyPrice: buyData?.outAmount ? 11500 / (parseInt(buyData.outAmount) / 1e6) : null,
+                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 10000 : null
+            };
+        } catch (error) {
+            console.error('Jupiter EURC Error:', error);
             return { buyPrice: null, sellPrice: null };
         }
     }
@@ -169,20 +193,23 @@ const EURC = (() => {
             kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
             kyberSell: document.getElementById('eurc-kyber-sell-alert'),
             mexcBuy: document.getElementById('eurc-mexc-buy-alert'),
-            mexcSell: document.getElementById('eurc-mexc-sell-alert')
+            mexcSell: document.getElementById('eurc-mexc-sell-alert'),
+            kyberJupBuy: document.getElementById('eurc-kyber-jupiter-buy-alert'),
+            kyberJupSell: document.getElementById('eurc-kyber-jupiter-sell-alert')
         };
 
         try {
-            const [kyberData, contractData, forexData] = await Promise.all([
+            const [kyberData, contractData, forexData, jupData] = await Promise.all([
                 fetchKyberPrice(),
                 fetchMexcContractPrice(),
-                fetchForexPrice()
+                fetchForexPrice(),
+                fetchJupPriceForEURC()
             ]);
             
             // Formatting helper
             const format = (val) => {
                 if (val === null || isNaN(val)) return 'N/A';
-                return val.toFixed(4);
+                return val.toFixed(5);
             };
             
             // Kyber vs MEXC Contract
@@ -246,6 +273,31 @@ const EURC = (() => {
                     elements.mexcBuy.textContent = 'MEXC contract error';
                     elements.mexcSell.textContent = 'MEXC contract error';
                 }
+            }
+            
+            // Kyber vs Jupiter
+            if (kyberData && jupData) {
+                const buyDiff = kyberData.buyPrice - jupData.buyPrice;
+                const sellDiff = jupData.sellPrice - kyberData.sellPrice;
+                
+                elements.kyberJupBuy.innerHTML = 
+                    `K: $${format(kyberData.buyPrice)} | J: $${format(jupData.buyPrice)} ` +
+                    `<span class="difference">$${format(buyDiff)}</span>`;
+                    
+                elements.kyberJupSell.innerHTML = 
+                    `K: $${format(kyberData.sellPrice)} | J: $${format(jupData.sellPrice)} ` +
+                    `<span class="difference">$${format(sellDiff)}</span>`;
+                
+                applyAlertStyles(
+                    elements.kyberJupBuy.querySelector('.difference'), 
+                    buyDiff,
+                    'kyber_jup_buy'
+                );
+                applyAlertStyles(
+                    elements.kyberJupSell.querySelector('.difference'), 
+                    sellDiff,
+                    'kyber_jup_sell'
+                );
             }
             
         } catch (error) {
@@ -330,6 +382,34 @@ const EURC = (() => {
                     frequency = 587; // D5
                 }
                 break;
+                
+            // Kyber vs Jupiter - Buy
+            case 'kyber_jup_buy':
+                if (value > 0.0008) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.0002) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            // Kyber vs Jupiter - Sell
+            case 'kyber_jup_sell':
+                if (value > 0.0015) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.001) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
         }
 
         if (shouldPlaySound && audioEnabled) {
@@ -340,7 +420,7 @@ const EURC = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate to match pumpfun
-        setInterval(updateAlerts, 2500);
+        setInterval(updateAlerts, 3300);
         
         setTimeout(() => {
             if (!audioEnabled) {
