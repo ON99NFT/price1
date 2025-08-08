@@ -144,8 +144,8 @@ const EURC = (() => {
             const sellAmount = "10000000000"; // 10000 EURC with 18 decimals
             
             const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}`),
-                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.EURC}&tokenOut=${addresses.USDC}&amountIn=${sellAmount}`)
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}&excludedSources=lo1inch`),
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.EURC}&tokenOut=${addresses.USDC}&amountIn=${sellAmount}&excludedSources=lo1inch`)
             ]);
 
             const buyData = await buyResponse.json();
@@ -276,29 +276,31 @@ const EURC = (() => {
             }
             
             // Kyber vs Jupiter
-            if (kyberData && jupData) {
-                const buyDiff = kyberData.buyPrice - jupData.buyPrice;
-                const sellDiff = jupData.sellPrice - kyberData.sellPrice;
-                
-                elements.kyberJupBuy.innerHTML = 
-                    `K: $${format(kyberData.buyPrice)} | J: $${format(jupData.buyPrice)} ` +
-                    `<span class="difference">$${format(buyDiff)}</span>`;
-                    
-                elements.kyberJupSell.innerHTML = 
-                    `K: $${format(kyberData.sellPrice)} | J: $${format(jupData.sellPrice)} ` +
-                    `<span class="difference">$${format(sellDiff)}</span>`;
-                
-                applyAlertStyles(
-                    elements.kyberJupBuy.querySelector('.difference'), 
-                    buyDiff,
-                    'kyber_jup_buy'
-                );
-                applyAlertStyles(
-                    elements.kyberJupSell.querySelector('.difference'), 
-                    sellDiff,
-                    'kyber_jup_sell'
-                );
-            }
+ // Replace the Jupiter comparison section in updateAlerts()
+if (kyberData && jupData) {
+    // Corrected comparisons:
+    const buyDiff = jupData.sellPrice - kyberData.buyPrice;  // Positive = opportunity
+    const sellDiff = kyberData.sellPrice - jupData.buyPrice;   // Positive = opportunity
+
+    elements.kyberJupBuy.innerHTML = 
+        `K: $${format(kyberData.buyPrice)} | J: $${format(jupData.sellPrice)} ` +
+        `<span class="difference">$${format(buyDiff)}</span>`;
+        
+    elements.kyberJupSell.innerHTML = 
+        `K: $${format(kyberData.sellPrice)} | J: $${format(jupData.buyPrice)} ` +
+        `<span class="difference">$${format(sellDiff)}</span>`;
+    
+    applyAlertStyles(
+        elements.kyberJupBuy.querySelector('.difference'), 
+        buyDiff,
+        'kyber_jup_buy'
+    );
+    applyAlertStyles(
+        elements.kyberJupSell.querySelector('.difference'), 
+        sellDiff,
+        'kyber_jup_sell'
+    );
+}
             
         } catch (error) {
             console.error('Update Error:', error);
@@ -329,11 +331,11 @@ const EURC = (() => {
         switch(type) {
             // Kyber vs MEXC Contract - Buy
             case 'kyber_buy':
-                if (value > 0.0008) {
+                if (value > 0.0006) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0002) {
+                } else if (value > 0.0003) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -343,34 +345,6 @@ const EURC = (() => {
                 
             // Kyber vs MEXC Contract - Sell
             case 'kyber_sell':
-                if (value > 0.0015) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 523; // C5
-                } else if (value > 0.001) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 587; // D5
-                }
-                break;
-                
-            // Contract vs Forex - Buy
-            case 'contract_forex_buy':
-                if (value > 0.0003) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > -0.0002) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            // Contract vs Forex - Sell
-            case 'contract_forex_sell':
                 if (value > 0.0014) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
@@ -383,13 +357,41 @@ const EURC = (() => {
                 }
                 break;
                 
-            // Kyber vs Jupiter - Buy
-            case 'kyber_jup_buy':
-                if (value > 0.0008) {
+            // Contract vs Forex - Buy
+            case 'contract_forex_buy':
+                if (value > 0.0006) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0002) {
+                } else if (value > 0.0003) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            // Contract vs Forex - Sell
+            case 'contract_forex_sell':
+                if (value > 0.0012) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.0006) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
+                
+            // Kyber vs Jupiter - Buy
+            case 'kyber_jup_buy':
+                if (value > 0.0012) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.0006) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -399,11 +401,11 @@ const EURC = (() => {
                 
             // Kyber vs Jupiter - Sell
             case 'kyber_jup_sell':
-                if (value > 0.0015) {
+                if (value > 0.001) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.001) {
+                } else if (value > 0.0005) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
