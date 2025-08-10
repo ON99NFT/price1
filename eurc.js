@@ -154,15 +154,15 @@ const EURC = (() => {
         const elements = {
             kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
             kyberSell: document.getElementById('eurc-kyber-sell-alert'),
-            kyberJupBuy: document.getElementById('eurc-kyber-jupiter-buy-alert'),
-            kyberJupSell: document.getElementById('eurc-kyber-jupiter-sell-alert')
+            jupMexcBuy: document.getElementById('eurc-jup-mexc-buy-alert'),
+            jupMexcSell: document.getElementById('eurc-jup-mexc-sell-alert')
         };
 
         try {
-        const [kyberData, contractData, jupData] = await Promise.all([
-            fetchKyberPrice(),
-            fetchMexcContractPrice(),
-            fetchJupPriceForEURC()
+            const [kyberData, contractData, jupData] = await Promise.all([
+                fetchKyberPrice(),
+                fetchMexcContractPrice(),
+                fetchJupPriceForEURC()
             ]);
             
             // Formatting helper
@@ -196,32 +196,30 @@ const EURC = (() => {
                 );
             }
             
-            // Kyber vs Jupiter
- // Replace the Jupiter comparison section in updateAlerts()
-if (kyberData && jupData) {
-    // Corrected comparisons:
-    const buyDiff = jupData.sellPrice - kyberData.buyPrice;  // Positive = opportunity
-    const sellDiff = kyberData.sellPrice - jupData.buyPrice;   // Positive = opportunity
+            // Jupiter vs MEXC
+            if (jupData && contractData) {
+                const buyDiff = contractData.bid - jupData.buyPrice;
+                const sellDiff = jupData.sellPrice - contractData.ask;
 
-    elements.kyberJupBuy.innerHTML = 
-        `K: $${format(kyberData.buyPrice)} | J: $${format(jupData.sellPrice)} ` +
-        `<span class="difference">$${format(buyDiff)}</span>`;
-        
-    elements.kyberJupSell.innerHTML = 
-        `K: $${format(kyberData.sellPrice)} | J: $${format(jupData.buyPrice)} ` +
-        `<span class="difference">$${format(sellDiff)}</span>`;
-    
-    applyAlertStyles(
-        elements.kyberJupBuy.querySelector('.difference'), 
-        buyDiff,
-        'kyber_jup_buy'
-    );
-    applyAlertStyles(
-        elements.kyberJupSell.querySelector('.difference'), 
-        sellDiff,
-        'kyber_jup_sell'
-    );
-}
+                elements.jupMexcBuy.innerHTML = 
+                    `J: $${format(jupData.buyPrice)} | M: $${format(contractData.bid)} ` +
+                    `<span class="difference">$${format(buyDiff)}</span>`;
+                
+                elements.jupMexcSell.innerHTML = 
+                    `J: $${format(jupData.sellPrice)} | M: $${format(contractData.ask)} ` +
+                    `<span class="difference">$${format(sellDiff)}</span>`;
+                
+                applyAlertStyles(
+                    elements.jupMexcBuy.querySelector('.difference'), 
+                    buyDiff,
+                    'jup_mexc_buy'
+                );
+                applyAlertStyles(
+                    elements.jupMexcSell.querySelector('.difference'), 
+                    sellDiff,
+                    'jup_mexc_sell'
+                );
+            }
             
         } catch (error) {
             console.error('Update Error:', error);
@@ -278,8 +276,8 @@ if (kyberData && jupData) {
                 }
                 break;
                 
-            // Kyber vs Jupiter - Buy
-            case 'kyber_jup_buy':
+            // Jupiter vs MEXC - Buy
+            case 'jup_mexc_buy':
                 if (value > 0.0008) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
@@ -292,8 +290,8 @@ if (kyberData && jupData) {
                 }
                 break;
                 
-            // Kyber vs Jupiter - Sell
-            case 'kyber_jup_sell':
+            // Jupiter vs MEXC - Sell
+            case 'jup_mexc_sell':
                 if (value > 0.0008) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
