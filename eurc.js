@@ -93,44 +93,6 @@ const EURC = (() => {
         }
     }
 
-    // Fetch Forex EUR/USD rates using Finnhub API
-    async function fetchForexPrice() {
-        const API_KEY = 'd1pep6hr01qu436eb0agd1pep6hr01qu436eb0b0';
-        const url = `https://finnhub.io/api/v1/forex/rates?base=USD&token=${API_KEY}`;
-        
-        try {
-            const response = await fetch(url);
-            
-            // Handle 403 specifically with detailed error message
-            if (response.status === 403) {
-                const errorData = await response.json();
-                throw new Error(`API key error: ${errorData.error || 'Invalid API key'}`);
-            }
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            
-            if (!data?.quote?.EUR) {
-                throw new Error('Invalid Forex response structure');
-            }
-            
-            // Convert EUR/USD rate to USD/EUR (1 EUR = ? USD)
-            const eurUsdRate = 1 / data.quote.EUR;
-            
-            // Apply a small spread (0.0002) to simulate bid/ask
-            return {
-                bid: eurUsdRate - 0.0001,
-                ask: eurUsdRate + 0.0001
-            };
-        } catch (error) {
-            console.error('Forex Error:', error);
-            return { error: error.message };
-        }
-    }
-
     // Fetch KyberSwap prices
     async function fetchKyberPrice() {
         const addresses = {
@@ -144,8 +106,8 @@ const EURC = (() => {
             const sellAmount = "10000000000"; // 10000 EURC with 18 decimals
             
             const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}&excludedSources=lo1inch`),
-                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.EURC}&tokenOut=${addresses.USDC}&amountIn=${sellAmount}&excludedSources=lo1inch`)
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.USDC}&tokenOut=${addresses.EURC}&amountIn=${buyAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`),
+                fetch(`https://aggregator-api.kyberswap.com/base/api/v1/routes?tokenIn=${addresses.EURC}&tokenOut=${addresses.USDC}&amountIn=${sellAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`)
             ]);
 
             const buyData = await buyResponse.json();
@@ -192,18 +154,15 @@ const EURC = (() => {
         const elements = {
             kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
             kyberSell: document.getElementById('eurc-kyber-sell-alert'),
-            mexcBuy: document.getElementById('eurc-mexc-buy-alert'),
-            mexcSell: document.getElementById('eurc-mexc-sell-alert'),
             kyberJupBuy: document.getElementById('eurc-kyber-jupiter-buy-alert'),
             kyberJupSell: document.getElementById('eurc-kyber-jupiter-sell-alert')
         };
 
         try {
-            const [kyberData, contractData, forexData, jupData] = await Promise.all([
-                fetchKyberPrice(),
-                fetchMexcContractPrice(),
-                fetchForexPrice(),
-                fetchJupPriceForEURC()
+        const [kyberData, contractData, jupData] = await Promise.all([
+            fetchKyberPrice(),
+            fetchMexcContractPrice(),
+            fetchJupPriceForEURC()
             ]);
             
             // Formatting helper
@@ -235,44 +194,6 @@ const EURC = (() => {
                     kyberSellDiff,
                     'kyber_sell'
                 );
-            }
-            
-            // MEXC Contract vs Forex
-            if (contractData && forexData && !forexData.error) {
-                const contractBuyDiff = contractData.bid - forexData.ask;
-                const contractSellDiff = forexData.bid - contractData.ask;
-                
-                elements.mexcBuy.innerHTML = 
-                    `C: $${format(contractData.bid)} | FX: $${format(forexData.ask)} ` +
-                    `<span class="difference">$${format(contractBuyDiff)}</span>`;
-                    
-                elements.mexcSell.innerHTML = 
-                    `C: $${format(contractData.ask)} | FX: $${format(forexData.bid)} ` +
-                    `<span class="difference">$${format(contractSellDiff)}</span>`;
-                
-                applyAlertStyles(
-                    elements.mexcBuy.querySelector('.difference'), 
-                    contractBuyDiff,
-                    'contract_forex_buy'
-                );
-                applyAlertStyles(
-                    elements.mexcSell.querySelector('.difference'), 
-                    contractSellDiff,
-                    'contract_forex_sell'
-                );
-            } else {
-                // Handle errors
-                if (forexData?.error) {
-                    elements.mexcBuy.innerHTML = `<span class="error">API Key Error</span>`;
-                    elements.mexcSell.innerHTML = `<span class="error">${forexData.error}</span>`;
-                } else if (!forexData) {
-                    elements.mexcBuy.innerHTML = `<span class="error">Forex API Error</span>`;
-                    elements.mexcSell.innerHTML = `<span class="error">Data unavailable</span>`;
-                }
-                if (!contractData) {
-                    elements.mexcBuy.textContent = 'MEXC contract error';
-                    elements.mexcSell.textContent = 'MEXC contract error';
-                }
             }
             
             // Kyber vs Jupiter
@@ -331,11 +252,11 @@ if (kyberData && jupData) {
         switch(type) {
             // Kyber vs MEXC Contract - Buy
             case 'kyber_buy':
-                if (value > 0.0006) {
+                if (value > 0.001) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0003) {
+                } else if (value > 0.0005) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -345,39 +266,11 @@ if (kyberData && jupData) {
                 
             // Kyber vs MEXC Contract - Sell
             case 'kyber_sell':
-                if (value > 0.0014) {
+                if (value > 0.0016) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0007) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 587; // D5
-                }
-                break;
-                
-            // Contract vs Forex - Buy
-            case 'contract_forex_buy':
-                if (value > 0.0006) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.0003) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            // Contract vs Forex - Sell
-            case 'contract_forex_sell':
-                if (value > 0.0012) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 523; // C5
-                } else if (value > 0.0006) {
+                } else if (value > 0.0008) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -387,11 +280,11 @@ if (kyberData && jupData) {
                 
             // Kyber vs Jupiter - Buy
             case 'kyber_jup_buy':
-                if (value > 0.0012) {
+                if (value > 0.0008) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0006) {
+                } else if (value > 0.0004) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -401,11 +294,11 @@ if (kyberData && jupData) {
                 
             // Kyber vs Jupiter - Sell
             case 'kyber_jup_sell':
-                if (value > 0.001) {
+                if (value > 0.0008) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0005) {
+                } else if (value > 0.0004) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -422,7 +315,7 @@ if (kyberData && jupData) {
     (function init() {
         updateAlerts();
         // Set refresh rate to match pumpfun
-        setInterval(updateAlerts, 3300);
+        setInterval(updateAlerts, 5700);
         
         setTimeout(() => {
             if (!audioEnabled) {
