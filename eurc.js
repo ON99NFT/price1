@@ -254,7 +254,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0005) {
+                } else if (value > 0.0001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -282,7 +282,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0004) {
+                } else if (value > 0.0001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -292,11 +292,11 @@ const EURC = (() => {
                 
             // Jupiter vs MEXC - Sell
             case 'jup_mexc_sell':
-                if (value > 0.0008) {
+                if (value > 0.00012) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0004) {
+                } else if (value > 0.0006) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
