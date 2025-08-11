@@ -292,7 +292,7 @@ const EURC = (() => {
                 
             // Jupiter vs MEXC - Sell
             case 'jup_mexc_sell':
-                if (value > 0.00012) {
+                if (value > 0.0012) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
