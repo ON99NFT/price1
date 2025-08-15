@@ -250,25 +250,25 @@ const EURC = (() => {
         switch(type) {
             // Kyber vs MEXC Contract - Buy
             case 'kyber_buy':
-                if (value > 0.001) {
+                if (value > 0.0015) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0002) {
+                } else if (value > -0.0002) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
-                    frequency = 880; // A5
+                    frequency = 523; // A5
                 }
                 break;
                 
             // Kyber vs MEXC Contract - Sell
             case 'kyber_sell':
-                if (value > 0.0016) {
+                if (value > 0.0015) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0008) {
+                } else if (value > 0.0013) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -278,11 +278,11 @@ const EURC = (() => {
                 
             // Jupiter vs MEXC - Buy
             case 'jup_mexc_buy':
-                if (value > 0.0008) {
+                if (value > 0.0015) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0001) {
+                } else if (value > -0.0002) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -292,11 +292,11 @@ const EURC = (() => {
                 
             // Jupiter vs MEXC - Sell
             case 'jup_mexc_sell':
-                if (value > 0.0012) {
+                if (value > 0.0015) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0006) {
+                } else if (value > 0.0012) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -313,7 +313,7 @@ const EURC = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate to match pumpfun
-        setInterval(updateAlerts, 5700);
+        setInterval(updateAlerts, 3300);
         
         setTimeout(() => {
             if (!audioEnabled) {
