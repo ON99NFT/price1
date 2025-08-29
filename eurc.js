@@ -313,7 +313,7 @@ const EURC = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate to match pumpfun
-        setInterval(updateAlerts, 3700);
+        setInterval(updateAlerts, 4300);
         
         setTimeout(() => {
             if (!audioEnabled) {
