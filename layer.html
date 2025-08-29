@@ -30,6 +30,20 @@
   </style>
 </head>
 <body>
+
+    <div class="token-section">
+  <h2>WLFI Token Alerts</h2>
+  <div class="comparison-container">
+    <div class="comparison-group">
+      <h3>MEXC vs Hyperliquid</h3>
+      <div class="price-container">
+        <p>Buy Alert: <span id="wlfi-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell Alert: <span id="wlfi-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
   <!-- eurc Section -->
   <div class="token-section">
     <h2>eurc Token Alerts</h2>
@@ -54,22 +68,11 @@
     </div>
   </div>
 
-  <div class="token-section">
-  <h2>WLFI Token Alerts</h2>
-  <div class="comparison-container">
-    <div class="comparison-group">
-      <h3>MEXC vs Hyperliquid</h3>
-      <div class="price-container">
-        <p>Buy Alert (MEXC bid vs Hyperliquid ask): <span id="wlfi-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert (Hyperliquid bid vs MEXC ask): <span id="wlfi-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-  </div>
-</div>
 
 
-  <script src="eurc.js"></script>
   <script src="wlfi.js"></script>
+  <script src="eurc.js"></script>
+
 
 </body>
 </html>

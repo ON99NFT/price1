@@ -254,7 +254,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0) {
+                } else if (value > 0.0004) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -268,7 +268,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0007) {
+                } else if (value > 0.0001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -282,7 +282,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0) {
+                } else if (value > 0.0004) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -296,7 +296,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0007) {
+                } else if (value > 0.0001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -313,7 +313,7 @@ const EURC = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate to match pumpfun
-        setInterval(updateAlerts, 3300);
+        setInterval(updateAlerts, 3700);
         
         setTimeout(() => {
             if (!audioEnabled) {
