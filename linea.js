@@ -1,4 +1,4 @@
-const WLFI = (() => {
+const LINEA = (() => {
     let audioContext = null;
     let audioEnabled = false;
     let enableButton = null;
@@ -40,7 +40,7 @@ const WLFI = (() => {
         });
 
         btnContainer.appendChild(enableButton);
-        const section = document.getElementById('wlfi-mexc-hyper-buy-alert')?.closest('.token-section');
+        const section = document.getElementById('linea-mexc-hyper-buy-alert')?.closest('.token-section');
         if (section) {
             section.appendChild(btnContainer);
         }
@@ -72,10 +72,10 @@ const WLFI = (() => {
         }
     }
 
-    // Fetch MEXC Futures prices for WLFI
+    // Fetch MEXC Futures prices for LINEA
     async function fetchMexcFuturePrice() {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const url = 'https://contract.mexc.com/api/v1/contract/depth/WLFI_USDT';
+        const url = 'https://contract.mexc.com/api/v1/contract/depth/LINEA_USDT';
         
         try {
             const response = await fetch(proxyUrl + url);
@@ -95,7 +95,7 @@ const WLFI = (() => {
         }
     }
 
-    // Fetch Hyperliquid Futures prices for WLFI
+    // Fetch Hyperliquid Futures prices for LINEA
     function fetchHyperliquidFuturePrice() {
         return new Promise((resolve, reject) => {
             const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
@@ -105,7 +105,7 @@ const WLFI = (() => {
             ws.onopen = () => {
                 ws.send(JSON.stringify({
                     method: "subscribe",
-                    subscription: { type: "l2Book", coin: "WLFI" }
+                    subscription: { type: "l2Book", coin: "LINEA" }
                 }));
                 
                 timeout = setTimeout(() => {
@@ -175,49 +175,19 @@ const WLFI = (() => {
         });
     }
 
-    // Fetch Jupiter prices for WLFI
-    async function fetchJupiterPriceForWLFI() {
-        const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintWLFI = 'WLFinEv6ypjkczcS83FZqFpgFZYwQXutRbxGe7oC16g';
-        
-        try {
-            const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintWLFI}&amount=10000000`), // 10 USDC
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${outputMintWLFI}&outputMint=${inputMintUSDC}&amount=10000000`)  // 10 WLFI
-            ]);
-            
-            const buyData = await buyResponse.json();
-            const sellData = await sellResponse.json();
-            
-            return {
-                buyPrice: buyData?.outAmount ? 10 / (parseInt(buyData.outAmount) / 1e6) : null,
-                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 10 : null
-            };
-        } catch (error) {
-            console.error('Jupiter WLFI Error:', error);
-            return { buyPrice: null, sellPrice: null };
-        }
-    }
-
-    // Update alerts with MEXC vs Hyperliquid and Jupiter comparisons
+    // Update alerts with MEXC vs Hyperliquid comparison
     async function updateAlerts() {
         const elements = {
-            mexcHyperBuy: document.getElementById('wlfi-mexc-hyper-buy-alert'),
-            mexcHyperSell: document.getElementById('wlfi-mexc-hyper-sell-alert'),
-            jupMexcBuy: document.getElementById('wlfi-jup-mexc-buy-alert'),
-            jupMexcSell: document.getElementById('wlfi-jup-mexc-sell-alert')
+            mexcHyperBuy: document.getElementById('linea-mexc-hyper-buy-alert'),
+            mexcHyperSell: document.getElementById('linea-mexc-hyper-sell-alert')
         };
 
         try {
-            // Fetch data from all exchanges
-            const [mexcData, hyperData, jupData] = await Promise.all([
+            // Fetch data from both exchanges
+            const [mexcData, hyperData] = await Promise.all([
                 fetchMexcFuturePrice(),
                 fetchHyperliquidFuturePrice().catch(error => {
                     console.error('Hyperliquid Error:', error);
-                    return null;
-                }),
-                fetchJupiterPriceForWLFI().catch(error => {
-                    console.error('Jupiter WLFI Error:', error);
                     return null;
                 })
             ]);
@@ -225,7 +195,7 @@ const WLFI = (() => {
             // Formatting helper
             const format = (val) => {
                 if (val === null || isNaN(val)) return 'N/A';
-                return val.toFixed(4);
+                return val.toFixed(5);
             };
             
             // MEXC Future vs Hyperliquid Future
@@ -262,40 +232,6 @@ const WLFI = (() => {
                 }
             }
             
-            // Jupiter vs MEXC (new comparison)
-            if (mexcData && jupData) {
-                const buyOpportunity = mexcData.bid - jupData.sellPrice;
-                const sellOpportunity = jupData.buyPrice - mexcData.ask;
-                
-                elements.jupMexcBuy.innerHTML = 
-                    `M: $${format(mexcData.bid)} | J: $${format(jupData.sellPrice)} ` +
-                    `<span class="difference">$${format(buyOpportunity)}</span>`;
-                
-                elements.jupMexcSell.innerHTML = 
-                    `J: $${format(jupData.buyPrice)} | M: $${format(mexcData.ask)} ` +
-                    `<span class="difference">$${format(sellOpportunity)}</span>`;
-                
-                applyAlertStyles(
-                    elements.jupMexcBuy.querySelector('.difference'), 
-                    buyOpportunity,
-                    'jup_mexc_buy'
-                );
-                applyAlertStyles(
-                    elements.jupMexcSell.querySelector('.difference'), 
-                    sellOpportunity,
-                    'jup_mexc_sell'
-                );
-            } else {
-                if (!mexcData) {
-                    elements.jupMexcBuy.textContent = 'MEXC data error';
-                    elements.jupMexcSell.textContent = 'MEXC data error';
-                }
-                if (!jupData) {
-                    elements.jupMexcBuy.textContent = 'Jupiter data error';
-                    elements.jupMexcSell.textContent = 'Jupiter data error';
-                }
-            }
-            
         } catch (error) {
             console.error('Update Error:', error);
             Object.values(elements).forEach(el => {
@@ -325,11 +261,11 @@ const WLFI = (() => {
         switch(type) {
             case 'mexc_hyper_buy':
                 // Buy opportunity: MEXC bid > Hyperliquid ask
-                if (value > -0.01) {
+                if (value > 0) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.021) {
+                } else if (value > -0.15) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -339,39 +275,11 @@ const WLFI = (() => {
                 
             case 'mexc_hyper_sell':
                 // Sell opportunity: Hyperliquid bid > MEXC ask
-                if (value > 0.05) {
+                if (value > 0.5) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.039) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 587; // D5
-                }
-                break;
-                
-            // Jupiter vs MEXC - Buy
-            case 'jup_mexc_buy':
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.03) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            // Jupiter vs MEXC - Sell
-            case 'jup_mexc_sell':
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 523; // C5
-                } else if (value > 0.03) {
+                } else if (value > 0.25) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -387,11 +295,11 @@ const WLFI = (() => {
 
     (function init() {
         updateAlerts();
-        setInterval(updateAlerts, 4700);
+        setInterval(updateAlerts, 2500);
         
         setTimeout(() => {
             if (!audioEnabled) {
-                const section = document.getElementById('wlfi-mexc-hyper-buy-alert')?.closest('.token-section');
+                const section = document.getElementById('linea-mexc-hyper-buy-alert')?.closest('.token-section');
                 if (section && !section.querySelector('.audio-btn-container')) {
                     createAudioEnableButton();
                 }

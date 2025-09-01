@@ -34,12 +34,21 @@
     <div class="token-section">
   <div class="comparison-container">
     <div class="comparison-group">
-      <h3>WLFI</h3>
+      <h3>WLFI HL vs M</h3>
       <div class="price-container">
         <p>Buy Alert: <span id="wlfi-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
         <p>Sell Alert: <span id="wlfi-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
       </div>
     </div>
+
+    <!-- Add this inside the WLFI section, after the existing comparison-group -->
+<div class="comparison-group">
+  <h3>WLFI JUP vs M</h3>
+  <div class="price-container">
+    <p>Buy Alert: <span id="wlfi-jup-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+    <p>Sell Alert: <span id="wlfi-jup-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+  </div>
+</div>
 
     <div class="comparison-group">
       <h3>XPL</h3>
@@ -48,38 +57,25 @@
         <p>Sell Alert: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
   </div>
 </div>
+
+    <div class="comparison-group">
+      <h3>LINEA</h3>
+      <div class="price-container">
+        <p>Buy Alert: <span id="linea-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell Alert: <span id="linea-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+      </div>
+    </div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- eurc Section -->
-  <div class="token-section">
-    <h2>eurc Token Alerts</h2>
-    <div class="comparison-container">
-      <div class="comparison-group">
-        <h3>KyberSwap vs MEXC</h3>
-        <div class="price-container">
-          <p>Buy Alert: <span id="eurc-kyber-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell Alert: <span id="eurc-kyber-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-<!-- Change this section -->
-<div class="comparison-group">
-  <h3>Jupiter vs MEXC</h3>
-  <div class="price-container">
-    <p>Buy Alert: <span id="eurc-jup-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell Alert: <span id="eurc-jup-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
-</div>
-        </div>
-      </div>
-    </div>
-  </div>
+
 
   <script src="wlfi.js"></script>
   <script src="xpl.js"></script>
-  <script src="eurc.js"></script>
+  <script src="linea.js"></script>
+
 
 </body>
 </html>
