@@ -265,7 +265,7 @@ const LINEA = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.15) {
+                } else if (value > -0.0011) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -275,11 +275,11 @@ const LINEA = (() => {
                 
             case 'mexc_hyper_sell':
                 // Sell opportunity: Hyperliquid bid > MEXC ask
-                if (value > 0.5) {
+                if (value > 0.005) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.25) {
+                } else if (value > 0.0025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;

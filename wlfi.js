@@ -199,25 +199,19 @@ const WLFI = (() => {
         }
     }
 
-    // Update alerts with MEXC vs Hyperliquid and Jupiter comparisons
-    async function updateAlerts() {
+    // Update MEXC vs Hyperliquid alerts
+    async function updateMexcHyperAlerts() {
         const elements = {
             mexcHyperBuy: document.getElementById('wlfi-mexc-hyper-buy-alert'),
-            mexcHyperSell: document.getElementById('wlfi-mexc-hyper-sell-alert'),
-            jupMexcBuy: document.getElementById('wlfi-jup-mexc-buy-alert'),
-            jupMexcSell: document.getElementById('wlfi-jup-mexc-sell-alert')
+            mexcHyperSell: document.getElementById('wlfi-mexc-hyper-sell-alert')
         };
 
         try {
-            // Fetch data from all exchanges
-            const [mexcData, hyperData, jupData] = await Promise.all([
+            // Fetch data from both exchanges
+            const [mexcData, hyperData] = await Promise.all([
                 fetchMexcFuturePrice(),
                 fetchHyperliquidFuturePrice().catch(error => {
                     console.error('Hyperliquid Error:', error);
-                    return null;
-                }),
-                fetchJupiterPriceForWLFI().catch(error => {
-                    console.error('Jupiter WLFI Error:', error);
                     return null;
                 })
             ]);
@@ -261,8 +255,37 @@ const WLFI = (() => {
                     elements.mexcHyperSell.textContent = 'Hyperliquid data error';
                 }
             }
+        } catch (error) {
+            console.error('MEXC-Hyper Update Error:', error);
+            elements.mexcHyperBuy.textContent = 'Update Error';
+            elements.mexcHyperSell.textContent = 'Update Error';
+        }
+    }
+
+    // Update Jupiter vs MEXC alerts
+    async function updateJupMexcAlerts() {
+        const elements = {
+            jupMexcBuy: document.getElementById('wlfi-jup-mexc-buy-alert'),
+            jupMexcSell: document.getElementById('wlfi-jup-mexc-sell-alert')
+        };
+
+        try {
+            // Fetch data from both exchanges
+            const [mexcData, jupData] = await Promise.all([
+                fetchMexcFuturePrice(),
+                fetchJupiterPriceForWLFI().catch(error => {
+                    console.error('Jupiter WLFI Error:', error);
+                    return null;
+                })
+            ]);
             
-            // Jupiter vs MEXC (new comparison)
+            // Formatting helper
+            const format = (val) => {
+                if (val === null || isNaN(val)) return 'N/A';
+                return val.toFixed(4);
+            };
+            
+            // Jupiter vs MEXC
             if (mexcData && jupData) {
                 const buyOpportunity = mexcData.bid - jupData.sellPrice;
                 const sellOpportunity = jupData.buyPrice - mexcData.ask;
@@ -295,12 +318,10 @@ const WLFI = (() => {
                     elements.jupMexcSell.textContent = 'Jupiter data error';
                 }
             }
-            
         } catch (error) {
-            console.error('Update Error:', error);
-            Object.values(elements).forEach(el => {
-                if (el) el.textContent = 'Update Error';
-            });
+            console.error('Jup-MEXC Update Error:', error);
+            elements.jupMexcBuy.textContent = 'Update Error';
+            elements.jupMexcSell.textContent = 'Update Error';
         }
     }
 
@@ -325,11 +346,11 @@ const WLFI = (() => {
         switch(type) {
             case 'mexc_hyper_buy':
                 // Buy opportunity: MEXC bid > Hyperliquid ask
-                if (value > -0.01) {
+                if (value > 0.01) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.021) {
+                } else if (value > 0.0) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -343,7 +364,7 @@ const WLFI = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.039) {
+                } else if (value > 0.0025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -357,7 +378,7 @@ const WLFI = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.03) {
+                } else if (value > 0.0025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -371,7 +392,7 @@ const WLFI = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.03) {
+                } else if (value > 0.02) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -386,8 +407,13 @@ const WLFI = (() => {
     }
 
     (function init() {
-        updateAlerts();
-        setInterval(updateAlerts, 4700);
+        // Initial updates
+        updateMexcHyperAlerts();
+        updateJupMexcAlerts();
+        
+        // Set different intervals for different comparisons
+        setInterval(updateMexcHyperAlerts, 2500); // MEXC vs Hyperliquid: 2500ms
+        setInterval(updateJupMexcAlerts, 4700);   // Jupiter vs MEXC: 4700ms
         
         setTimeout(() => {
             if (!audioEnabled) {
@@ -399,5 +425,5 @@ const WLFI = (() => {
         }, 5000);
     })();
   
-    return { updateAlerts };
+    return { updateMexcHyperAlerts, updateJupMexcAlerts };
 })();
