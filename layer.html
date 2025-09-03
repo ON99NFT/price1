@@ -3,79 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Crypto Alerts">
-  <title>Combined Alerts</title>
+  <title>Crypto Arbitrage Alerts</title>
   <link rel="stylesheet" href="style.css">
-  <style>
-    /* Add custom styles for the new grid layout */
-    #pumpfun-section .comparison-container {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-    }
-    
-    .comparison-group {
-      background: #1e1e2e;
-      border-radius: 10px;
-      padding: 15px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    
-    /* Responsive layout */
-    @media (max-width: 768px) {
-      #pumpfun-section .comparison-container {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
 </head>
 <body>
-
-    <div class="token-section">
-  <div class="comparison-container">
-    <div class="comparison-group">
-      <h3>WLFI HL vs M</h3>
-      <div class="price-container">
-        <p>Buy Alert: <span id="wlfi-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert: <span id="wlfi-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-
-    <!-- Add this inside the WLFI section, after the existing comparison-group -->
-<div class="comparison-group">
-  <h3>WLFI JUP vs M</h3>
-  <div class="price-container">
-    <p>Buy Alert: <span id="wlfi-jup-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell Alert: <span id="wlfi-jup-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+  <div id="global-audio-control">
+    <button id="global-audio-btn">
+      <span class="audio-icon">🔇</span> Enable All Sounds
+    </button>
   </div>
-</div>
 
-    <div class="comparison-group">
-      <h3>XPL</h3>
-      <div class="price-container">
-        <p>Buy Alert: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
-</div>
-
-    <div class="comparison-group">
-      <h3>LINEA</h3>
-      <div class="price-container">
-        <p>Buy Alert: <span id="linea-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell Alert: <span id="linea-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+  <div class="token-section">
+    <h2>WLFI Token</h2>
+    <div class="comparison-container">
+      <div class="comparison-group">
+        <h3>WLFI HL vs MEXC</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="wlfi-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="wlfi-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
       </div>
-    </div>
+
+      <div class="comparison-group">
+        <h3>WLFI JUP vs MEXC</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="wlfi-jup-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="wlfi-jup-mexc-sell-alert" aria-live="polite">Loading...</span></p>
         </div>
       </div>
     </div>
   </div>
 
+  <div class="token-section">
+    <h2>XPL Token</h2>
+    <div class="comparison-container">
+      <div class="comparison-group">
+        <h3>XPL HL vs MEXC</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <div class="token-section">
+    <h2>LINEA Token</h2>
+    <div class="comparison-container">
+      <div class="comparison-group">
+        <h3>LINEA HL vs MEXC</h3>
+        <div class="price-container">
+          <p>Buy Alert: <span id="linea-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell Alert: <span id="linea-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
 
+  <script src="global-audio.js"></script>
   <script src="wlfi.js"></script>
   <script src="xpl.js"></script>
   <script src="linea.js"></script>
-
-
 </body>
 </html>

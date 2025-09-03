@@ -110,32 +110,7 @@ body {
   font-size: 1.1em;
 }
 
-/* Base Alert Styles */
-.alert-positive, .alert-negative,
-.alert-large-green, .alert-large-red {
-  color: white !important;
-  padding: 4px 10px;
-  border-radius: 4px;
-  transition: all 0.3s ease;
-}
-
-.alert-positive { background-color: #009900; }
-.alert-negative { background-color: #990000; }
-
-.alert-large-green { 
-  background-color: #007700;  
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 1.1em;
-}
-.alert-large-red { 
-  background-color: #770000;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 1.1em;
-}
-
-/* New Eye-Friendly Alert Styles */
+/* Alert Styles */
 .alert-high-positive {
   background: linear-gradient(145deg, #00aa00, #008800);
   padding: 6px 12px;
@@ -155,25 +130,6 @@ body {
   box-shadow: 0 0 8px rgba(0, 200, 0, 0.2);
 }
 
-.alert-high-negative {
-  background: linear-gradient(145deg, #aa0000, #880000);
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 1.1em;
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
-  animation: gentle-pulse 2s infinite;
-  border: 2px solid #ff0000;
-}
-
-.alert-medium-negative {
-  background: linear-gradient(145deg, #880000, #660000);
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 1.1em;
-  border: 2px solid #cc0000;
-  box-shadow: 0 0 8px rgba(200, 0, 0, 0.2);
-}
-
 @keyframes gentle-pulse {
   0% { 
     transform: scale(1);
@@ -189,24 +145,34 @@ body {
   }
 }
 
-@keyframes gentle-pulse-red {
-  0% { 
-    transform: scale(1);
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
-  }
-  50% { 
-    transform: scale(1.02);
-    box-shadow: 0 0 16px rgba(255, 0, 0, 0.5);
-  }
-  100% { 
-    transform: scale(1);
-    box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
-  }
+/* Global Audio Control */
+#global-audio-control {
+  text-align: center;
+  margin: 20px auto;
+  max-width: 800px;
 }
 
-/* Apply the red animation to negative alerts */
-.alert-high-negative {
-  animation: gentle-pulse-red 2s infinite;
+#global-audio-btn {
+  padding: 12px 20px;
+  background: #2196F3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  transition: all 0.3s ease;
+}
+
+#global-audio-btn:hover {
+  background: #1976D2;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+}
+
+#global-audio-btn.audio-enabled {
+  background: #2E7D32;
 }
 
 @media (max-width: 768px) {
@@ -229,54 +195,4 @@ body {
     margin-left: 0;
     width: 100%;
   }
-}
-
-/* Add to style.css */
-.token-section {
-  position: relative; /* Required for absolute positioning of children */
-}
-
-.audio-btn-container {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  z-index: 100;
-  transition: opacity 0.3s ease;
-}
-
-.token-audio-btn {
-  padding: 10px 15px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-  transition: all 0.3s ease;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.token-audio-btn:hover {
-  transform: scale(1.05);
-  background: #45a049;
-  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
-}
-
-.token-audio-btn:active {
-  transform: scale(0.98);
-}
-
-/* Add to your existing CSS */
-.error {
-  color: #ff6b6b;
-  font-size: 0.9em;
-  margin-top: 5px;
-  font-weight: bold;
-  background: rgba(255, 0, 0, 0.1);
-  padding: 3px 8px;
-  border-radius: 4px;
 }
