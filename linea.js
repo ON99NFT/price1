@@ -194,7 +194,7 @@ const LINEA = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 1046; // C6
-        } else if (value > -0.00051) {
+        } else if (value > -0.00001) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -208,7 +208,7 @@ const LINEA = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 523; // C5
-        } else if (value > 0.00119) {
+        } else if (value > 0.00039) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;

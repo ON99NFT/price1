@@ -194,7 +194,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 1046; // C6
-        } else if (value > -0.071) {
+        } else if (value > -0.081) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -208,7 +208,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 523; // C5
-        } else if (value > 0.119) {
+        } else if (value > 0.139) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
