@@ -27,6 +27,7 @@ globalAudioBtn.addEventListener('click', async () => {
     if (typeof WLFI !== 'undefined' && WLFI.enableAudio) WLFI.enableAudio();
     if (typeof XPL !== 'undefined' && XPL.enableAudio) XPL.enableAudio();
     if (typeof LINEA !== 'undefined' && LINEA.enableAudio) LINEA.enableAudio();
+    if (typeof LINEAKyber !== 'undefined' && LINEAKyber.enableAudio) LINEAKyber.enableAudio();
   } catch (error) {
     console.error('Audio initialization failed:', error);
     globalAudioBtn.innerHTML = '<span class="audio-icon">❌</span> Error';
