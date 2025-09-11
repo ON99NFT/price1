@@ -1,5 +1,95 @@
 const XPL = (() => {
   let audioEnabled = false;
+  let fundingRateInterval = null;
+  let nextFundingTime = null;
+
+  // Fetch MEXC Funding Rate for XPL (XPL_USDT)
+  async function fetchMexcFundingRate() {
+    const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+    const url = 'https://contract.mexc.com/api/v1/contract/funding_rate/XPL_USDT';
+    
+    try {
+      const response = await fetch(proxyUrl + url);
+      const data = await response.json();
+      
+      if (!data?.data?.fundingRate) {
+        throw new Error('Invalid MEXC funding rate response');
+      }
+      
+      return {
+        rate: parseFloat(data.data.fundingRate),
+        nextTime: data.data.nextSettleTime
+      };
+    } catch (error) {
+      console.error('MEXC Funding Rate Error:', error);
+      return null;
+    }
+  }
+
+  // Update funding rate countdown timer
+  function updateFundingCountdown() {
+    if (!nextFundingTime) return;
+    
+    const now = new Date().getTime();
+    const diff = nextFundingTime - now;
+    
+    if (diff <= 0) {
+      // Time's up, refresh funding rate
+      updateFundingRate();
+      return;
+    }
+    
+    // Format the time difference
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    
+    document.getElementById('xpl-next-funding').textContent = 
+      `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  // Update funding rate display
+  async function updateFundingRate() {
+    const fundingElement = document.getElementById('xpl-funding-rate');
+    const rateValueElement = fundingElement.querySelector('.funding-rate-value');
+    
+    try {
+      const fundingData = await fetchMexcFundingRate();
+      
+      if (!fundingData) {
+        rateValueElement.textContent = 'Error';
+        fundingElement.className = 'funding-rate';
+        return;
+      }
+      
+      const rate = fundingData.rate;
+      const ratePercent = (rate * 100).toFixed(4);
+      
+      rateValueElement.textContent = `${ratePercent}%`;
+      
+      // Set appropriate styling based on rate value
+      if (rate > 0.0005) {
+        fundingElement.className = 'funding-rate positive';
+      } else if (rate < -0.0005) {
+        fundingElement.className = 'funding-rate negative';
+      } else {
+        fundingElement.className = 'funding-rate neutral';
+      }
+      
+      // Set next funding time
+      nextFundingTime = parseInt(fundingData.nextTime);
+      
+      // Start countdown if not already running
+      if (!fundingRateInterval) {
+        fundingRateInterval = setInterval(updateFundingCountdown, 1000);
+      }
+      
+    } catch (error) {
+      console.error('Funding Rate Update Error:', error);
+      rateValueElement.textContent = 'Error';
+      fundingElement.className = 'funding-rate';
+    }
+  }
 
   // Fetch MEXC Futures prices for XPL
   async function fetchMexcFuturePrice() {
@@ -226,8 +316,11 @@ const XPL = (() => {
     audioEnabled = true;
   }
 
+  // Initialize
   updateAlerts();
+  updateFundingRate(); // Initial funding rate fetch
   setInterval(updateAlerts, 2500);
+  setInterval(updateFundingRate, 300000); // Update funding rate every 5 minutes
   
   return { updateAlerts, enableAudio };
 })();

@@ -230,3 +230,15 @@ body {
     box-shadow: 0 0 12px rgba(255, 0, 0, 0.3);
   }
 }
+
+.funding-rate.positive .funding-rate-value {
+  color: #027f02;
+}
+
+.funding-rate.negative .funding-rate-value {
+  color: #bb0000;
+}
+
+.funding-rate.neutral .funding-rate-value {
+  color: #99cc00;
+}

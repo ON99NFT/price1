@@ -38,32 +38,40 @@
     </div>
   </div>
 
-  <!-- AVNT Section -->
-  <div class="token-section">
-    <div class="comparison-container">
-      <div class="comparison-group">
-        <h3>XPL HL vs MEXC</h3>
-        <div class="price-container">
-          <p>Buy: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
+<!-- AVNT Section -->
+<div class="token-section">
+  <div class="comparison-container">
+    <div class="comparison-group">
+      <h3>XPL HL vs MEXC
+        <span id="xpl-funding-rate" class="funding-rate">
+          <span class="funding-rate-value">Loading...</span>
+          <span class="next-funding-time"><span id="xpl-next-funding">--:--:--</span></span>
+        </span>
+      </h3>
+      <div class="price-container">
+        <p>Buy: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
       </div>
+    </div>
 
-      <div class="comparison-group">
-        <h3>LINEA Kyber vs MEXC</h3>
-        <div class="price-container">
-          <p>Buy: <span id="linea-kyber-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="linea-kyber-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
+    <div class="comparison-group">
+      <h3>LINEA Kyber vs MEXC
+        <span id="linea-funding-rate" class="funding-rate">
+          <span class="funding-rate-value">Loading...</span>
+          <span class="next-funding-time"><span id="linea-next-funding">--:--:--</span></span>
+        </span>
+      </h3>
+      <div class="price-container">
+        <p>Buy: <span id="linea-kyber-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell: <span id="linea-kyber-mexc-sell-alert" aria-live="polite">Loading...</span></p>
       </div>
-
-
     </div>
   </div>
+</div>
+
 
   <script src="global-audio.js"></script>
   <script src="eurc.js"></script>
-  <script src="avnt.js"></script>
   <script src="xpl.js"></script>
   <script src="linea-kyber.js"></script>
 </body>
