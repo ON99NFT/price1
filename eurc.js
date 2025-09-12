@@ -344,7 +344,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0005) {
+                } else if (value > -0.0003) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -358,7 +358,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0005) {
+                } else if (value > 0.0008) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -372,7 +372,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.0005) {
+                } else if (value > -0.0003) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -386,7 +386,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.0005) {
+                } else if (value > 0.0008) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -405,7 +405,7 @@ const EURC = (() => {
         updateFundingRate(); // Initial funding rate fetch
         // Set refresh rate to match pumpfun
         setInterval(updateAlerts, 4700);
-        setInterval(updateFundingRate, 300000); // Update funding rate every 5 minutes
+        setInterval(updateFundingRate, 60000); // Update funding rate every 5 minutes
         
         setTimeout(() => {
             if (!audioEnabled) {

@@ -272,7 +272,7 @@ const LINEAKyber = (() => {
   updateAlerts();
   updateFundingRate(); // Initial funding rate fetch
   setInterval(updateAlerts, 2500);
-  setInterval(updateFundingRate, 300000); // Update funding rate every 5 minutes
+  setInterval(updateFundingRate, 60000); // Update funding rate every 5 minutes
   
   return { updateAlerts, enableAudio };
 })();

@@ -284,7 +284,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 1046; // C6
-        } else if (value > -0.081) {
+        } else if (value > -0.099) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -298,7 +298,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 523; // C5
-        } else if (value > 0.139) {
+        } else if (value > 0.169) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -320,7 +320,7 @@ const XPL = (() => {
   updateAlerts();
   updateFundingRate(); // Initial funding rate fetch
   setInterval(updateAlerts, 2500);
-  setInterval(updateFundingRate, 300000); // Update funding rate every 5 minutes
+  setInterval(updateFundingRate, 60000); // Update funding rate every 5 minutes
   
   return { updateAlerts, enableAudio };
 })();
