@@ -307,7 +307,7 @@ async function updateAlerts() {
         
         // Kyber vs Pyth
         if (kyberData && pythPrice !== null) {
-            const kyberPythBuyDiff = kyberData.buyPrice - pythPrice;
+            const kyberPythBuyDiff = pythPrice - kyberData.buyPrice;
             const kyberPythSellDiff = kyberData.sellPrice - pythPrice;
 
             elements.kyberPythBuy.innerHTML = 
