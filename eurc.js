@@ -444,12 +444,12 @@ function applyAlertStyles(element, value, type) {
             
         // Kyber vs Pyth - Buy
         case 'kyber_pyth_buy':
-            if (Math.abs(value) > 0.002) {
-                element.classList.add(value > 0 ? 'alert-high-positive' : 'alert-high-negative');
+            if (value > 0.001) {
+                element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = value > 0 ? 1046 : 392; // C6 or G4
-            } else if (Math.abs(value) > 0.001) {
-                element.classList.add(value > 0 ? 'alert-medium-positive' : 'alert-medium-negative');
+            } else if (value > 0.0005) {
+                element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = value > 0 ? 880 : 440; // A5 or A4
@@ -458,12 +458,12 @@ function applyAlertStyles(element, value, type) {
             
         // Kyber vs Pyth - Sell
         case 'kyber_pyth_sell':
-            if (Math.abs(value) > 0.002) {
-                element.classList.add(value > 0 ? 'alert-high-positive' : 'alert-high-negative');
+            if (value > 0.001) {
+                element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = value > 0 ? 1046 : 392; // C6 or G4
-            } else if (Math.abs(value) > 0.001) {
-                element.classList.add(value > 0 ? 'alert-medium-positive' : 'alert-medium-negative');
+            } else if (value > 0.0002) {
+                element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
                 frequency = value > 0 ? 880 : 440; // A5 or A4
@@ -477,7 +477,7 @@ function applyAlertStyles(element, value, type) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 1046; // C6
-            } else if (value > 0.0001) {
+            } else if (value > 0.0002) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
@@ -492,7 +492,7 @@ function applyAlertStyles(element, value, type) {
                 element.classList.add('alert-high-positive');
                 shouldPlaySound = true;
                 frequency = 1046; // C6
-            } else if (value > 0.0001) {
+            } else if (value > 0.0002) {
                 element.classList.add('alert-medium-positive');
                 shouldPlaySound = true;
                 volume = 0.1;
