@@ -25,7 +25,7 @@ const EURC = (() => {
         }
     }
 
-    // Fetch Pyth EUR/USD price - UPDATED VERSION
+    // Fetch Pyth EUR/USD price
     async function fetchPythEURUSD() {
         // Pyth price feed ID for EUR/USD
         const priceId = '0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b';
@@ -203,51 +203,19 @@ const EURC = (() => {
         }
     }
 
-    // Fetch Jupiter prices for EURC
-    async function fetchJupPriceForEURC() {
-        const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintEURC = 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr';
-        
-        try {
-            const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintEURC}&amount=11500000000`), // 11500 USDC
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${outputMintEURC}&outputMint=${inputMintUSDC}&amount=10000000000`)  // 10000 EURC
-            ]);
-            
-            const buyData = await buyResponse.json();
-            const sellData = await sellResponse.json();
-            
-            return {
-                buyPrice: buyData?.outAmount ? 11500 / (parseInt(buyData.outAmount) / 1e6) : null,
-                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 10000 : null
-            };
-        } catch (error) {
-            console.error('Jupiter EURC Error:', error);
-            return { buyPrice: null, sellPrice: null };
-        }
-    }
-
     // Update alerts with pumpfun-like system
     async function updateAlerts() {
         const elements = {
             kyberBuy: document.getElementById('eurc-kyber-buy-alert'),
             kyberSell: document.getElementById('eurc-kyber-sell-alert'),
-            // Removed jupMexcBuy and jupMexcSell
             kyberPythBuy: document.getElementById('eurc-kyber-pyth-buy-alert'),
-            kyberPythSell: document.getElementById('eurc-kyber-pyth-sell-alert'),
-            // New elements for Jup vs Pyth
-            jupPythBuy: document.getElementById('eurc-jup-pyth-buy-alert'),
-            jupPythSell: document.getElementById('eurc-jup-pyth-sell-alert'),
-            // Elements for Kyber vs Jupiter
-            kyberJupBuy: document.getElementById('eurc-kyber-jup-buy-alert'),
-            kyberJupSell: document.getElementById('eurc-kyber-jup-sell-alert')
+            kyberPythSell: document.getElementById('eurc-kyber-pyth-sell-alert')
         };
 
         try {
-            const [kyberData, contractData, jupData, pythPrice] = await Promise.all([
+            const [kyberData, contractData, pythPrice] = await Promise.all([
                 fetchKyberPrice(),
                 fetchMexcContractPrice(),
-                fetchJupPriceForEURC(),
                 fetchPythEURUSD()
             ]);
             
@@ -282,31 +250,6 @@ const EURC = (() => {
                 );
             }
             
-            // Jupiter vs Pyth (NEW)
-            if (jupData && pythPrice !== null) {
-                const jupPythBuyDiff = pythPrice - jupData.buyPrice;
-                const jupPythSellDiff = jupData.sellPrice - pythPrice;
-
-                elements.jupPythBuy.innerHTML = 
-                    `J: $${format(jupData.buyPrice)} | P: $${format(pythPrice)} ` +
-                    `<span class="difference">$${format(jupPythBuyDiff)}</span>`;
-                
-                elements.jupPythSell.innerHTML = 
-                    `J: $${format(jupData.sellPrice)} | P: $${format(pythPrice)} ` +
-                    `<span class="difference">$${format(jupPythSellDiff)}</span>`;
-                
-                applyAlertStyles(
-                    elements.jupPythBuy.querySelector('.difference'), 
-                    jupPythBuyDiff,
-                    'jup_pyth_buy'
-                );
-                applyAlertStyles(
-                    elements.jupPythSell.querySelector('.difference'), 
-                    jupPythSellDiff,
-                    'jup_pyth_sell'
-                );
-            }
-            
             // Kyber vs Pyth
             if (kyberData && pythPrice !== null) {
                 const kyberPythBuyDiff = pythPrice - kyberData.buyPrice;
@@ -329,34 +272,6 @@ const EURC = (() => {
                     elements.kyberPythSell.querySelector('.difference'), 
                     kyberPythSellDiff,
                     'kyber_pyth_sell'
-                );
-            }
-            
-            // Kyber vs Jupiter
-            if (kyberData && jupData) {
-                // Buy alert: Kyber buy vs Jupiter sell
-                const kyberJupBuyDiff = jupData.sellPrice - kyberData.buyPrice;
-                
-                // Sell alert: Jupiter buy vs Kyber sell
-                const kyberJupSellDiff = kyberData.sellPrice - jupData.buyPrice;
-
-                elements.kyberJupBuy.innerHTML = 
-                    `K Buy: $${format(kyberData.buyPrice)} | J Sell: $${format(jupData.sellPrice)} ` +
-                    `<span class="difference">$${format(kyberJupBuyDiff)}</span>`;
-                
-                elements.kyberJupSell.innerHTML = 
-                    `J Buy: $${format(jupData.buyPrice)} | K Sell: $${format(kyberData.sellPrice)} ` +
-                    `<span class="difference">$${format(kyberJupSellDiff)}</span>`;
-                
-                applyAlertStyles(
-                    elements.kyberJupBuy.querySelector('.difference'), 
-                    kyberJupBuyDiff,
-                    'kyber_jup_buy'
-                );
-                applyAlertStyles(
-                    elements.kyberJupSell.querySelector('.difference'), 
-                    kyberJupSellDiff,
-                    'kyber_jup_sell'
                 );
             }
             
@@ -416,34 +331,6 @@ const EURC = (() => {
                 }
                 break;
                 
-            // Jupiter vs Pyth - Buy (NEW)
-            case 'jup_pyth_buy':
-                if (value > 0.001) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.0005) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            // Jupiter vs Pyth - Sell (NEW)
-            case 'jup_pyth_sell':
-                if (value > 0.001) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.0002) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
             // Kyber vs Pyth - Buy
             case 'kyber_pyth_buy':
                 if (value > 0.001) {
@@ -471,36 +358,6 @@ const EURC = (() => {
                     frequency = value > 0 ? 880 : 440; // A5 or A4
                 }
                 break;
-                
-            // Kyber vs Jupiter - Buy
-            case 'kyber_jup_buy':
-                // Positive value means Kyber buy price is higher than Jupiter sell price
-                if (value > 0.001) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.0002) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            // Kyber vs Jupiter - Sell
-            case 'kyber_jup_sell':
-                // Positive value means Jupiter buy price is higher than Kyber sell price
-                if (value > 0.001) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.0002) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
         }
 
         if (shouldPlaySound && window.GlobalAudio && window.GlobalAudio.enabled) {
@@ -513,7 +370,7 @@ const EURC = (() => {
         updateAlerts();
         updateFundingRate(); // Initial funding rate fetch
         // Set refresh rate
-        setInterval(updateAlerts, 4700);
+        setInterval(updateAlerts, 2500);
         setInterval(updateFundingRate, 60000); // Update funding rate every minute
     })();
   
