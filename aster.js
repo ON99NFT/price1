@@ -1,0 +1,401 @@
+// aster.js - Updated with Hyperliquid vs MEXC comparison
+const ASTER = (() => {
+    let audioEnabled = false;
+    let fundingRateInterval = null;
+    let nextFundingTime = null;
+
+    // Fetch KyberSwap prices for ASTER on BNB chain
+    async function fetchKyberPrice() {
+        const addresses = {
+            USDT: '0x55d398326f99059ff775485246999027b3197955', // USDT on BNB
+            ASTER: '0x000Ae314E2A2172a039B26378814C252734f556A' // ASTER on BNB
+        };
+
+        try {
+            // Format amounts properly without scientific notation
+            const buyAmount = "10000000000000000000"; // 10 USDT (18 decimals)
+            const sellAmount = "10000000000000000000"; // 10 ASTER (18 decimals)
+            
+            const [buyResponse, sellResponse] = await Promise.all([
+                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.USDT}&tokenOut=${addresses.ASTER}&amountIn=${buyAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`),
+                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.ASTER}&tokenOut=${addresses.USDT}&amountIn=${sellAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`)
+            ]);
+
+            const buyData = await buyResponse.json();
+            const sellData = await sellResponse.json();
+            
+            return {
+                buyPrice: buyData.data?.routeSummary?.amountOut ? 
+                    10 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e18) : null,
+                sellPrice: sellData.data?.routeSummary?.amountOut ? 
+                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e18) / 10 : null
+            };
+        } catch (error) {
+            console.error('Kyber ASTER Error:', error);
+            return { buyPrice: null, sellPrice: null };
+        }
+    }
+
+    // Fetch MEXC Futures prices for ASTER
+    async function fetchMexcFuturePrice() {
+        const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+        const url = 'https://contract.mexc.com/api/v1/contract/depth/ASTER_USDT';
+        
+        try {
+            const response = await fetch(proxyUrl + url);
+            const data = await response.json();
+            
+            if (!data?.data?.bids?.[0]?.[0] || !data?.data?.asks?.[0]?.[0]) {
+                throw new Error('Invalid MEXC response');
+            }
+            
+            return {
+                bid: parseFloat(data.data.bids[0][0]),
+                ask: parseFloat(data.data.asks[0][0])
+            };
+        } catch (error) {
+            console.error('MEXC Futures ASTER Error:', error);
+            return null;
+        }
+    }
+
+    // Fetch Hyperliquid Futures prices for ASTER
+    function fetchHyperliquidFuturePrice() {
+        return new Promise((resolve, reject) => {
+            const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
+            let timeout;
+            let receivedData = false;
+            
+            ws.onopen = () => {
+                ws.send(JSON.stringify({
+                    method: "subscribe",
+                    subscription: { type: "l2Book", coin: "ASTER" }
+                }));
+                
+                timeout = setTimeout(() => {
+                    if (!receivedData) {
+                        ws.close();
+                        reject(new Error('Hyperliquid connection timed out'));
+                    }
+                }, 5000);
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    
+                    if (message.channel === "l2Book" && message.data) {
+                        receivedData = true;
+                        clearTimeout(timeout);
+                        ws.close();
+                        
+                        const orderbook = message.data;
+                        
+                        if (!orderbook.levels || orderbook.levels.length < 2) {
+                            reject(new Error('Invalid Hyperliquid response structure'));
+                            return;
+                        }
+                        
+                        const bids = orderbook.levels[0];
+                        const asks = orderbook.levels[1];
+                        
+                        if (!bids || bids.length === 0 || !asks || asks.length === 0) {
+                            reject(new Error('Empty bids or asks array'));
+                            return;
+                        }
+                        
+                        const bestBid = bids[0]?.px;
+                        const bestAsk = asks[0]?.px;
+                        
+                        if (bestBid === undefined || bestAsk === undefined) {
+                            reject(new Error('Missing bid/ask prices in level data'));
+                            return;
+                        }
+                        
+                        resolve({
+                            bid: parseFloat(bestBid),
+                            ask: parseFloat(bestAsk)
+                        });
+                    }
+                } catch (error) {
+                    clearTimeout(timeout);
+                    ws.close();
+                    reject(error);
+                }
+            };
+            
+            ws.onerror = (error) => {
+                clearTimeout(timeout);
+                ws.close();
+                reject(error);
+            };
+            
+            ws.onclose = () => {
+                clearTimeout(timeout);
+                if (!receivedData) {
+                    reject(new Error('WebSocket closed before receiving data'));
+                }
+            };
+        });
+    }
+
+    // Update alerts with all comparisons
+    async function updateAlerts() {
+        const elements = {
+            kyberHyperBuy: document.getElementById('aster-kyber-hyper-buy-alert'),
+            kyberHyperSell: document.getElementById('aster-kyber-hyper-sell-alert'),
+            kyberMexcBuy: document.getElementById('aster-kyber-mexc-buy-alert'),
+            kyberMexcSell: document.getElementById('aster-kyber-mexc-sell-alert'),
+            hyperMexcBuy: document.getElementById('aster-hyper-mexc-buy-alert'),
+            hyperMexcSell: document.getElementById('aster-hyper-mexc-sell-alert')
+        };
+
+        try {
+            // Fetch data from all exchanges
+            const [kyberData, hyperData, mexcData] = await Promise.all([
+                fetchKyberPrice(),
+                fetchHyperliquidFuturePrice().catch(error => {
+                    console.error('Hyperliquid ASTER Error:', error);
+                    return null;
+                }),
+                fetchMexcFuturePrice().catch(error => {
+                    console.error('MEXC ASTER Error:', error);
+                    return null;
+                })
+            ]);
+            
+            // Formatting helper
+            const format = (val) => {
+                if (val === null || isNaN(val)) return 'N/A';
+                return val.toFixed(4);
+            };
+            
+            // Kyber Spot vs Hyperliquid Future
+            if (kyberData && hyperData) {
+                const buyOpportunity = hyperData.bid - kyberData.sellPrice;
+                const sellOpportunity = kyberData.buyPrice - hyperData.ask;
+                
+                elements.kyberHyperBuy.innerHTML = 
+                    `H: $${format(hyperData.bid)} | K: $${format(kyberData.sellPrice)} ` +
+                    `<span class="difference">$${format(buyOpportunity)}</span>`;
+                
+                elements.kyberHyperSell.innerHTML = 
+                    `K: $${format(kyberData.buyPrice)} | H: $${format(hyperData.ask)} ` +
+                    `<span class="difference">$${format(sellOpportunity)}</span>`;
+                
+                applyAlertStyles(
+                    elements.kyberHyperBuy.querySelector('.difference'), 
+                    buyOpportunity,
+                    'kyber_hyper_buy'
+                );
+                applyAlertStyles(
+                    elements.kyberHyperSell.querySelector('.difference'), 
+                    sellOpportunity,
+                    'kyber_hyper_sell'
+                );
+            } else {
+                if (!kyberData) {
+                    elements.kyberHyperBuy.textContent = 'Kyber data error';
+                    elements.kyberHyperSell.textContent = 'Kyber data error';
+                }
+                if (!hyperData) {
+                    elements.kyberHyperBuy.textContent = 'Hyperliquid data error';
+                    elements.kyberHyperSell.textContent = 'Hyperliquid data error';
+                }
+            }
+            
+            // Kyber Spot vs MEXC Future
+            if (kyberData && mexcData) {
+                const buyOpportunity = mexcData.bid - kyberData.sellPrice;
+                const sellOpportunity = kyberData.buyPrice - mexcData.ask;
+                
+                elements.kyberMexcBuy.innerHTML = 
+                    `M: $${format(mexcData.bid)} | K: $${format(kyberData.sellPrice)} ` +
+                    `<span class="difference">$${format(buyOpportunity)}</span>`;
+                
+                elements.kyberMexcSell.innerHTML = 
+                    `K: $${format(kyberData.buyPrice)} | M: $${format(mexcData.ask)} ` +
+                    `<span class="difference">$${format(sellOpportunity)}</span>`;
+                
+                applyAlertStyles(
+                    elements.kyberMexcBuy.querySelector('.difference'), 
+                    buyOpportunity,
+                    'kyber_mexc_buy'
+                );
+                applyAlertStyles(
+                    elements.kyberMexcSell.querySelector('.difference'), 
+                    sellOpportunity,
+                    'kyber_mexc_sell'
+                );
+            } else {
+                if (!kyberData) {
+                    elements.kyberMexcBuy.textContent = 'Kyber data error';
+                    elements.kyberMexcSell.textContent = 'Kyber data error';
+                }
+                if (!mexcData) {
+                    elements.kyberMexcBuy.textContent = 'MEXC data error';
+                    elements.kyberMexcSell.textContent = 'MEXC data error';
+                }
+            }
+            
+            // Hyperliquid Future vs MEXC Future
+            if (hyperData && mexcData) {
+                const buyOpportunity = mexcData.bid - hyperData.ask;
+                const sellOpportunity = hyperData.bid - mexcData.ask;
+                
+                elements.hyperMexcBuy.innerHTML = 
+                    `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
+                    `<span class="difference">$${format(buyOpportunity)}</span>`;
+                
+                elements.hyperMexcSell.innerHTML = 
+                    `H: $${format(hyperData.bid)} | M: $${format(mexcData.ask)} ` +
+                    `<span class="difference">$${format(sellOpportunity)}</span>`;
+                
+                applyAlertStyles(
+                    elements.hyperMexcBuy.querySelector('.difference'), 
+                    buyOpportunity,
+                    'hyper_mexc_buy'
+                );
+                applyAlertStyles(
+                    elements.hyperMexcSell.querySelector('.difference'), 
+                    sellOpportunity,
+                    'hyper_mexc_sell'
+                );
+            } else {
+                if (!hyperData) {
+                    elements.hyperMexcBuy.textContent = 'Hyperliquid data error';
+                    elements.hyperMexcSell.textContent = 'Hyperliquid data error';
+                }
+                if (!mexcData) {
+                    elements.hyperMexcBuy.textContent = 'MEXC data error';
+                    elements.hyperMexcSell.textContent = 'MEXC data error';
+                }
+            }
+            
+        } catch (error) {
+            console.error('ASTER Update Error:', error);
+            Object.values(elements).forEach(el => {
+                if (el) el.textContent = 'Update Error';
+            });
+        }
+    }
+
+    function applyAlertStyles(element, value, type) {
+        if (!element) return;
+        
+        element.className = 'difference';
+        const existingIcon = element.querySelector('.direction-icon');
+        if (existingIcon) existingIcon.remove();
+        
+        let shouldPlaySound = false;
+        let volume = 0.2;
+        let frequency = 784; // Default frequency (G5)
+        
+        // Add direction icon
+        const direction = document.createElement('span');
+        direction.className = 'direction-icon';
+        direction.textContent = value > 0 ? ' ↑' : ' ↓';
+        element.appendChild(direction);
+        
+        // Different thresholds and sounds for each comparison type
+        switch(type) {
+            case 'kyber_hyper_buy':
+                // Buy opportunity: Hyperliquid bid > Kyber sell price
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.011) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            case 'kyber_hyper_sell':
+                // Sell opportunity: Kyber buy price > Hyperliquid ask
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.006) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
+                
+            case 'kyber_mexc_buy':
+                // Buy opportunity: MEXC bid > Kyber sell price
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.011) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            case 'kyber_mexc_sell':
+                // Sell opportunity: Kyber buy price > MEXC ask
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.006) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
+                
+            case 'hyper_mexc_buy':
+                // Buy opportunity: MEXC bid > Hyperliquid ask
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.00) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            case 'hyper_mexc_sell':
+                // Sell opportunity: Hyperliquid bid > MEXC ask
+                if (value > 0.05) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.011) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
+        }
+
+        if (shouldPlaySound && audioEnabled) {
+            window.playSystemAlert(volume, frequency);
+        }
+    }
+
+    function enableAudio() {
+        audioEnabled = true;
+    }
+
+    // Initialize
+    updateAlerts();
+    setInterval(updateAlerts, 2000);
+    
+    return { updateAlerts, enableAudio };
+})();
