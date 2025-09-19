@@ -172,8 +172,8 @@ const ASTER = (() => {
             
             // Kyber Spot vs Hyperliquid Future
             if (kyberData && hyperData) {
-                const buyOpportunity = hyperData.bid - kyberData.sellPrice;
-                const sellOpportunity = kyberData.buyPrice - hyperData.ask;
+                const buyOpportunity = hyperData.ask - kyberData.sellPrice;
+                const sellOpportunity = kyberData.buyPrice - hyperData.bid;
                 
                 elements.kyberHyperBuy.innerHTML = 
                     `H: $${format(hyperData.bid)} | K: $${format(kyberData.sellPrice)} ` +
@@ -206,8 +206,8 @@ const ASTER = (() => {
             
             // Kyber Spot vs MEXC Future
             if (kyberData && mexcData) {
-                const buyOpportunity = mexcData.bid - kyberData.sellPrice;
-                const sellOpportunity = kyberData.buyPrice - mexcData.ask;
+                const buyOpportunity = mexcData.ask - kyberData.sellPrice;
+                const sellOpportunity = kyberData.buyPrice - mexcData.bid;
                 
                 elements.kyberMexcBuy.innerHTML = 
                     `M: $${format(mexcData.bid)} | K: $${format(kyberData.sellPrice)} ` +
@@ -240,8 +240,8 @@ const ASTER = (() => {
             
             // Hyperliquid Future vs MEXC Future
             if (hyperData && mexcData) {
-                const buyOpportunity = mexcData.bid - hyperData.ask;
-                const sellOpportunity = hyperData.bid - mexcData.ask;
+                const buyOpportunity = mexcData.ask - hyperData.bid;
+                const sellOpportunity = hyperData.ask - mexcData.bid;
                 
                 elements.hyperMexcBuy.innerHTML = 
                     `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
