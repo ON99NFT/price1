@@ -172,8 +172,8 @@ const ASTER = (() => {
             
             // Kyber Spot vs Hyperliquid Future
             if (kyberData && hyperData) {
-                const buyOpportunity = hyperData.ask - kyberData.sellPrice;
-                const sellOpportunity = kyberData.buyPrice - hyperData.bid;
+                const buyOpportunity = hyperData.bid - kyberData.buyPrice;
+                const sellOpportunity = kyberData.sellPrice - hyperData.ask;
                 
                 elements.kyberHyperBuy.innerHTML = 
                     `H: $${format(hyperData.bid)} | K: $${format(kyberData.sellPrice)} ` +
