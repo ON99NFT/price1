@@ -13,8 +13,8 @@ const ASTER = (() => {
 
         try {
             // Format amounts properly without scientific notation
-            const buyAmount = "10000000000000000000"; // 10 USDT (18 decimals)
-            const sellAmount = "10000000000000000000"; // 10 ASTER (18 decimals)
+            const buyAmount = "1500000000000000000000"; // 10 USDT (18 decimals)
+            const sellAmount = "2000000000000000000000"; // 10 ASTER (18 decimals)
             
             const [buyResponse, sellResponse] = await Promise.all([
                 fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.USDT}&tokenOut=${addresses.ASTER}&amountIn=${buyAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`),
@@ -26,9 +26,9 @@ const ASTER = (() => {
             
             return {
                 buyPrice: buyData.data?.routeSummary?.amountOut ? 
-                    10 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e18) : null,
+                    1500 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e18) : null,
                 sellPrice: sellData.data?.routeSummary?.amountOut ? 
-                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e18) / 10 : null
+                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e18) / 2000 : null
             };
         } catch (error) {
             console.error('Kyber ASTER Error:', error);
@@ -206,8 +206,8 @@ const ASTER = (() => {
             
             // Kyber Spot vs MEXC Future
             if (kyberData && mexcData) {
-                const buyOpportunity = mexcData.ask - kyberData.sellPrice;
-                const sellOpportunity = kyberData.buyPrice - mexcData.bid;
+                const buyOpportunity = mexcData.bid - kyberData.buyPrice;
+                const sellOpportunity = kyberData.sellPrice - mexcData.ask;
                 
                 elements.kyberMexcBuy.innerHTML = 
                     `M: $${format(mexcData.bid)} | K: $${format(kyberData.sellPrice)} ` +
@@ -240,8 +240,8 @@ const ASTER = (() => {
             
             // Hyperliquid Future vs MEXC Future
             if (hyperData && mexcData) {
-                const buyOpportunity = mexcData.ask - hyperData.bid;
-                const sellOpportunity = hyperData.ask - mexcData.bid;
+                const buyOpportunity = mexcData.bid - hyperData.ask;
+                const sellOpportunity = hyperData.bid - mexcData.ask;
                 
                 elements.hyperMexcBuy.innerHTML = 
                     `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
