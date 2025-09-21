@@ -223,7 +223,7 @@ const XPL = (() => {
         const sellOpportunity = hyperData.bid - mexcData.ask;
         
         elements.mexcHyperBuy.innerHTML = 
-          `M: $${format(mexcData.bid)} | H: $${format(hyperData.ask)} ` +
+          `H: $${format(hyperData.ask)} | M: $${format(mexcData.bid)} ` +
           `<span class="difference">$${format(buyOpportunity)}</span>`;
         
         elements.mexcHyperSell.innerHTML = 
@@ -284,7 +284,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 1046; // C6
-        } else if (value > -0.099) {
+        } else if (value > -0.011) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -298,7 +298,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 523; // C5
-        } else if (value > 0.169) {
+        } else if (value > 0.029) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
