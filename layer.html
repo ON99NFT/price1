@@ -56,8 +56,60 @@
     </div>
   </div>
 
+  <!-- Add this to your layer.html file inside the body, after the ASTER section -->
+<div class="token-section">
+  <div class="comparison-container">
+    <div class="comparison-group">
+      <h3>0G HL vs MEXC
+        <span id="zerog-hyper-funding-rate" class="funding-rate">
+          <span class="funding-rate-value">Loading...</span>
+        </span>
+      </h3>
+      <div class="price-container">
+        <p>Buy: <span id="zerog-hyper-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell: <span id="zerog-hyper-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+      </div>
+    </div>
+
+    <div class="comparison-group">
+      <h3>0G MEXC Spot vs Future
+        <span id="zerog-mexc-funding-rate" class="funding-rate">
+          <span class="funding-rate-value">Loading...</span>
+          <span class="next-funding-time"><span id="zerog-mexc-next-funding">--:--:--</span></span>
+        </span>
+      </h3>
+      <div class="price-container">
+        <p>Buy: <span id="zerog-mexc-spot-future-buy-alert" aria-live="polite">Loading...</span></p>
+        <p>Sell: <span id="zerog-mexc-spot-future-sell-alert" aria-live="polite">Loading...</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
   <div class="token-section">
     <div class="comparison-container">
+
+            <div class="comparison-group">
+        <h3>XPL HL vs MEXC
+          <span id="xpl-funding-rate" class="funding-rate">
+            <span class="funding-rate-value">Loading...</span>
+            <span class="next-funding-time"><span id="xpl-next-funding">--:--:--</span></span>
+          </span>
+        </h3>
+        <div class="price-container">
+          <p>Buy: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
+          <p>Sell: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
+        </div>
+      </div>
+
+      <div class="comparison-group">
+  <h3>ASTER HL vs MEXC</h3>
+  <div class="price-container">
+    <p>Buy: <span id="aster-hyper-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+    <p>Sell: <span id="aster-hyper-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+  </div>
+</div>
+
     <div class="comparison-group">
       <h3>ASTER Kyber vs Hyperliquid
       <span id="aster-hyper-funding-rate" class="funding-rate">
@@ -81,14 +133,6 @@
     <p>Sell: <span id="aster-kyber-mexc-sell-alert" aria-live="polite">Loading...</span></p>
   </div>
 </div>
-<!-- Add this to your layer.html file inside the ASTER token section -->
-<div class="comparison-group">
-  <h3>ASTER HL vs MEXC</h3>
-  <div class="price-container">
-    <p>Buy: <span id="aster-hyper-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell: <span id="aster-hyper-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
-</div>
 
 <div class="comparison-group">
   <h3>ASTER MEXC Spot vs Future</h3>
@@ -98,24 +142,13 @@
   </div>
 </div>
 
-      <div class="comparison-group">
-        <h3>XPL HL vs MEXC
-          <span id="xpl-funding-rate" class="funding-rate">
-            <span class="funding-rate-value">Loading...</span>
-            <span class="next-funding-time"><span id="xpl-next-funding">--:--:--</span></span>
-          </span>
-        </h3>
-        <div class="price-container">
-          <p>Buy: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
   </div>
 </div>
 
   <script src="global-audio.js"></script>
   <script src="eurc.js"></script>
   <script src="eurc-jup.js"></script>
+  <script src="0g.js"></script>
   <script src="xpl.js"></script>
   <script src="aster.js"></script>
 </body>

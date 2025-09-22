@@ -1,15 +1,15 @@
-// aster.js - Updated with Hyperliquid vs MEXC comparison and funding rates
-const ASTER = (() => {
+// 0g.js - Hyperliquid vs MEXC comparison and funding rates
+const ZEROG = (() => {
     let audioEnabled = false;
     let fundingRateInterval = null;
     let nextFundingTime = null;
     let hyperliquidFundingRate = null;
     let mexcFundingRate = null;
 
-    // Fetch MEXC Funding Rate for ASTER
+    // Fetch MEXC Funding Rate for 0G
     async function fetchMexcFundingRate() {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const url = 'https://contract.mexc.com/api/v1/contract/funding_rate/ASTER_USDT';
+        const url = 'https://contract.mexc.com/api/v1/contract/funding_rate/0G_USDT';
         
         try {
             const response = await fetch(proxyUrl + url);
@@ -29,7 +29,7 @@ const ASTER = (() => {
         }
     }
 
-    // Fetch Hyperliquid Funding Rate for ASTER
+    // Fetch Hyperliquid Funding Rate for 0G
     async function fetchHyperliquidFundingRate() {
         try {
             // Hyperliquid funding rate API (based on documentation)
@@ -40,7 +40,7 @@ const ASTER = (() => {
                 },
                 body: JSON.stringify({
                     type: 'fundingHistory',
-                    coin: 'ASTER',
+                    coin: '0G',
                     startTime: Date.now() - 24 * 60 * 60 * 1000, // Last 24 hours
                     endTime: Date.now()
                 })
@@ -77,7 +77,7 @@ const ASTER = (() => {
             if (mexcData) {
                 mexcFundingRate = mexcData.rate;
                 const ratePercent = (mexcData.rate * 100).toFixed(4);
-                const rateElement = document.getElementById('aster-mexc-funding-rate');
+                const rateElement = document.getElementById('zerog-mexc-funding-rate');
                 
                 if (rateElement) {
                     rateElement.querySelector('.funding-rate-value').textContent = `${ratePercent}%`;
@@ -105,7 +105,7 @@ const ASTER = (() => {
             if (hyperData) {
                 hyperliquidFundingRate = hyperData.rate;
                 const ratePercent = (hyperData.rate * 100).toFixed(4);
-                const rateElement = document.getElementById('aster-hyper-funding-rate');
+                const rateElement = document.getElementById('zerog-hyper-funding-rate');
                 
                 if (rateElement) {
                     rateElement.querySelector('.funding-rate-value').textContent = `${ratePercent}%`;
@@ -143,46 +143,14 @@ const ASTER = (() => {
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((diff % (1000 * 60)) / 1000);
         
-        document.getElementById('aster-mexc-next-funding').textContent = 
+        document.getElementById('zerog-mexc-next-funding').textContent = 
             `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
 
-    // Fetch KyberSwap prices for ASTER on BNB chain
-    async function fetchKyberPrice() {
-        const addresses = {
-            USDT: '0x55d398326f99059ff775485246999027b3197955', // USDT on BNB
-            ASTER: '0x000Ae314E2A2172a039B26378814C252734f556A' // ASTER on BNB
-        };
-
-        try {
-            // Format amounts properly without scientific notation
-            const buyAmount = "3000000000000000000000"; // 3000 USDT (18 decimals)
-            const sellAmount = "2000000000000000000000"; // 2000 ASTER (18 decimals)
-            
-            const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.USDT}&tokenOut=${addresses.ASTER}&amountIn=${buyAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`),
-                fetch(`https://aggregator-api.kyberswap.com/bsc/api/v1/routes?tokenIn=${addresses.ASTER}&tokenOut=${addresses.USDT}&amountIn=${sellAmount}&excludedSources=lo1inch,kyberswap-limit-order-v2`)
-            ]);
-
-            const buyData = await buyResponse.json();
-            const sellData = await sellResponse.json();
-            
-            return {
-                buyPrice: buyData.data?.routeSummary?.amountOut ? 
-                    3000 / (parseFloat(buyData.data.routeSummary.amountOut) / 1e18) : null,
-                sellPrice: sellData.data?.routeSummary?.amountOut ? 
-                    (parseFloat(sellData.data.routeSummary.amountOut) / 1e18) / 2000 : null
-            };
-        } catch (error) {
-            console.error('Kyber ASTER Error:', error);
-            return { buyPrice: null, sellPrice: null };
-        }
-    }
-
-    // Fetch MEXC Futures prices for ASTER
+    // Fetch MEXC Futures prices for 0G
     async function fetchMexcFuturePrice() {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const url = 'https://contract.mexc.com/api/v1/contract/depth/ASTER_USDT';
+        const url = 'https://contract.mexc.com/api/v1/contract/depth/0G_USDT';
         
         try {
             const response = await fetch(proxyUrl + url);
@@ -197,15 +165,15 @@ const ASTER = (() => {
                 ask: parseFloat(data.data.asks[0][0])
             };
         } catch (error) {
-            console.error('MEXC Futures ASTER Error:', error);
+            console.error('MEXC Futures 0G Error:', error);
             return null;
         }
     }
 
-    // Fetch MEXC Spot prices for ASTER
+    // Fetch MEXC Spot prices for 0G
     async function fetchMexcSpotPrice() {
         const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
-        const apiUrl = 'https://api.mexc.com/api/v3/depth?symbol=ASTERUSDT&limit=5';
+        const apiUrl = 'https://api.mexc.com/api/v3/depth?symbol=0GUSDT&limit=5';
         
         try {
             const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
@@ -224,12 +192,12 @@ const ASTER = (() => {
                 ask: bestAsk
             };
         } catch (error) {
-            console.error('MEXC Spot ASTER Error:', error);
+            console.error('MEXC Spot 0G Error:', error);
             return null;
         }
     }
 
-    // Fetch Hyperliquid Futures prices for ASTER
+    // Fetch Hyperliquid Futures prices for 0G
     function fetchHyperliquidFuturePrice() {
         return new Promise((resolve, reject) => {
             const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
@@ -239,7 +207,7 @@ const ASTER = (() => {
             ws.onopen = () => {
                 ws.send(JSON.stringify({
                     method: "subscribe",
-                    subscription: { type: "l2Book", coin: "ASTER" }
+                    subscription: { type: "l2Book", coin: "0G" }
                 }));
                 
                 timeout = setTimeout(() => {
@@ -312,30 +280,25 @@ const ASTER = (() => {
     // Update alerts with all comparisons
     async function updateAlerts() {
         const elements = {
-            kyberHyperBuy: document.getElementById('aster-kyber-hyper-buy-alert'),
-            kyberHyperSell: document.getElementById('aster-kyber-hyper-sell-alert'),
-            kyberMexcBuy: document.getElementById('aster-kyber-mexc-buy-alert'),
-            kyberMexcSell: document.getElementById('aster-kyber-mexc-sell-alert'),
-            hyperMexcBuy: document.getElementById('aster-hyper-mexc-buy-alert'),
-            hyperMexcSell: document.getElementById('aster-hyper-mexc-sell-alert'),
-            mexcSpotFutureBuy: document.getElementById('aster-mexc-spot-future-buy-alert'),
-            mexcSpotFutureSell: document.getElementById('aster-mexc-spot-future-sell-alert')
+            hyperMexcBuy: document.getElementById('zerog-hyper-mexc-buy-alert'),
+            hyperMexcSell: document.getElementById('zerog-hyper-mexc-sell-alert'),
+            mexcSpotFutureBuy: document.getElementById('zerog-mexc-spot-future-buy-alert'),
+            mexcSpotFutureSell: document.getElementById('zerog-mexc-spot-future-sell-alert')
         };
 
         try {
             // Fetch data from all exchanges
-            const [kyberData, hyperData, mexcFutureData, mexcSpotData] = await Promise.all([
-                fetchKyberPrice(),
+            const [hyperData, mexcFutureData, mexcSpotData] = await Promise.all([
                 fetchHyperliquidFuturePrice().catch(error => {
-                    console.error('Hyperliquid ASTER Error:', error);
+                    console.error('Hyperliquid 0G Error:', error);
                     return null;
                 }),
                 fetchMexcFuturePrice().catch(error => {
-                    console.error('MEXC Future ASTER Error:', error);
+                    console.error('MEXC Future 0G Error:', error);
                     return null;
                 }),
                 fetchMexcSpotPrice().catch(error => {
-                    console.error('MEXC Spot ASTER Error:', error);
+                    console.error('MEXC Spot 0G Error:', error);
                     return null;
                 })
             ]);
@@ -343,76 +306,8 @@ const ASTER = (() => {
             // Formatting helper
             const format = (val) => {
                 if (val === null || isNaN(val)) return 'N/A';
-                return val.toFixed(4);
+                return val.toFixed(3);
             };
-            
-            // Kyber Spot vs Hyperliquid Future
-            if (kyberData && hyperData) {
-                const buyOpportunity = hyperData.bid - kyberData.buyPrice;
-                const sellOpportunity = kyberData.sellPrice - hyperData.ask;
-                
-                elements.kyberHyperBuy.innerHTML = 
-                    `K: $${format(kyberData.buyPrice)} | H: $${format(hyperData.bid)} ` +
-                    `<span class="difference">$${format(buyOpportunity)}</span>`;
-                
-                elements.kyberHyperSell.innerHTML = 
-                    `K: $${format(kyberData.sellPrice)} | H: $${format(hyperData.ask)} ` +
-                    `<span class="difference">$${format(sellOpportunity)}</span>`;
-                
-                applyAlertStyles(
-                    elements.kyberHyperBuy.querySelector('.difference'), 
-                    buyOpportunity,
-                    'kyber_hyper_buy'
-                );
-                applyAlertStyles(
-                    elements.kyberHyperSell.querySelector('.difference'), 
-                    sellOpportunity,
-                    'kyber_hyper_sell'
-                );
-            } else {
-                if (!kyberData) {
-                    elements.kyberHyperBuy.textContent = 'Kyber data error';
-                    elements.kyberHyperSell.textContent = 'Kyber data error';
-                }
-                if (!hyperData) {
-                    elements.kyberHyperBuy.textContent = 'Hyperliquid data error';
-                    elements.kyberHyperSell.textContent = 'Hyperliquid data error';
-                }
-            }
-            
-            // Kyber Spot vs MEXC Future
-            if (kyberData && mexcFutureData) {
-                const buyOpportunity = mexcFutureData.bid - kyberData.buyPrice;
-                const sellOpportunity = kyberData.sellPrice - mexcFutureData.ask;
-                
-                elements.kyberMexcBuy.innerHTML = 
-                    `K: $${format(kyberData.buyPrice)} | M: $${format(mexcFutureData.bid)} ` +
-                    `<span class="difference">$${format(buyOpportunity)}</span>`;
-                
-                elements.kyberMexcSell.innerHTML = 
-                    `K: $${format(kyberData.sellPrice)} | M: $${format(mexcFutureData.ask)} ` +
-                    `<span class="difference">$${format(sellOpportunity)}</span>`;
-                
-                applyAlertStyles(
-                    elements.kyberMexcBuy.querySelector('.difference'), 
-                    buyOpportunity,
-                    'kyber_mexc_buy'
-                );
-                applyAlertStyles(
-                    elements.kyberMexcSell.querySelector('.difference'), 
-                    sellOpportunity,
-                    'kyber_mexc_sell'
-                );
-            } else {
-                if (!kyberData) {
-                    elements.kyberMexcBuy.textContent = 'Kyber data error';
-                    elements.kyberMexcSell.textContent = 'Kyber data error';
-                }
-                if (!mexcFutureData) {
-                    elements.kyberMexcBuy.textContent = 'MEXC Future data error';
-                    elements.kyberMexcSell.textContent = 'MEXC Future data error';
-                }
-            }
             
             // Hyperliquid Future vs MEXC Future
             if (hyperData && mexcFutureData) {
@@ -483,7 +378,7 @@ const ASTER = (() => {
             }
             
         } catch (error) {
-            console.error('ASTER Update Error:', error);
+            console.error('0G Update Error:', error);
             Object.values(elements).forEach(el => {
                 if (el) el.textContent = 'Update Error';
             });
@@ -509,69 +404,13 @@ const ASTER = (() => {
         
         // Different thresholds and sounds for each comparison type
         switch(type) {
-            case 'kyber_hyper_buy':
-                // Buy opportunity: Hyperliquid bid > Kyber sell price
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.008) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            case 'kyber_hyper_sell':
-                // Sell opportunity: Kyber buy price > Hyperliquid ask
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 523; // C5
-                } else if (value > 0.001) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 587; // D5
-                }
-                break;
-                
-            case 'kyber_mexc_buy':
-                // Buy opportunity: MEXC bid > Kyber sell price
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 1046; // C6
-                } else if (value > 0.008) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 880; // A5
-                }
-                break;
-                
-            case 'kyber_mexc_sell':
-                // Sell opportunity: Kyber buy price > MEXC ask
-                if (value > 0.05) {
-                    element.classList.add('alert-high-positive');
-                    shouldPlaySound = true;
-                    frequency = 523; // C5
-                } else if (value > 0.001) {
-                    element.classList.add('alert-medium-positive');
-                    shouldPlaySound = true;
-                    volume = 0.1;
-                    frequency = 587; // D5
-                }
-                break;
-                
             case 'hyper_mexc_buy':
                 // Buy opportunity: MEXC bid > Hyperliquid ask
-                if (value > 0.05) {
+                if (value > 0.5) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.001) {
+                } else if (value > 0.02) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -581,11 +420,11 @@ const ASTER = (() => {
                 
             case 'hyper_mexc_sell':
                 // Sell opportunity: Hyperliquid bid > MEXC ask
-                if (value > 0.05) {
+                if (value > 0.5) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.004) {
+                } else if (value > 0.02) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -595,11 +434,11 @@ const ASTER = (() => {
 
             case 'mexc_spot_future_buy':
                 // Buy opportunity: MEXC Future bid > MEXC Spot ask
-                if (value > 0.05) {
+                if (value > 0.9) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > 0.008) {
+                } else if (value > 0.0) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -609,11 +448,11 @@ const ASTER = (() => {
                 
             case 'mexc_spot_future_sell':
                 // Sell opportunity: MEXC Spot bid > MEXC Future ask
-                if (value > 0.05) {
+                if (value > 0.9) {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.001) {
+                } else if (value > 0.1) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
