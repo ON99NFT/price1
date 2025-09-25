@@ -1,3 +1,4 @@
+// xpl.js - Updated with Spot vs Future comparison
 const XPL = (() => {
   let audioEnabled = false;
   let fundingRateInterval = null;
@@ -46,6 +47,13 @@ const XPL = (() => {
     
     document.getElementById('xpl-next-funding').textContent = 
       `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    
+    // Also update the spot vs future funding timer if it exists
+    const spotFutureTimer = document.getElementById('xpl-mexc-next-funding');
+    if (spotFutureTimer) {
+      spotFutureTimer.textContent = 
+        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
   }
 
   // Update funding rate display
@@ -74,6 +82,14 @@ const XPL = (() => {
         fundingElement.className = 'funding-rate negative';
       } else {
         fundingElement.className = 'funding-rate neutral';
+      }
+      
+      // Also update the spot vs future funding rate display
+      const spotFutureFundingElement = document.getElementById('xpl-mexc-funding-rate');
+      if (spotFutureFundingElement) {
+        const spotFutureRateValue = spotFutureFundingElement.querySelector('.funding-rate-value');
+        spotFutureRateValue.textContent = `${ratePercent}%`;
+        spotFutureFundingElement.className = fundingElement.className;
       }
       
       // Set next funding time
@@ -110,6 +126,33 @@ const XPL = (() => {
       };
     } catch (error) {
       console.error('MEXC Futures Error:', error);
+      return null;
+    }
+  }
+
+  // Fetch MEXC Spot prices for XPL
+  async function fetchMexcSpotPrice() {
+    const proxyUrl = 'https://api.codetabs.com/v1/proxy/?quest=';
+    const apiUrl = 'https://api.mexc.com/api/v3/depth?symbol=XPLUSDT&limit=5';
+    
+    try {
+      const response = await fetch(proxyUrl + encodeURIComponent(apiUrl));
+      const data = await response.json();
+      
+      if (!data.bids || !data.asks || data.bids.length === 0 || data.asks.length === 0) {
+        throw new Error('Invalid spot order book');
+      }
+      
+      // Get best bid and ask
+      const bestBid = parseFloat(data.bids[0][0]);
+      const bestAsk = parseFloat(data.asks[0][0]);
+      
+      return {
+        bid: bestBid,
+        ask: bestAsk
+      };
+    } catch (error) {
+      console.error('MEXC Spot XPL Error:', error);
       return null;
     }
   }
@@ -194,19 +237,25 @@ const XPL = (() => {
     });
   }
 
-  // Update alerts with MEXC vs Hyperliquid comparison
+  // Update alerts with all comparisons
   async function updateAlerts() {
     const elements = {
       mexcHyperBuy: document.getElementById('xpl-mexc-hyper-buy-alert'),
-      mexcHyperSell: document.getElementById('xpl-mexc-hyper-sell-alert')
+      mexcHyperSell: document.getElementById('xpl-mexc-hyper-sell-alert'),
+      mexcSpotFutureBuy: document.getElementById('xpl-mexc-spot-future-buy-alert'),
+      mexcSpotFutureSell: document.getElementById('xpl-mexc-spot-future-sell-alert')
     };
 
     try {
-      // Fetch data from both exchanges
-      const [mexcData, hyperData] = await Promise.all([
+      // Fetch data from all exchanges
+      const [mexcData, hyperData, mexcSpotData] = await Promise.all([
         fetchMexcFuturePrice(),
         fetchHyperliquidFuturePrice().catch(error => {
           console.error('Hyperliquid Error:', error);
+          return null;
+        }),
+        fetchMexcSpotPrice().catch(error => {
+          console.error('MEXC Spot XPL Error:', error);
           return null;
         })
       ]);
@@ -250,6 +299,40 @@ const XPL = (() => {
           elements.mexcHyperSell.textContent = 'Hyperliquid data error';
         }
       }
+
+      // MEXC Spot vs MEXC Future
+      if (mexcSpotData && mexcData) {
+        const buyOpportunity = mexcData.bid - mexcSpotData.ask;
+        const sellOpportunity = mexcSpotData.bid - mexcData.ask;
+        
+        elements.mexcSpotFutureBuy.innerHTML = 
+          `Spot: $${format(mexcSpotData.ask)} | Future: $${format(mexcData.bid)} ` +
+          `<span class="difference">$${format(buyOpportunity)}</span>`;
+        
+        elements.mexcSpotFutureSell.innerHTML = 
+          `Spot: $${format(mexcSpotData.bid)} | Future: $${format(mexcData.ask)} ` +
+          `<span class="difference">$${format(sellOpportunity)}</span>`;
+        
+        applyAlertStyles(
+          elements.mexcSpotFutureBuy.querySelector('.difference'), 
+          buyOpportunity,
+          'mexc_spot_future_buy'
+        );
+        applyAlertStyles(
+          elements.mexcSpotFutureSell.querySelector('.difference'), 
+          sellOpportunity,
+          'mexc_spot_future_sell'
+        );
+      } else {
+        if (!mexcSpotData) {
+          elements.mexcSpotFutureBuy.textContent = 'MEXC Spot data error';
+          elements.mexcSpotFutureSell.textContent = 'MEXC Spot data error';
+        }
+        if (!mexcData) {
+          elements.mexcSpotFutureBuy.textContent = 'MEXC Future data error';
+          elements.mexcSpotFutureSell.textContent = 'MEXC Future data error';
+        }
+      }
       
     } catch (error) {
       console.error('Update Error:', error);
@@ -284,7 +367,7 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 1046; // C6
-        } else if (value > -0.051) {
+        } else if (value > -0.0021) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -298,7 +381,35 @@ const XPL = (() => {
           element.classList.add('alert-high-positive');
           shouldPlaySound = true;
           frequency = 523; // C5
-        } else if (value > 0.0139) {
+        } else if (value > 0.0079) {
+          element.classList.add('alert-medium-positive');
+          shouldPlaySound = true;
+          volume = 0.1;
+          frequency = 587; // D5
+        }
+        break;
+
+      case 'mexc_spot_future_buy':
+        // Buy opportunity: MEXC Future bid > MEXC Spot ask
+        if (value > 0.9) {
+          element.classList.add('alert-high-positive');
+          shouldPlaySound = true;
+          frequency = 1046; // C6
+        } else if (value > 0.0079) {
+          element.classList.add('alert-medium-positive');
+          shouldPlaySound = true;
+          volume = 0.1;
+          frequency = 880; // A5
+        }
+        break;
+        
+      case 'mexc_spot_future_sell':
+        // Sell opportunity: MEXC Spot bid > MEXC Future ask
+        if (value > 0.9) {
+          element.classList.add('alert-high-positive');
+          shouldPlaySound = true;
+          frequency = 523; // C5
+        } else if (value > 0.01) {
           element.classList.add('alert-medium-positive');
           shouldPlaySound = true;
           volume = 0.1;
@@ -320,7 +431,7 @@ const XPL = (() => {
   updateAlerts();
   updateFundingRate(); // Initial funding rate fetch
   setInterval(updateAlerts, 2500);
-  setInterval(updateFundingRate, 60000); // Update funding rate every 5 minutes
+  setInterval(updateFundingRate, 60000); // Update funding rate every minute
   
   return { updateAlerts, enableAudio };
 })();
