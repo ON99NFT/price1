@@ -1,4 +1,4 @@
-// xpl.js - Updated with Spot vs Future comparison
+// xpl.js - Updated with Kyber vs Future comparison (Hyperliquid removed)
 const XPL = (() => {
   let audioEnabled = false;
   let fundingRateInterval = null;
@@ -157,105 +157,74 @@ const XPL = (() => {
     }
   }
 
-  // Fetch Hyperliquid Futures prices for XPL
-  function fetchHyperliquidFuturePrice() {
-    return new Promise((resolve, reject) => {
-      const ws = new WebSocket('wss://api.hyperliquid.xyz/ws');
-      let timeout;
-      let receivedData = false;
-      
-      ws.onopen = () => {
-        ws.send(JSON.stringify({
-          method: "subscribe",
-          subscription: { type: "l2Book", coin: "XPL" }
-        }));
-        
-        timeout = setTimeout(() => {
-          if (!receivedData) {
-            ws.close();
-            reject(new Error('Hyperliquid connection timed out'));
-          }
-        }, 5000);
-      };
-      
-      ws.onmessage = (event) => {
-        try {
-          const message = JSON.parse(event.data);
-          
-          if (message.channel === "l2Book" && message.data) {
-            receivedData = true;
-            clearTimeout(timeout);
-            ws.close();
-            
-            const orderbook = message.data;
-            
-            if (!orderbook.levels || orderbook.levels.length < 2) {
-              reject(new Error('Invalid Hyperliquid response structure'));
-              return;
-            }
-            
-            const bids = orderbook.levels[0];
-            const asks = orderbook.levels[1];
-            
-            if (!bids || bids.length === 0 || !asks || asks.length === 0) {
-              reject(new Error('Empty bids or asks array'));
-              return;
-            }
-            
-            const bestBid = bids[0]?.px;
-            const bestAsk = asks[0]?.px;
-            
-            if (bestBid === undefined || bestAsk === undefined) {
-              reject(new Error('Missing bid/ask prices in level data'));
-              return;
-            }
-            
-            resolve({
-              bid: parseFloat(bestBid),
-              ask: parseFloat(bestAsk)
-            });
-          }
-        } catch (error) {
-          clearTimeout(timeout);
-          ws.close();
-          reject(error);
-        }
-      };
-      
-      ws.onerror = (error) => {
-        clearTimeout(timeout);
-        ws.close();
-        reject(error);
-      };
-      
-      ws.onclose = () => {
-        clearTimeout(timeout);
-        if (!receivedData) {
-          reject(new Error('WebSocket closed before receiving data'));
-        }
-      };
-    });
-  }
-
-  // Update alerts with all comparisons
-  async function updateAlerts() {
-    const elements = {
-      mexcHyperBuy: document.getElementById('xpl-mexc-hyper-buy-alert'),
-      mexcHyperSell: document.getElementById('xpl-mexc-hyper-sell-alert'),
-      mexcSpotFutureBuy: document.getElementById('xpl-mexc-spot-future-buy-alert'),
-      mexcSpotFutureSell: document.getElementById('xpl-mexc-spot-future-sell-alert')
+  // Fetch KyberSwap prices for WXPL on Plasma - CORRECTED VERSION
+  async function fetchKyberXPLPrice() {
+    // First, let's verify the token addresses and get correct decimals
+    const addresses = {
+      // Use correct token addresses for Plasma chain
+      USDT: '0xB8CE59FC3717ada4C02eaDF9682A9e934F625ebb', // USDT on Plasma
+      WXPL: '0x6100E367285b01F48D07953803A2d8dCA5D19873'  // WXPL on Plasma
     };
 
     try {
-      // Fetch data from all exchanges
-      const [mexcData, hyperData, mexcSpotData] = await Promise.all([
+      // Use more reasonable amounts
+      const buyAmount = "1000000000"; // 1000 USDT (assuming 6 decimals)
+      const sellAmount = "1000000000000000000000"; // 1 WXPL (assuming 18 decimals)
+      
+      // KyberSwap API for Plasma chain
+      const [buyResponse, sellResponse] = await Promise.all([
+        fetch(`https://aggregator-api.kyberswap.com/plasma/api/v1/routes?tokenIn=${addresses.USDT}&tokenOut=${addresses.WXPL}&amountIn=${buyAmount}`),
+        fetch(`https://aggregator-api.kyberswap.com/plasma/api/v1/routes?tokenIn=${addresses.WXPL}&tokenOut=${addresses.USDT}&amountIn=${sellAmount}`)
+      ]);
+
+      if (!buyResponse.ok || !sellResponse.ok) {
+        throw new Error('Kyber API request failed');
+      }
+
+      const buyData = await buyResponse.json();
+      const sellData = await sellResponse.json();
+      
+      console.log('Kyber Buy Response:', buyData); // Debug log
+      console.log('Kyber Sell Response:', sellData); // Debug log
+      
+      // Extract prices safely
+      const buyPrice = buyData.data?.routeSummary?.amountOut 
+        ? parseFloat(buyData.data.routeSummary.amountOut) / 1e18  // Adjust based on actual WXPL decimals
+        : null;
+      
+      const sellPrice = sellData.data?.routeSummary?.amountOut 
+        ? parseFloat(sellData.data.routeSummary.amountOut) / 1e6   // Adjust based on actual USDT decimals  
+        : null;
+
+      return {
+        buyPrice: buyPrice ? 1000 / buyPrice : null, // Price per WXPL in USDT
+        sellPrice: sellPrice ? sellPrice / 1000 : null  // Price per WXPL in USDT (selling 1 WXPL)
+      };
+    } catch (error) {
+      console.error('Kyber XPL Error:', error);
+      return { buyPrice: null, sellPrice: null };
+    }
+  }
+
+  // Update alerts with comparisons (Hyperliquid removed)
+  async function updateAlerts() {
+    const elements = {
+      mexcSpotFutureBuy: document.getElementById('xpl-mexc-spot-future-buy-alert'),
+      mexcSpotFutureSell: document.getElementById('xpl-mexc-spot-future-sell-alert'),
+      kyberMexcBuy: document.getElementById('xpl-kyber-mexc-buy-alert'),
+      kyberMexcSell: document.getElementById('xpl-kyber-mexc-sell-alert')
+    };
+
+    try {
+      // Fetch data from exchanges (Hyperliquid removed)
+      const [mexcData, mexcSpotData, kyberData] = await Promise.all([
         fetchMexcFuturePrice(),
-        fetchHyperliquidFuturePrice().catch(error => {
-          console.error('Hyperliquid Error:', error);
-          return null;
-        }),
         fetchMexcSpotPrice().catch(error => {
           console.error('MEXC Spot XPL Error:', error);
+          return null;
+        }),
+        fetchKyberXPLPrice().catch(error => {
+          console.error('Kyber XPL Error:', error);
           return null;
         })
       ]);
@@ -266,40 +235,6 @@ const XPL = (() => {
         return val.toFixed(4);
       };
       
-      // MEXC Future vs Hyperliquid Future
-      if (mexcData && hyperData) {
-        const buyOpportunity = mexcData.bid - hyperData.ask;
-        const sellOpportunity = hyperData.bid - mexcData.ask;
-        
-        elements.mexcHyperBuy.innerHTML = 
-          `H: $${format(hyperData.ask)} | M: $${format(mexcData.bid)} ` +
-          `<span class="difference">$${format(buyOpportunity)}</span>`;
-        
-        elements.mexcHyperSell.innerHTML = 
-          `H: $${format(hyperData.bid)} | M: $${format(mexcData.ask)} ` +
-          `<span class="difference">$${format(sellOpportunity)}</span>`;
-        
-        applyAlertStyles(
-          elements.mexcHyperBuy.querySelector('.difference'), 
-          buyOpportunity,
-          'mexc_hyper_buy'
-        );
-        applyAlertStyles(
-          elements.mexcHyperSell.querySelector('.difference'), 
-          sellOpportunity,
-          'mexc_hyper_sell'
-        );
-      } else {
-        if (!mexcData) {
-          elements.mexcHyperBuy.textContent = 'MEXC data error';
-          elements.mexcHyperSell.textContent = 'MEXC data error';
-        }
-        if (!hyperData) {
-          elements.mexcHyperBuy.textContent = 'Hyperliquid data error';
-          elements.mexcHyperSell.textContent = 'Hyperliquid data error';
-        }
-      }
-
       // MEXC Spot vs MEXC Future
       if (mexcSpotData && mexcData) {
         const buyOpportunity = mexcData.bid - mexcSpotData.ask;
@@ -333,6 +268,40 @@ const XPL = (() => {
           elements.mexcSpotFutureSell.textContent = 'MEXC Future data error';
         }
       }
+
+      // Kyber vs MEXC Future
+      if (kyberData && mexcData) {
+        const buyOpportunity = mexcData.bid - kyberData.buyPrice;
+        const sellOpportunity = kyberData.sellPrice - mexcData.ask;
+        
+        elements.kyberMexcBuy.innerHTML = 
+          `K: $${format(kyberData.buyPrice)} | M: $${format(mexcData.bid)} ` +
+          `<span class="difference">$${format(buyOpportunity)}</span>`;
+        
+        elements.kyberMexcSell.innerHTML = 
+          `K: $${format(kyberData.sellPrice)} | M: $${format(mexcData.ask)} ` +
+          `<span class="difference">$${format(sellOpportunity)}</span>`;
+        
+        applyAlertStyles(
+          elements.kyberMexcBuy.querySelector('.difference'), 
+          buyOpportunity,
+          'kyber_mexc_buy'
+        );
+        applyAlertStyles(
+          elements.kyberMexcSell.querySelector('.difference'), 
+          sellOpportunity,
+          'kyber_mexc_sell'
+        );
+      } else {
+        if (!kyberData) {
+          elements.kyberMexcBuy.textContent = 'Kyber data error';
+          elements.kyberMexcSell.textContent = 'Kyber data error';
+        }
+        if (!mexcData) {
+          elements.kyberMexcBuy.textContent = 'MEXC data error';
+          elements.kyberMexcSell.textContent = 'MEXC data error';
+        }
+      }
       
     } catch (error) {
       console.error('Update Error:', error);
@@ -361,34 +330,6 @@ const XPL = (() => {
     
     // Different thresholds and sounds for each comparison type
     switch(type) {
-      case 'mexc_hyper_buy':
-        // Buy opportunity: MEXC bid > Hyperliquid ask
-        if (value > 0.01) {
-          element.classList.add('alert-high-positive');
-          shouldPlaySound = true;
-          frequency = 1046; // C6
-        } else if (value > -0.0021) {
-          element.classList.add('alert-medium-positive');
-          shouldPlaySound = true;
-          volume = 0.1;
-          frequency = 880; // A5
-        }
-        break;
-        
-      case 'mexc_hyper_sell':
-        // Sell opportunity: Hyperliquid bid > MEXC ask
-        if (value > 0.5) {
-          element.classList.add('alert-high-positive');
-          shouldPlaySound = true;
-          frequency = 523; // C5
-        } else if (value > 0.0079) {
-          element.classList.add('alert-medium-positive');
-          shouldPlaySound = true;
-          volume = 0.1;
-          frequency = 587; // D5
-        }
-        break;
-
       case 'mexc_spot_future_buy':
         // Buy opportunity: MEXC Future bid > MEXC Spot ask
         if (value > 0.9) {
@@ -416,6 +357,34 @@ const XPL = (() => {
           frequency = 587; // D5
         }
         break;
+
+      case 'kyber_mexc_buy':
+        // Buy opportunity: MEXC bid > Kyber buy price
+        if (value > 0.01) {
+          element.classList.add('alert-high-positive');
+          shouldPlaySound = true;
+          frequency = 1046; // C6
+        } else if (value > 0.003) {
+          element.classList.add('alert-medium-positive');
+          shouldPlaySound = true;
+          volume = 0.1;
+          frequency = 880; // A5
+        }
+        break;
+        
+      case 'kyber_mexc_sell':
+        // Sell opportunity: Kyber sell price > MEXC ask
+        if (value > 0.005) {
+          element.classList.add('alert-high-positive');
+          shouldPlaySound = true;
+          frequency = 523; // C5
+        } else if (value > 0.001) {
+          element.classList.add('alert-medium-positive');
+          shouldPlaySound = true;
+          volume = 0.1;
+          frequency = 587; // D5
+        }
+        break;
     }
 
     if (shouldPlaySound && audioEnabled) {
@@ -430,7 +399,7 @@ const XPL = (() => {
   // Initialize
   updateAlerts();
   updateFundingRate(); // Initial funding rate fetch
-  setInterval(updateAlerts, 2500);
+  setInterval(updateAlerts, 2000);
   setInterval(updateFundingRate, 60000); // Update funding rate every minute
   
   return { updateAlerts, enableAudio };

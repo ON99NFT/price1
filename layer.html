@@ -1,170 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Crypto Arbitrage Alerts</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crypto Arbitrage Alerts</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="global-audio-control">
-    <button id="global-audio-btn">
-      <span class="audio-icon">🔇</span> Enable All Sounds
-    </button>
-  </div>
+<div id="global-audio-control">
+<button id="global-audio-btn">
+<span class="audio-icon">🔇</span> Enable All Sounds
+</button>
+</div>
 
-  <!-- eurc Section -->
-  <div class="token-section">
-    <div class="comparison-container">
-      <div class="comparison-group">
-        <h3>EURC Kyber vs MEXC 
-          <span id="eurc-funding-rate" class="funding-rate">
-            <span class="funding-rate-value">Loading...</span>
-            <span class="next-funding-time"><span id="eurc-next-funding">--:--:--</span></span>
-          </span>
-        </h3>
-        <div class="price-container">
-          <p>Buy: <span id="eurc-kyber-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="eurc-kyber-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-
-      <div class="comparison-group">
-        <h3>EURC Kyber vs Jup</h3>
-        <div class="price-container">
-          <p>Buy: <span id="eurc-kyber-jup-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="eurc-kyber-jup-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-
-      <div class="comparison-group">
-        <h3>EURC Kyber vs Pyth</h3>
-        <div class="price-container">
-          <p>Buy: <span id="eurc-kyber-pyth-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="eurc-kyber-pyth-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-
-            <div class="comparison-group">
-        <h3>EURC Jup vs Pyth</h3>
-        <div class="price-container">
-          <p>Buy: <span id="eurc-jup-pyth-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="eurc-jup-pyth-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-      
-    </div>
-  </div>
-
-  <!-- Add this to your layer.html file inside the body, after the ASTER section -->
+<!-- eurc Section -->
 <div class="token-section">
-  <div class="comparison-container">
-    <div class="comparison-group">
-      <h3>0G HL vs MEXC
-        <span id="zerog-hyper-funding-rate" class="funding-rate">
-          <span class="funding-rate-value">Loading...</span>
-        </span>
-      </h3>
-      <div class="price-container">
-        <p>Buy: <span id="zerog-hyper-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell: <span id="zerog-hyper-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-
-    <div class="comparison-group">
-      <h3>0G MEXC Spot vs Future
-        <span id="zerog-mexc-funding-rate" class="funding-rate">
-          <span class="funding-rate-value">Loading...</span>
-          <span class="next-funding-time"><span id="zerog-mexc-next-funding">--:--:--</span></span>
-        </span>
-      </h3>
-      <div class="price-container">
-        <p>Buy: <span id="zerog-mexc-spot-future-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell: <span id="zerog-mexc-spot-future-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <div class="token-section">
-    <div class="comparison-container">
-
-            <div class="comparison-group">
-        <h3>XPL HL vs MEXC
-          <span id="xpl-funding-rate" class="funding-rate">
-            <span class="funding-rate-value">Loading...</span>
-            <span class="next-funding-time"><span id="xpl-next-funding">--:--:--</span></span>
-          </span>
-        </h3>
-        <div class="price-container">
-          <p>Buy: <span id="xpl-mexc-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-          <p>Sell: <span id="xpl-mexc-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-        </div>
-      </div>
-
-      <!-- Add this inside the XPL token section, after the existing XPL HL vs MEXC group -->
+<div class="comparison-container">
 <div class="comparison-group">
-  <h3>XPL MEXC Spot vs Future
-    <span id="xpl-mexc-funding-rate" class="funding-rate">
-      <span class="funding-rate-value">Loading...</span>
-      <span class="next-funding-time"><span id="xpl-mexc-next-funding">--:--:--</span></span>
-    </span>
-  </h3>
-  <div class="price-container">
-    <p>Buy: <span id="xpl-mexc-spot-future-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell: <span id="xpl-mexc-spot-future-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
+<h3>EURC Kyber vs MEXC 
+<span id="eurc-funding-rate" class="funding-rate">
+<span class="funding-rate-value">Loading...</span>
+<span class="next-funding-time"><span id="eurc-next-funding">--:--:--</span></span>
+</span>
+</h3>
+<div class="price-container">
+<p>Buy: <span id="eurc-kyber-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="eurc-kyber-sell-alert" aria-live="polite">Loading...</span></p>
+</div>
 </div>
 
 <div class="comparison-group">
-  <h3>ASTER MEXC Spot vs Future</h3>
-  <div class="price-container">
-    <p>Buy: <span id="aster-mexc-spot-future-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell: <span id="aster-mexc-spot-future-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
+<h3>EURC Kyber vs Jup</h3>
+<div class="price-container">
+<p>Buy: <span id="eurc-kyber-jup-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="eurc-kyber-jup-sell-alert" aria-live="polite">Loading...</span></p>
 </div>
-
-
-    <div class="comparison-group">
-      <h3>ASTER Kyber vs Hyperliquid
-      <span id="aster-hyper-funding-rate" class="funding-rate">
-      <span class="funding-rate-value">Loading...</span>
-      </span>
-      </h3>
-      <div class="price-container">
-        <p>Buy: <span id="aster-kyber-hyper-buy-alert" aria-live="polite">Loading...</span></p>
-        <p>Sell: <span id="aster-kyber-hyper-sell-alert" aria-live="polite">Loading...</span></p>
-      </div>
-    </div>
+</div>
 
 <div class="comparison-group">
-  <h3>ASTER Kyber vs MEXC
-        <span id="aster-mexc-funding-rate" class="funding-rate">
-      <span class="funding-rate-value">Loading...</span>
-      <span class="next-funding-time"><span id="aster-mexc-next-funding">--:--:--</span></span>
-  </h3>
-  <div class="price-container">
-    <p>Buy: <span id="aster-kyber-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell: <span id="aster-kyber-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
+<h3>EURC Kyber vs Pyth</h3>
+<div class="price-container">
+<p>Buy: <span id="eurc-kyber-pyth-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="eurc-kyber-pyth-sell-alert" aria-live="polite">Loading...</span></p>
+</div>
 </div>
 
-      <div class="comparison-group">
-  <h3>ASTER HL vs MEXC</h3>
-  <div class="price-container">
-    <p>Buy: <span id="aster-hyper-mexc-buy-alert" aria-live="polite">Loading...</span></p>
-    <p>Sell: <span id="aster-hyper-mexc-sell-alert" aria-live="polite">Loading...</span></p>
-  </div>
+<div class="comparison-group">
+<h3>EURC Jup vs Pyth</h3>
+<div class="price-container">
+<p>Buy: <span id="eurc-jup-pyth-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="eurc-jup-pyth-sell-alert" aria-live="polite">Loading...</span></p>
+</div>
 </div>
 
-  </div>
+</div>
 </div>
 
-  <script src="global-audio.js"></script>
-  <script src="eurc.js"></script>
-  <script src="eurc-jup.js"></script>
-  <script src="0g.js"></script>
-  <script src="xpl.js"></script>
-  <script src="aster.js"></script>
+<div class="token-section">
+<div class="comparison-container">
+
+<div class="comparison-group">
+<h3>XPL Kyber vs MEXC</h3>
+<div class="price-container">
+<p>Buy: <span id="xpl-kyber-mexc-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="xpl-kyber-mexc-sell-alert" aria-live="polite">Loading...</span></p>
+</div>
+</div>
+
+<div class="comparison-group">
+<h3>XPL MEXC Spot vs Future</h3>
+<div class="price-container">
+<p>Buy: <span id="xpl-mexc-spot-future-buy-alert" aria-live="polite">Loading...</span></p>
+<p>Sell: <span id="xpl-mexc-spot-future-sell-alert" aria-live="polite">Loading...</span></p>
+</div>
+</div>
+
+</div>
+</div>
+
+<script src="global-audio.js"></script>
+<script src="eurc.js"></script>
+<script src="eurc-jup.js"></script>
+<script src="xpl.js"></script>
+
 </body>
 </html>
