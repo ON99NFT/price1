@@ -91,20 +91,25 @@ const EURC_JUP = (() => {
         }
     }
 
-    // Fetch Jupiter prices for EURC
+    // Fetch Jupiter prices for EURC - UPDATED with new API endpoint
     async function fetchJupPriceForEURC() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
         const outputMintEURC = 'HzwqbKZw8HxMN6bF2yFZNrht3c2iXXzpKcFu7uBEDKtr';
         
         try {
             const [buyResponse, sellResponse] = await Promise.all([
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintEURC}&amount=11500000000`), // 11500 USDC
-                fetch(`https://quote-api.jup.ag/v6/quote?inputMint=${outputMintEURC}&outputMint=${inputMintUSDC}&amount=10000000000`)  // 10000 EURC
+                // Updated to use /swap/v1/quote endpoint as per Jupiter docs
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintEURC}&amount=11500000000`), // 11500 USDC
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${outputMintEURC}&outputMint=${inputMintUSDC}&amount=10000000000`)  // 10000 EURC
             ]);
             
             const buyData = await buyResponse.json();
             const sellData = await sellResponse.json();
             
+            console.log('Jupiter Buy Response:', buyData);
+            console.log('Jupiter Sell Response:', sellData);
+            
+            // Parse the new response format
             return {
                 buyPrice: buyData?.outAmount ? 11500 / (parseInt(buyData.outAmount) / 1e6) : null,
                 sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 10000 : null
@@ -288,7 +293,7 @@ const EURC_JUP = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate
-        setInterval(updateAlerts, 9000);
+        setInterval(updateAlerts, 3000);
     })();
   
     return { updateAlerts };
