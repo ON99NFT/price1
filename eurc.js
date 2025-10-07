@@ -309,7 +309,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.0003) {
+                } else if (value > 0.0008) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -337,7 +337,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = value > 0 ? 1046 : 392; // C6 or G4
-                } else if (value > 0.0005) {
+                } else if (value > -0.001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -351,7 +351,7 @@ const EURC = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = value > 0 ? 1046 : 392; // C6 or G4
-                } else if (value > 0.0002) {
+                } else if (value > 0.0025) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
