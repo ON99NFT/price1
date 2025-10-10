@@ -204,7 +204,7 @@ const MON = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 1046; // C6
-                } else if (value > -0.001) {
+                } else if (value > 0.001) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
