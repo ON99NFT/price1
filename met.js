@@ -3,6 +3,7 @@ const MET = (() => {
     let audioEnabled = false;
     let hyperliquidPrice = null;
     let mexcPrice = null;
+    let jupiterPrice = null;
 
     // Fetch MEXC Futures prices for MET
     async function fetchMexcFuturePrice() {
@@ -107,16 +108,49 @@ const MET = (() => {
         });
     }
 
-    // Update alerts with Hyperliquid vs MEXC comparison
+    // Fetch Jupiter price for MET
+    async function fetchJupiterPriceForMET() {
+        const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
+        const outputMintMET = 'METmFwWaCNPZwL47n8u75iV6nSsJNfzDzD2E2pbhH6dK'; // MET token mint address
+        
+        try {
+            const [buyResponse, sellResponse] = await Promise.all([
+                // Buy MET with USDC: 100 USDC
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintMET}&amount=100000000`),
+                // Sell MET for USDC: 100 MET (assuming 8 decimals)
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${outputMintMET}&outputMint=${inputMintUSDC}&amount=100000000`)
+            ]);
+            
+            const buyData = await buyResponse.json();
+            const sellData = await sellResponse.json();
+            
+            console.log('Jupiter MET Buy Response:', buyData);
+            console.log('Jupiter MET Sell Response:', sellData);
+            
+            return {
+                // Price per MET when buying: amountInUSDC / amountOutMET
+                buyPrice: buyData?.outAmount ? 100 / (parseInt(buyData.outAmount) / 1e8) : null,
+                // Price per MET when selling: amountOutUSDC / amountInMET
+                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 100 : null
+            };
+        } catch (error) {
+            console.error('Jupiter MET Error:', error);
+            return { buyPrice: null, sellPrice: null };
+        }
+    }
+
+    // Update alerts with Hyperliquid vs MEXC and Jupiter comparisons
     async function updateAlerts() {
         const elements = {
             hyperMexcBuy: document.getElementById('met-hyper-mexc-buy-alert'),
-            hyperMexcSell: document.getElementById('met-hyper-mexc-sell-alert')
+            hyperMexcSell: document.getElementById('met-hyper-mexc-sell-alert'),
+            jupHyperBuy: document.getElementById('met-jup-hyper-buy-alert'),
+            jupHyperSell: document.getElementById('met-jup-hyper-sell-alert')
         };
 
         try {
-            // Fetch data from both exchanges
-            const [hyperData, mexcFutureData] = await Promise.all([
+            // Fetch data from all sources
+            const [hyperData, mexcFutureData, jupData] = await Promise.all([
                 fetchHyperliquidFuturePrice().catch(error => {
                     console.error('Hyperliquid MET Error:', error);
                     return null;
@@ -124,12 +158,17 @@ const MET = (() => {
                 fetchMexcFuturePrice().catch(error => {
                     console.error('MEXC Future MET Error:', error);
                     return null;
+                }),
+                fetchJupiterPriceForMET().catch(error => {
+                    console.error('Jupiter MET Error:', error);
+                    return null;
                 })
             ]);
             
             // Store prices for external access
             hyperliquidPrice = hyperData;
             mexcPrice = mexcFutureData;
+            jupiterPrice = jupData;
             
             // Formatting helper
             const format = (val) => {
@@ -168,6 +207,43 @@ const MET = (() => {
                 if (!mexcFutureData) {
                     elements.hyperMexcBuy.textContent = 'MEXC Future data error';
                     elements.hyperMexcSell.textContent = 'MEXC Future data error';
+                }
+            }
+            
+            // Jupiter vs Hyperliquid
+            if (jupData && hyperData) {
+                // Buy opportunity: Jupiter sell price vs Hyperliquid ask
+                const jupHyperBuyOpportunity = jupData.sellPrice - hyperData.ask;
+                
+                // Sell opportunity: Hyperliquid bid vs Jupiter buy price
+                const jupHyperSellOpportunity = hyperData.bid - jupData.buyPrice;
+
+                elements.jupHyperBuy.innerHTML = 
+                    `J: $${format(jupData.sellPrice)} | H: $${format(hyperData.ask)} ` +
+                    `<span class="difference">$${format(jupHyperBuyOpportunity)}</span>`;
+                
+                elements.jupHyperSell.innerHTML = 
+                    `H: $${format(hyperData.bid)} | J: $${format(jupData.buyPrice)} ` +
+                    `<span class="difference">$${format(jupHyperSellOpportunity)}</span>`;
+                
+                applyAlertStyles(
+                    elements.jupHyperBuy.querySelector('.difference'), 
+                    jupHyperBuyOpportunity,
+                    'jup_hyper_buy'
+                );
+                applyAlertStyles(
+                    elements.jupHyperSell.querySelector('.difference'), 
+                    jupHyperSellOpportunity,
+                    'jup_hyper_sell'
+                );
+            } else {
+                if (!jupData) {
+                    elements.jupHyperBuy.textContent = 'Jupiter data error';
+                    elements.jupHyperSell.textContent = 'Jupiter data error';
+                }
+                if (!hyperData) {
+                    elements.jupHyperBuy.textContent = 'Hyperliquid data error';
+                    elements.jupHyperSell.textContent = 'Hyperliquid data error';
                 }
             }
             
@@ -225,6 +301,34 @@ const MET = (() => {
                     frequency = 587; // D5
                 }
                 break;
+                
+            case 'jup_hyper_buy':
+                // Buy opportunity: Jupiter sell price > Hyperliquid ask
+                if (value > 0.5) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 1046; // C6
+                } else if (value > 0.01) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 880; // A5
+                }
+                break;
+                
+            case 'jup_hyper_sell':
+                // Sell opportunity: Hyperliquid bid > Jupiter buy price
+                if (value > 0.5) {
+                    element.classList.add('alert-high-positive');
+                    shouldPlaySound = true;
+                    frequency = 523; // C5
+                } else if (value > 0.09) {
+                    element.classList.add('alert-medium-positive');
+                    shouldPlaySound = true;
+                    volume = 0.1;
+                    frequency = 587; // D5
+                }
+                break;
         }
 
         if (shouldPlaySound && audioEnabled) {
@@ -238,12 +342,13 @@ const MET = (() => {
 
     // Initialize
     updateAlerts();
-    setInterval(updateAlerts, 2000);
+    setInterval(updateAlerts, 5000);
     
     return { 
         updateAlerts, 
         enableAudio,
         getHyperliquidPrice: () => hyperliquidPrice,
-        getMexcPrice: () => mexcPrice
+        getMexcPrice: () => mexcPrice,
+        getJupiterPrice: () => jupiterPrice
     };
 })();
