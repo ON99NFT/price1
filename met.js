@@ -111,14 +111,14 @@ const MET = (() => {
     // Fetch Jupiter price for MET
     async function fetchJupiterPriceForMET() {
         const inputMintUSDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v';
-        const outputMintMET = 'METmFwWaCNPZwL47n8u75iV6nSsJNfzDzD2E2pbhH6dK'; // MET token mint address
+        const outputMintMET = 'METvsvVRapdj9cFLzq4Tr43xK4tAjQfwX76z3n6mWQL'; // MET token mint address
         
         try {
             const [buyResponse, sellResponse] = await Promise.all([
                 // Buy MET with USDC: 100 USDC
-                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintMET}&amount=100000000`),
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${inputMintUSDC}&outputMint=${outputMintMET}&amount=1000000000`),
                 // Sell MET for USDC: 100 MET (assuming 8 decimals)
-                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${outputMintMET}&outputMint=${inputMintUSDC}&amount=100000000`)
+                fetch(`https://lite-api.jup.ag/swap/v1/quote?inputMint=${outputMintMET}&outputMint=${inputMintUSDC}&amount=1000000000`)
             ]);
             
             const buyData = await buyResponse.json();
@@ -129,9 +129,9 @@ const MET = (() => {
             
             return {
                 // Price per MET when buying: amountInUSDC / amountOutMET
-                buyPrice: buyData?.outAmount ? 100 / (parseInt(buyData.outAmount) / 1e8) : null,
+                buyPrice: buyData?.outAmount ? 1000 / (parseInt(buyData.outAmount) / 1e6) : null,
                 // Price per MET when selling: amountOutUSDC / amountInMET
-                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 100 : null
+                sellPrice: sellData?.outAmount ? (parseInt(sellData.outAmount) / 1e6) / 1000 : null
             };
         } catch (error) {
             console.error('Jupiter MET Error:', error);
@@ -294,7 +294,7 @@ const MET = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.09) {
+                } else if (value > 0.01) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -322,7 +322,7 @@ const MET = (() => {
                     element.classList.add('alert-high-positive');
                     shouldPlaySound = true;
                     frequency = 523; // C5
-                } else if (value > 0.09) {
+                } else if (value > 0.01) {
                     element.classList.add('alert-medium-positive');
                     shouldPlaySound = true;
                     volume = 0.1;
@@ -342,7 +342,7 @@ const MET = (() => {
 
     // Initialize
     updateAlerts();
-    setInterval(updateAlerts, 5000);
+    setInterval(updateAlerts, 3000);
     
     return { 
         updateAlerts, 
