@@ -293,7 +293,7 @@ const EURC_JUP = (() => {
     (function init() {
         updateAlerts();
         // Set refresh rate
-        setInterval(updateAlerts, 7000);
+        setInterval(updateAlerts, 4000);
     })();
   
     return { updateAlerts };
